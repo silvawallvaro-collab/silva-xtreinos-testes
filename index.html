@@ -437,9 +437,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
    CONFIGURAÇÃO — edite aqui
    ===================================================== */
 const CONFIG = {
-  firebaseApiKey: "AIzaSyDismx661GxCEk9JAbWFPLJ8LUXyDglUPw",
-  firebaseUrl: "https://zeus-xtreinos-default-rtdb.firebaseio.com",
-  masterUid: "LIv6mwygtxMFSEaW2TWCPzKJLby1",
+  firebaseApiKey: "AIzaSyCSajNuSmcpVlTaEs6CXheoOEz6PzIbLRA",
+  firebaseUrl: "https://silva-xtreinos-testes-default-rtdb.firebaseio.com",
+  masterUid: "COLOCAR_UID_DO_ORGANIZADOR_PRINCIPAL_TESTE_AQUI",
   pollMs: 4000,                // de quanto em quanto tempo atualizar (modo online)
   enforceRoster: true,         // exigir jogadores mínimos para inscrever (Squad 4, Duo 2, Solo 1)
   points: [12, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0]  // pontos por posição (1º ao 12º)
@@ -463,7 +463,7 @@ function hashPass(s){ // hash simples (cyrb53) — ver observação de seguranç
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
 // E-mail interno usado apenas pelo Firebase Authentication; nunca é exibido ao organizador.
-function organizerEmail(user){ return "org-" + hashPass(String(user).trim().toLowerCase()) + "@zeus-xtreinos.firebaseapp.com"; }
+function organizerEmail(user){ return "org-" + hashPass(String(user).trim().toLowerCase()) + "@silva-xtreinos-testes.firebaseapp.com"; }
 function makeStore(getter){
   const mem = {};
   return {
