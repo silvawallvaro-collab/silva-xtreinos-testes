@@ -959,28 +959,43 @@ function parseAutoKillText(raw){
   });
   return out;
 }
-function autoKillCropRects(w,h){
-  // Referência do placar enviado: 1600x720. As posições são escaladas
-  // pela altura real da imagem para não deslocar os recortes em outros tamanhos.
-  const refH=720;
-  const leftY=[185,220,280,315,375,410,470,505,565,600];
-  // O lado direito tem uma linha no rank 9; os demais têm duas.
-  const rightY=[185,220,285,320,350,385,445,510,545];
-  const rects=[];
-  const add=(x0,x1,y)=>{
-    const cy=y/refH;
-    const half=.027;
-    rects.push([x0,cy-half,x1,cy+half]);
+function autoKillPlayerRects(w,h){
+  // Coordenadas medidas no placar de referência 1600x720.
+  // Cada jogador tem duas áreas independentes: nick e número de abates.
+  const leftRows=[185,222,280,319,376,414,470,509,565,603];
+  const rightRows=[185,220,285,320,350,385,445,510,545];
+  const columns=[
+    {nick:[.190,.278],kills:[.278,.326]},
+    {nick:[.375,.445],kills:[.445,.505]},
+    {nick:[.598,.675],kills:[.675,.725]},
+    {nick:[.720,.810],kills:[.810,.865]}
+  ];
+  const players=[];
+  const add=(y,col)=>{
+    const c=columns[col], cy=y/720, half=.018;
+    const rect=([x0,x1])=>({
+      left:Math.max(0,Math.round(x0*w)),
+      top:Math.max(0,Math.round((cy-half)*h)),
+      right:Math.min(w,Math.round(x1*w)),
+      bottom:Math.min(h,Math.round((cy+half)*h))
+    });
+    players.push({nick:rect(c.nick),kills:rect(c.kills)});
   };
-  for(const y of leftY){add(.185,.345,y);add(.365,.535,y);}
-  for(const y of rightY){add(.585,.725,y);add(.725,.865,y);}
-  return rects.map(([x0,y0,x1,y1])=>({
-    left:Math.max(0,Math.round(x0*w)),
-    top:Math.max(0,Math.round(y0*h)),
-    right:Math.min(w,Math.round(x1*w)),
-    bottom:Math.min(h,Math.round(y1*h))
-  })).filter(r=>r.right>r.left&&r.bottom>r.top);
+  for(const y of leftRows){add(y,0);add(y,1);}
+  for(const y of rightRows){add(y,2);add(y,3);}
+  return players;
 }
+function cleanAutoKillNick(text,index){
+  let s=String(text||"").replace(/[\r\n\t]+/g," ").replace(/\s+/g," ").trim();
+  s=s.replace(/\b(?:abates?|abat[eé]s?)\b/ig,"").replace(/^[\s|:;.,\-–—]+|[\s|:;.,\-–—]+$/g,"").trim();
+  s=s.replace(/^[^A-Za-zÀ-ÿ0-9@<({\[]+/,"").trim();
+  return s || `REVISAR NICK #${index+1}`;
+}
+function parseAutoKillNumber(text){
+  const m=String(text||"").match(/\d{1,2}/);
+  return m ? Math.min(99,Number(m[0])) : null;
+}
+
 function parseAutoKillCell(text){
   const s=String(text||"").replace(/[|]/g," ").replace(/\s+/g," ").trim();
   const m=s.match(/^(.*?)\s*([0-9])\s*(?:A?bates?|Abat[eé]s?)\b/i);
@@ -995,7 +1010,7 @@ function parseAutoKillCell(text){
 function renderAutoKillReview(){
   const box=$("#autoKillReview");
   if(!state.autoKillRows.length){box.innerHTML='<p class="empty">Nenhum jogador identificado. Ajuste o texto no formato Nick - kills.</p>';return;}
-  box.innerHTML='<h3>Conferir jogadores e kills</h3><div class="table-wrap"><table><thead><tr><th>Jogador</th><th>Kills</th></tr></thead><tbody>'+state.autoKillRows.map((r,i)=>`<tr><td><input data-ak-nick="${i}" value="${esc(r.nick)}" maxlength="32"></td><td><input data-ak-kills="${i}" type="number" min="0" max="99" value="${r.kills}"></td></tr>`).join("")+'</tbody></table></div><p class="muted small-t mt">Confira com atenção antes de salvar. O sistema não publica sem sua confirmação.</p>';
+  box.innerHTML='<h3>Conferir jogadores e kills</h3><div class="table-wrap"><table><thead><tr><th>Jogador</th><th>Kills</th></tr></thead><tbody>'+state.autoKillRows.map((r,i)=>`<tr><td><input data-ak-nick="${i}" value="${esc(r.nick)}" maxlength="32"></td><td><input data-ak-kills="${i}" type="number" min="0" max="99" value="${r.kills ?? ""}"></td></tr>`).join("")+'</tbody></table></div><p class="muted small-t mt">Confira com atenção antes de salvar. O sistema não publica sem sua confirmação.</p>';
 }
 $("#autoKillScrim").addEventListener("change",e=>{state.autoKillScrim=e.target.value;state.autoKillRows=[];renderAutomaticKillAdmin();});
 $("#autoKillRound").addEventListener("change",e=>{state.autoKillRound=Math.max(1,Math.min(5,+e.target.value||1));state.autoKillRows=[];renderAutomaticKillAdmin();});
@@ -1007,27 +1022,36 @@ $("#autoKillRead").addEventListener("click",async()=>{
   try{
     if(!window.Tesseract) await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Não foi possível carregar o leitor de imagem. Verifique a internet."));document.head.appendChild(sc);});
     const bitmap=await createImageBitmap(file);
-    const rects=autoKillCropRects(bitmap.width,bitmap.height);
-    const worker=await Tesseract.createWorker("eng",1,{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo jogador "+Math.min(38,Math.max(1,Math.round((m.progress||0)*38)))+" de 38...";}});
+    const players=autoKillPlayerRects(bitmap.width,bitmap.height);
+    const worker=await Tesseract.createWorker("eng",1,{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo placar: "+Math.min(38,Math.max(1,Math.round((m.progress||0)*38)))+" de 38 jogadores...";}});
     const parsed=[],rawLines=[];
+    const readCrop=async(r,whitelist)=>{
+      const cw=r.right-r.left,ch=r.bottom-r.top;
+      if(cw<5||ch<5)return "";
+      const crop=document.createElement("canvas");crop.width=cw*4;crop.height=ch*4;
+      const cctx=crop.getContext("2d",{willReadFrequently:true});
+      cctx.imageSmoothingEnabled=true;cctx.imageSmoothingQuality="high";
+      cctx.drawImage(bitmap,r.left,r.top,cw,ch,0,0,crop.width,crop.height);
+      await worker.setParameters({tessedit_pageseg_mode:"7",preserve_interword_spaces:"1",tessedit_char_whitelist:whitelist||""});
+      const result=await worker.recognize(crop);
+      return String(result.data.text||"").trim();
+    };
     try{
-      await worker.setParameters({tessedit_pageseg_mode:"7",preserve_interword_spaces:"1"});
-      for(let i=0;i<rects.length;i++){
-        const r=rects[i],cw=r.right-r.left,ch=r.bottom-r.top;
-        if(cw<10||ch<10)continue;
-        const crop=document.createElement("canvas");crop.width=cw*3;crop.height=ch*3;
-        const cctx=crop.getContext("2d");cctx.imageSmoothingEnabled=true;cctx.imageSmoothingQuality="high";
-        cctx.drawImage(bitmap,r.left,r.top,cw,ch,0,0,crop.width,crop.height);
-        const result=await worker.recognize(crop);
-        const text=(result.data.text||"").trim();if(text)rawLines.push(text);
-        const row=parseAutoKillCell(text);if(row)parsed.push(row);
+      for(let i=0;i<players.length;i++){
+        const nickText=await readCrop(players[i].nick,"");
+        const killsText=await readCrop(players[i].kills,"0123456789");
+        const nick=cleanAutoKillNick(nickText,i);
+        const kills=parseAutoKillNumber(killsText);
+        rawLines.push(`${nickText} | ${killsText}`);
+        // Mantém a posição do jogador mesmo se o OCR não reconhecer um dos campos.
+        parsed.push({nick,kills:kills===null?"":kills});
       }
     }finally{await worker.terminate();bitmap.close?.();}
-    const unique=[];const seen=new Set();for(const row of parsed){const key=row.nick.toLocaleLowerCase("pt-BR");if(!seen.has(key)){seen.add(key);unique.push(row);}}
-    state.autoKillRows=unique;
-    $("#autoKillText").value=unique.map(r=>r.nick+" - "+r.kills).join("\n") || rawLines.join("\n");
+    state.autoKillRows=parsed;
+    $("#autoKillText").value=parsed.map(r=>r.nick+" - "+r.kills).join("\n");
     renderAutoKillReview();
-    status.textContent=unique.length?`Identifiquei ${unique.length} jogador(es) em áreas separadas do placar. Confira os nomes e abates antes de salvar.`:"Não consegui identificar os campos neste print. Confira se a imagem mostra o placar inteiro e tente novamente.";
+    const missing=parsed.filter(r=>!r.kills.toString().match(/^\\d+$/)||r.nick.startsWith("REVISAR NICK")).length;
+    status.textContent=`Analisei ${parsed.length} posições do placar. ${missing} precisam de conferência manual; revise os campos destacados antes de salvar.`;
   }catch(err){status.textContent=err.message||"Falha ao ler a imagem.";toast(status.textContent,"err");}finally{btn.disabled=false;}
 });
 $("#autoKillPrepare").addEventListener("click",()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");state.autoKillRows=parseAutoKillText($("#autoKillText").value);renderAutoKillReview();if(!state.autoKillRows.length)toast("Não encontrei linhas no formato Nick - kills","err");});
