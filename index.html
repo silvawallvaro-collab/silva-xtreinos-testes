@@ -203,6 +203,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <div class="card"><div class="stat" id="sScrims">0</div><p class="muted">Treinos realizados</p></div>
   </div>
 
+  <div id="homeAutomaticKills" class="mt"></div>
+
   <h2 class="title">Ranking geral</h2>
   <div class="table-wrap"><table><thead><tr><th>#</th><th>Time</th><th>Quedas</th><th>Booyah</th><th>Abates</th><th>Pontos</th><th>Resultados das quedas</th></tr></thead><tbody id="homeRank"></tbody></table></div>
   <p class="muted small-t mt" id="homeRankInfo"></p>
@@ -350,6 +352,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <button data-tab="resultados">Queda</button>
         <button data-tab="calls">Sorteio de call</button>
         <button data-tab="sala">ID / Senha</button>
+        <button data-tab="automaticKill" id="tabAutomaticKill" hidden>AUTOMATIC.KILL</button>
         <button data-tab="pessoas">Times e jogadores</button>
         <button data-tab="avisos">Avisos</button>
         <button data-tab="logs">Logs</button>
@@ -406,6 +409,30 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         </form>
         <div class="actions mt"><button class="btn danger small" type="button" data-act="clearRoomCredentials">Remover da página inicial</button></div>
         <p class="muted small-t mt" id="roomCredentialsStatus"></p>
+      </div>
+    </div>
+
+    <div class="atab" data-atab="automaticKill" hidden>
+      <div class="card">
+        <h3 style="color:var(--cyan)">AUTOMATIC.KILL</h3>
+        <p class="muted small-t">Ferramenta exclusiva do organizador principal. Envie o print do placar, revise os nomes e kills reconhecidos e salve cada queda. A publicação só acontece quando você confirmar.</p>
+        <label class="mt">X-Treino<select id="autoKillScrim"></select></label>
+        <label>Queda<select id="autoKillRound"><option value="1">Queda 1 — Bermuda</option><option value="2">Queda 2 — Purgatório</option><option value="3">Queda 3 — Kalahari</option><option value="4">Queda 4 — Nova Terra</option><option value="5">Queda 5 — Solara</option></select></label>
+        <label class="mt">Foto do resultado<input id="autoKillImage" type="file" accept="image/*"></label>
+        <div id="autoKillImagePreview" class="mt"></div>
+        <div class="actions mt"><button class="btn" id="autoKillRead" type="button">LER FOTO AUTOMATICAMENTE</button></div>
+        <p id="autoKillStatus" class="muted small-t mt">Selecione uma imagem para começar. A leitura depende da nitidez do print.</p>
+        <label class="mt">Texto reconhecido (uma linha por jogador: Nick - kills)<textarea id="autoKillText" rows="8" placeholder="Exemplo:
+NickPlayer - 8
+OutroNick - 5"></textarea></label>
+        <p class="muted small-t">Se o reconhecimento separar os nomes e números, ajuste o texto aqui. O formato aceito é: nome do jogador, hífen e quantidade de kills.</p>
+        <div class="actions mt"><button class="btn ghost" id="autoKillPrepare" type="button">PREPARAR / ATUALIZAR LISTA</button><button class="btn" id="autoKillSaveRound" type="button">SALVAR ESTA QUEDA</button></div>
+        <div id="autoKillReview" class="mt"></div>
+        <div class="divider mt"></div>
+        <h3 class="mt">Resumo das 5 quedas</h3>
+        <div id="autoKillRoundsSummary" class="mt"></div>
+        <div class="actions mt"><button class="btn" id="autoKillPublish" type="button">PUBLICAR ABATES NA PÁGINA INICIAL</button><button class="btn danger small" id="autoKillUnpublish" type="button">REMOVER PUBLICAÇÃO</button></div>
+        <p class="muted small-t mt" id="autoKillPublishStatus"></p>
       </div>
     </div>
 
@@ -599,7 +626,8 @@ const DB = {
   },
   del(p){return this.set(p,undefined);},
   async replaceAll(obj){
-    const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults"];
+    const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills"];
+    if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
     this.data=obj||{};this.persist();if(!this.cloud)return;
     try{for(const branch of branches){const value=this.data[branch];await this.request(branch,value===undefined?"DELETE":"PUT",value);}this.status="online";}
     catch(e){this.status="error";toast("Falha ao restaurar: "+e.message,"err");}
@@ -609,7 +637,8 @@ const DB = {
     if(!this.cloud||this.pending>0)return false;
     try{
       // Não lê a raiz inteira: cada coleção pública é consultada separadamente.
-      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults"];
+      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills"];
+      if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
       let changed=false;
       for(const branch of branches){
         const r=await this.request(branch,"GET");
@@ -630,7 +659,7 @@ function updatePill(){
 /* =====================================================
    REGRAS DE NEGÓCIO
    ===================================================== */
-const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "" };
+const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", autoKillScrim: "", autoKillRound: 1, autoKillRows: [] };
 const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","clearRoomCredentials"]);
 function adminSess(){
   try {
@@ -761,6 +790,7 @@ function renderHome(){
   } else { roomBox.hidden = true; roomBox.innerHTML = ""; }
   $("#sTeams").textContent = teams.length; $("#sPlayers").textContent = users.length;
   $("#sScrims").textContent = arr(DB.get("scrims")).filter(x => x.status === "done").length;
+  renderPublishedAutomaticKills();
   const rk = standings(); $("#homeRank").innerHTML = rankRows(rk, true);
   $("#homeRankInfo").textContent = rk.length ? rk.length + " time(s) • " + Math.max(...rk.map(r => r.games)) + " queda(s) disputada(s) • " + pointsDesc() : "";
   const news = arr(DB.get("news")).sort((a, b) => b.at - a.at).slice(0, 4);
@@ -844,7 +874,8 @@ function renderAdmin(){
   if (!on) return;
   const master = isMaster(), sess = adminSess();
   $("#tabEquipe").hidden = !master;
-  if (!master && state.adminTab === "equipe") state.adminTab = "treinos";
+  $("#tabAutomaticKill").hidden = !master;
+  if (!master && ["equipe", "automaticKill"].includes(state.adminTab)) state.adminTab = "treinos";
   $("#adminWho").textContent = "Conectado como " + sess.user + (master ? " (organizador principal)" : " (organizador)");
   if (master){
     const adms = arr(DB.get("admins")).sort((a, b) => a.created - b.created);
@@ -858,6 +889,7 @@ function renderAdmin(){
   $$("#adminTabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === state.adminTab));
   $$(".atab").forEach(a => a.hidden = a.dataset.atab !== state.adminTab);
   if (state.adminTab === "calls") renderCallAdmin();
+  if (state.adminTab === "automaticKill" && master) renderAutomaticKillAdmin();
 
   const scrims = scrimsSorted().reverse();
   $("#adminScrims").innerHTML = scrims.length ? scrims.map(s => {
@@ -902,6 +934,80 @@ function renderResults(){
   }).join("") + `</tbody></table><div class="actions" style="padding:13px"><button class="btn" data-act="saveround">Salvar queda ${state.resRound}</button><button class="btn danger small" data-act="clearround">Limpar queda</button></div>`;
 }
 
+/* =====================================================
+   AUTOMATIC.KILL — OCR + conferência + publicação
+   ===================================================== */
+function autoKillRoundData(){ return DB.get("automaticKillDrafts/"+(state.autoKillScrim||"")) || {}; }
+function renderAutomaticKillAdmin(){
+  if(!isMaster()) return;
+  const scrims=scrimsSorted().slice().reverse(), sel=$("#autoKillScrim");
+  const active=sel.value || state.autoKillScrim;
+  sel.innerHTML=scrims.length?scrims.map(sc=>`<option value="${esc(sc.id)}">${esc(sc.title)} — ${esc(sc.date)}</option>`).join(""):'<option value="">Nenhum treino cadastrado</option>';
+  state.autoKillScrim=scrims.some(sc=>sc.id===active)?active:(scrims[0]?.id||""); sel.value=state.autoKillScrim;
+  $("#autoKillRound").value=String(state.autoKillRound);
+  const rounds=autoKillRoundData();
+  $("#autoKillRoundsSummary").innerHTML=[1,2,3,4,5].map(n=>{const rows=rounds["r"+n]||[];return `<div class="rrow"><span>Queda ${n}: <b>${rows.length} jogador(es)</b> • ${rows.reduce((a,x)=>a+(+x.kills||0),0)} kills</span><span class="badge ${rows.length?"ok":"wait"}">${rows.length?"Salva":"Pendente"}</span></div>`;}).join("");
+  const pub=DB.get("automaticKills/"+state.autoKillScrim);
+  $("#autoKillPublishStatus").textContent=pub?.publishedAt?"Publicado em "+new Date(pub.publishedAt).toLocaleString("pt-BR")+" • "+(pub.players||[]).length+" jogador(es).":"Ainda não publicado para este treino.";
+  if(!state.autoKillRows.length) $("#autoKillReview").innerHTML='<p class="muted small-t">A lista de conferência aparecerá aqui depois de preparar o texto.</p>';
+}
+function parseAutoKillText(raw){
+  const out=[];
+  raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{
+    let m=line.match(/^(.+?)\s*(?:[-–—,:;|]|\t)\s*(\d{1,2})\s*$/);
+    if(!m) m=line.match(/^(.+?)\s{2,}(\d{1,2})\s*$/);
+    if(m){const nick=m[1].trim().replace(/^\d+[.)\s]+/,"");const kills=Number(m[2]);if(nick&&Number.isInteger(kills)&&kills>=0&&kills<=99)out.push({nick,kills});}
+  });
+  return out;
+}
+function renderAutoKillReview(){
+  const box=$("#autoKillReview");
+  if(!state.autoKillRows.length){box.innerHTML='<p class="empty">Nenhum jogador identificado. Ajuste o texto no formato Nick - kills.</p>';return;}
+  box.innerHTML='<h3>Conferir jogadores e kills</h3><div class="table-wrap"><table><thead><tr><th>Jogador</th><th>Kills</th></tr></thead><tbody>'+state.autoKillRows.map((r,i)=>`<tr><td><input data-ak-nick="${i}" value="${esc(r.nick)}" maxlength="32"></td><td><input data-ak-kills="${i}" type="number" min="0" max="99" value="${r.kills}"></td></tr>`).join("")+'</tbody></table></div><p class="muted small-t mt">Confira com atenção antes de salvar. O sistema não publica sem sua confirmação.</p>';
+}
+$("#autoKillScrim").addEventListener("change",e=>{state.autoKillScrim=e.target.value;state.autoKillRows=[];renderAutomaticKillAdmin();});
+$("#autoKillRound").addEventListener("change",e=>{state.autoKillRound=Math.max(1,Math.min(5,+e.target.value||1));state.autoKillRows=[];renderAutomaticKillAdmin();});
+$("#autoKillImage").addEventListener("change",e=>{const file=e.target.files?.[0],box=$("#autoKillImagePreview");if(!file){box.innerHTML="";return;}if(!file.type.startsWith("image/")){e.target.value="";return toast("Selecione uma imagem válida","err");}const url=URL.createObjectURL(file);box.innerHTML=`<img src="${url}" alt="Prévia do resultado" style="max-width:100%;max-height:260px;border-radius:12px;display:block">`;$("#autoKillStatus").textContent="Imagem carregada. Clique em LER FOTO AUTOMATICAMENTE.";});
+$("#autoKillRead").addEventListener("click",async()=>{
+  if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  const file=$("#autoKillImage").files?.[0];if(!file)return toast("Escolha a foto do resultado primeiro","err");
+  const status=$("#autoKillStatus"),btn=$("#autoKillRead");btn.disabled=true;status.textContent="Lendo a imagem... isso pode levar alguns segundos.";
+  try{
+    if(!window.Tesseract) await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Não foi possível carregar o leitor de imagem. Verifique a internet."));document.head.appendChild(sc);});
+    const result=await Tesseract.recognize(file,"eng",{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo a foto: "+Math.round((m.progress||0)*100)+"%";}});
+    $("#autoKillText").value=(result.data.text||"").trim();
+    const parsed=parseAutoKillText($("#autoKillText").value);state.autoKillRows=parsed;renderAutoKillReview();
+    status.textContent=parsed.length?`Leitura concluída: ${parsed.length} linha(s) reconhecida(s). Confira e corrija antes de salvar.`:"A foto foi lida, mas não consegui separar automaticamente nome e kills. Edite o texto no formato Nick - kills e clique em PREPARAR.";
+  }catch(err){status.textContent=err.message||"Falha ao ler a imagem.";toast(status.textContent,"err");}finally{btn.disabled=false;}
+});
+$("#autoKillPrepare").addEventListener("click",()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");state.autoKillRows=parseAutoKillText($("#autoKillText").value);renderAutoKillReview();if(!state.autoKillRows.length)toast("Não encontrei linhas no formato Nick - kills","err");});
+$("#autoKillReview").addEventListener("input",e=>{const n=e.target.dataset.akNick,k=e.target.dataset.akKills;if(n!==undefined)state.autoKillRows[+n].nick=e.target.value;if(k!==undefined)state.autoKillRows[+k].kills=Math.max(0,Math.min(99,+e.target.value||0));});
+$("#autoKillSaveRound").addEventListener("click",async()=>{
+  if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  if(!state.autoKillScrim)return toast("Selecione um X-Treino","err");
+  const rows=state.autoKillRows.map(r=>({nick:String(r.nick||"").trim(),kills:+r.kills||0})).filter(r=>r.nick);
+  if(!rows.length)return toast("Prepare e confira a lista antes de salvar","err");
+  const seen=new Set();for(const r of rows){const k=r.nick.toLocaleLowerCase("pt-BR");if(seen.has(k))return toast("Há jogador repetido na lista: "+r.nick,"err");seen.add(k);}
+  try{await DB.set("automaticKillDrafts/"+state.autoKillScrim+"/r"+state.autoKillRound,rows);toast("Queda "+state.autoKillRound+" salva no Firebase! ✅");renderAutomaticKillAdmin();}
+  catch(err){toast("Não foi possível salvar a queda: "+err.message,"err");}
+});
+$("#autoKillPublish").addEventListener("click",async()=>{
+  if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  const sc=DB.get("scrims/"+state.autoKillScrim);if(!sc)return toast("Selecione um X-Treino","err");
+  const rounds=autoKillRoundData();const totals={};
+  for(let n=1;n<=5;n++)for(const r of (rounds["r"+n]||[])){const key=r.nick.toLocaleLowerCase("pt-BR");if(!totals[key])totals[key]={nick:r.nick,kills:0,rounds:0,history:{}};totals[key].kills+=+r.kills||0;totals[key].rounds++;totals[key].history["r"+n]=+r.kills||0;}
+  const players=Object.values(totals).sort((a,b)=>b.kills-a.kills||a.nick.localeCompare(b.nick));if(!players.length)return toast("Salve pelo menos uma queda antes de publicar","err");
+  if(!await ask("Publicar "+players.length+" jogador(es) e seus abates na página inicial de "+sc.title+"?"))return;
+  try{await DB.set("automaticKills/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,publishedAt:Date.now(),rounds:[1,2,3,4,5].filter(n=>(rounds["r"+n]||[]).length)});await logAct("Publicou abates automáticos de "+sc.title);toast("Abates publicados na página inicial! 🏆");render();}catch(err){toast("Não foi possível publicar: "+err.message,"err");}
+});
+$("#autoKillUnpublish").addEventListener("click",async()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");if(!state.autoKillScrim)return; if(!await ask("Remover os abates publicados deste X-Treino da página inicial?"))return;await DB.del("automaticKills/"+state.autoKillScrim);await logAct("Removeu publicação de abates");toast("Publicação removida");renderAutomaticKillAdmin();renderHome();});
+function renderPublishedAutomaticKills(){
+  const box=$("#homeAutomaticKills");if(!box)return;
+  const all=arr(DB.get("automaticKills")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
+  if(!all.length){box.innerHTML="";return;}
+  box.innerHTML=all.map(pub=>`<div class="card mt"><div class="flex between wrap"><div><h2 class="title">ABATES DOS JOGADORES</h2><p class="muted small-t">${esc(pub.scrimTitle||"X-Treino")} • Publicado em ${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):"—"}</p></div><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Abates totais</th><th>Quedas registradas</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td><b>${+p.kills||0}</b></td><td>${+p.rounds||0}/5</td></tr>`).join("")}</tbody></table></div></div>`).join("");
+}
+
 /* contagem regressiva */
 function tick(){
   const el = $("#countdown"); if (!el) return;
@@ -922,7 +1028,7 @@ document.addEventListener("click", async e => {
   if (g){ e.preventDefault(); go(g.dataset.go); return; }
 
   const tabBtn = e.target.closest("#adminTabs button");
-  if (tabBtn){ state.adminTab = tabBtn.dataset.tab; renderAdmin(); return; }
+  if (tabBtn){ if (tabBtn.dataset.tab === "automaticKill" && !isMaster()) return toast("AUTOMATIC.KILL é exclusivo do organizador principal", "err"); state.adminTab = tabBtn.dataset.tab; renderAdmin(); return; }
   const roundBtn = e.target.closest("#resRounds [data-round]");
   if (roundBtn){ state.resRound = +roundBtn.dataset.round; renderResults(); return; }
 
@@ -1288,183 +1394,4 @@ async function extraActs(act, id, id2, u, t){
     }
     case "admkick": {
       const tm = DB.get("teams/" + id); if (!tm || !await ask("Remover este jogador do time?")) return true;
-      await DB.del(`teams/${id}/members/${id2}`); await DB.del(`teams/${id}/starters/${id2}`);
-      if (tm.captainId === id2){ const rest = Object.keys(tm.members || {}).filter(k => k !== id2); await DB.set(`teams/${id}/captainId`, rest[0] || ""); }
-      await logAct(`Removeu ${tm.members[id2]} do time ${tm.name}`); return true;
-    }
-    case "admcap": { const tm = DB.get("teams/" + id); await DB.set(`teams/${id}/captainId`, id2); await logAct(`Novo capitão do time ${tm.name}: ${tm.members[id2]}`); return true; }
-    case "admteamedit": {
-      const tm = DB.get("teams/" + id); if (!tm) return true;
-      const name = await promptText("Nome do time", tm.name); if (name === null) return true;
-      const tag = (await promptText("Tag (2 a 4 letras)", tm.tag) || "").toUpperCase(); if (name.length < 2 || tag.length < 2 || tag.length > 4) return no("Nome ou tag inválidos");
-      await DB.set(`teams/${id}/name`, name); await DB.set(`teams/${id}/tag`, tag); await logAct(`Editou o time ${tm.name} → ${name}`); toast("Time atualizado ✅"); return true;
-    }
-    case "admuseredit": {
-      const x = DB.get("users/" + id); if (!x) return true;
-      const nick = await promptText("Nick do jogador", x.nick); if (!nick || nick.length < 3) return true;
-      if (arr(DB.get("users")).some(o => o.id !== id && o.nick.toLowerCase() === nick.toLowerCase())) return no("Nick já em uso");
-      const ffid = await promptText("ID do Free Fire", x.ffid); if (ffid === null) return true;
-      await DB.set(`users/${id}/nick`, nick); await DB.set(`users/${id}/ffid`, ffid);
-      const tm = teamOf(id); if (tm) await DB.set(`teams/${tm.id}/members/${id}`, nick);
-      await logAct("Editou o jogador " + nick); toast("Jogador atualizado ✅"); return true;
-    }
-    case "scrimedit": {
-      const s = DB.get("scrims/" + id); if (!s) return true;
-      const title = await promptText("Título do treino", s.title); if (!title) return true;
-      const date = await promptText("Data (AAAA-MM-DD)", s.date); if (!/^\d{4}-\d{2}-\d{2}$/.test(date || "")) return no("Data inválida");
-      const time = await promptText("Hora (HH:MM)", s.time); if (!/^\d{2}:\d{2}$/.test(time || "")) return no("Hora inválida");
-      const slots = parseInt(await promptText("Total de vagas", String(s.slots)), 10); if (!(slots >= 2)) return no("Vagas inválidas");
-      await DB.set("scrims/" + id, { ...s, title, date, time, slots }); await logAct("Editou o treino " + title); toast("Treino atualizado ✅"); return true;
-    }
-    case "admreg": {
-      const sel = $(`[data-regsel="${id}"]`); if (!sel || !sel.value) return no("Escolha um time");
-      await DB.set(`scrims/${id}/regs/${sel.value}`, { tid: sel.value, at: Date.now(), checkin: false });
-      const tm = DB.get("teams/" + sel.value); await logAct("Inscreveu o time " + (tm ? tm.name : "") + " no treino"); return true;
-    }
-    case "saveround": {
-      const sid = state.resScrim, rn = state.resRound, o = {}, used = {};
-      for (const tr of $$("#resTableWrap tr[data-tid]")){
-        const p = parseInt($("[data-f=place]", tr).value, 10) || 0, k = Math.max(0, parseInt($("[data-f=kills]", tr).value, 10) || 0);
-        if (p < 0 || p > 12) return no("A colocação deve ser de 1 a 12");
-        if (!p){ if (k) return no("Informe a colocação do time que tem abates"); continue; }
-        if (used[p]) return no(`Colocação ${p}º repetida`); used[p] = 1; o[tr.dataset.tid] = { place: p, kills: k };
-      }
-      if (Object.keys(o).length) await DB.set(`results/${sid}/r${rn}`, o); else await DB.del(`results/${sid}/r${rn}`);
-      const sc = DB.get("scrims/" + sid); await logAct(`Salvou a queda ${rn} do treino ${sc ? sc.title : ""} (${Object.keys(o).length} times)`);
-      state.resFresh = true; toast("Queda salva — ranking atualizado ✅"); $("#resTableWrap").innerHTML = ""; return true;
-    }
-    case "clearround": {
-      if (!await ask("Apagar os resultados desta queda?")) return true;
-      await DB.del(`results/${state.resScrim}/r${state.resRound}`); await logAct(`Limpou a queda ${state.resRound}`); $("#resTableWrap").innerHTML = ""; return true;
-    }
-    case "logdel": await DB.del("logs/" + id); return true;
-    case "logwipe": if (await ask("Apagar todos os logs?")){ await DB.del("logs"); toast("Logs apagados"); } return true;
-  }
-  return false;
-}
-document.addEventListener("input", e => {
-  const i = e.target.closest(".res-in"); if (!i) return;
-  const tr = i.closest("tr"), p = +$("[data-f=place]", tr).value, k = +$("[data-f=kills]", tr).value || 0;
-  $("[data-pts]", tr).textContent = p > 0 ? ptsOf({ place: p, kills: k }) : "—";
-});
-$("#logForm").addEventListener("submit", async e => {
-  e.preventDefault(); if (!isAdmin()) return toast("Sessão encerrada", "err");
-  const text = new FormData(e.target).get("text").trim(); if (!text) return;
-  const id = uid(), a = adminSess(); await DB.set("logs/" + id, { id, at: Date.now(), who: a.user, text }); e.target.reset(); toast("Log criado ✅"); render();
-});
-$("#admTeamForm").addEventListener("submit", async e => {
-  e.preventDefault(); if (!isAdmin()) return toast("Sessão encerrada", "err");
-  const f = new FormData(e.target), name = f.get("name").trim(), tag = f.get("tag").trim().toUpperCase();
-  if (arr(DB.get("teams")).some(x => x.name.toLowerCase() === name.toLowerCase())) return toast("Já existe um time com esse nome", "err");
-  const id = uid(); await DB.set("teams/" + id, { id, name, tag, captainId: "", code: genCode(), members: {}, created: Date.now() });
-  await logAct("Criou o time " + name); e.target.reset(); toast("Time criado ✅"); render();
-});
-$("#pointsForm").addEventListener("submit", async e => {
-  e.preventDefault(); if (!isAdmin()) return toast("Sessão encerrada", "err");
-  const f = new FormData(e.target), pts = Array.from({ length: 12 }, (_, i) => Math.max(0, Number(f.get("p" + (i + 1))) || 0));
-  await DB.set("settings/points", pts); await DB.set("settings/killPts", Math.max(0, Number(f.get("kill")) || 0));
-  await logAct("Alterou a tabela de pontuação"); toast("Pontuação salva — ranking recalculado ✅"); render();
-});
-const CALL_MAPS = [
-  { name: "Bermuda", round: 1 },
-  { name: "Purgatório", round: 2 },
-  { name: "Kalahari", round: 3 },
-  { name: "Nova Terra", round: 4 },
-  { name: "Solara", round: 5 }
-];
-function selectedCallScrim(){
-  const all = scrimsSorted().slice().reverse();
-  if (!all.some(x => x.id === state.callScrim)) state.callScrim = (nextScrim() || all[0] || {}).id || "";
-  return DB.get("scrims/" + state.callScrim) || null;
-}
-function renderCallAdmin(){
-  if (!isAdmin()) return;
-  const sel = $("#callAdminScrim");
-  if (!sel) return;
-  const all = scrimsSorted().slice().reverse();
-  const current = state.callScrim;
-  sel.innerHTML = all.length ? all.map(x => `<option value="${esc(x.id)}">${esc(x.title)} — ${esc(x.date)}</option>`).join("") : '<option value="">Nenhum treino criado</option>';
-  if (!all.some(x => x.id === current)) state.callScrim = (nextScrim() || all[0] || {}).id || "";
-  sel.value = state.callScrim;
-  const wrap = $("#callAdminMaps");
-  const sc = selectedCallScrim();
-  if (!sc){ wrap.innerHTML = '<div class="empty">Crie um treino primeiro para configurar as calls.</div>'; return; }
-  const regs = confirmedRegs(sc).slice(0, 12).filter(r => DB.get("teams/" + r.tid));
-  wrap.innerHTML = CALL_MAPS.map(m => {
-    const pool = arr(DB.get(`callPools/${sc.id}/r${m.round}`));
-    const result = DB.get(`callResults/${sc.id}/r${m.round}`) || {};
-    const done = Object.keys(result).length;
-    return `<div class="call-map">
-      <div class="flex between wrap"><h3>Queda ${m.round} — ${m.name}</h3><span class="badge ${done ? "ok" : "off"}">${done ? done + " call(s) sorteada(s)" : "Aguardando sorteio"}</span></div>
-      <p class="muted small-t mt">Cadastre um nome por linha. Para ${regs.length} equipe(s) confirmada(s), é necessário ter pelo menos ${regs.length} nomes diferentes.</p>
-      <label class="mt">Nomes das calls<textarea id="callPool-r${m.round}" placeholder="Exemplo:\nRED ZONE\nHANGAR\nSENTOSA">${esc(pool.join("\n"))}</textarea></label>
-      <div class="actions mt"><button class="btn ghost small" data-act="savecallpool" data-round="${m.round}">Salvar nomes</button><button class="btn small" data-act="drawcalls" data-round="${m.round}" ${regs.length ? "" : "disabled"}>Sortear Queda ${m.round}</button><button class="btn danger small" data-act="clearcalls" data-round="${m.round}" ${done ? "" : "disabled"}>Apagar resultado</button></div>
-      ${done ? `<p class="muted small-t mt">Resultado salvo para ${done} equipe(s). Um novo sorteio substituirá apenas esta queda.</p>` : ""}
-    </div>`;
-  }).join("");
-}
-function renderCallsPublic(){
-  const sel = $("#publicCallScrim"); if (!sel) return;
-  const all = scrimsSorted().slice().reverse();
-  sel.innerHTML = all.length ? all.map(x => `<option value="${esc(x.id)}">${esc(x.title)} — ${esc(x.date)}</option>`).join("") : '<option value="">Nenhum treino disponível</option>';
-  if (!all.some(x => x.id === state.publicCallScrim)) state.publicCallScrim = (nextScrim() || all[0] || {}).id || "";
-  sel.value = state.publicCallScrim;
-  const sc = DB.get("scrims/" + state.publicCallScrim), info = $("#publicCallInfo"), wrap = $("#publicCallsList");
-  if (!sc){ info.textContent = "Ainda não há treino cadastrado."; wrap.innerHTML = ""; return; }
-  const teams = confirmedRegs(sc).slice(0,12).filter(r => DB.get("teams/" + r.tid));
-  info.textContent = `${sc.title} • ${sc.date} • ${teams.length} equipe(s) confirmada(s)`;
-  wrap.innerHTML = CALL_MAPS.map(m => {
-    const result = DB.get(`callResults/${sc.id}/r${m.round}`) || {};
-    const rows = teams.map((r,i) => { const tm=DB.get("teams/"+r.tid), call=result[r.tid]; return `<div class="call-slot"><span class="num">${i+1}</span><span class="teamname">[${esc(tm.tag)}] ${esc(tm.name)}</span><span class="callname">${call ? esc(call) : "Aguardando"}</span></div>`; }).join("");
-    return `<div class="card"><div class="flex between wrap"><h3>Queda ${m.round} — ${m.name}</h3><span class="badge ${Object.keys(result).length ? "ok" : "wait"}">${Object.keys(result).length ? "Sorteado" : "Pendente"}</span></div><div class="grid mt">${rows || '<p class="empty">Nenhuma equipe confirmada neste treino.</p>'}</div></div>`;
-  }).join("");
-}
-
-function renderAdmin2(){
-  if (!isAdmin()) return;
-  const ln = id => esc(DB.get("teams/" + id) ? DB.get("teams/" + id).name : "?");
-  const scrims = scrimsSorted().reverse(), allTeams = arr(DB.get("teams"));
-  $("#adminScrims").innerHTML = scrims.length ? scrims.map(s => {
-    const regs = scrimRegs(s), free = allTeams.filter(tm => !(s.regs && s.regs[tm.id]));
-    return `<div class="card"><div class="flex between wrap"><h3>${esc(s.title)}</h3><div class="flex"><select data-status="${s.id}" style="width:auto"><option value="open"${s.status === "open" ? " selected" : ""}>Aberto</option><option value="closed"${s.status === "closed" ? " selected" : ""}>Fechado</option><option value="done"${s.status === "done" ? " selected" : ""}>Finalizado</option></select>
-      <button class="btn small ghost" data-act="scrimedit" data-id="${s.id}">Editar</button><button class="btn small danger" data-act="delscrim" data-id="${s.id}">Excluir</button></div></div>
-      <p class="muted small-t">${esc(fmtDate(s))} • ${esc(s.mode)} • ${Math.min(regs.length, s.slots)}/${s.slots} vagas${regs.length > s.slots ? " (+" + (regs.length - s.slots) + " na fila)" : ""}</p>
-      <div class="mt">${regs.map((r, i) => { const tm = DB.get("teams/" + r.tid); return tm ? `<div class="rrow"><span>${i + 1}. [${esc(tm.tag)}] ${esc(tm.name)} ${i >= s.slots ? '<span class="badge wait">fila</span>' : ""} ${r.checkin ? '<span class="badge ok">check-in</span>' : ""}</span><button class="btn small danger" data-act="delreg" data-id="${s.id}" data-id2="${r.tid}">Remover</button></div>` : ""; }).join("") || '<span class="muted small-t">Sem inscritos.</span>'}</div>
-      ${free.length ? `<div class="flex mt"><select data-regsel="${s.id}">${free.map(tm => `<option value="${tm.id}">[${esc(tm.tag)}] ${esc(tm.name)}</option>`).join("")}</select><button class="btn small" data-act="admreg" data-id="${s.id}">Inscrever</button></div>` : ""}</div>`;
-  }).join("") : '<div class="card empty">Nenhum treino criado.</div>';
-  $("#adminTeams").innerHTML = allTeams.length ? allTeams.map(t => {
-    const reqs = arr(t.requests);
-    return `<div class="card"><div class="flex between wrap"><b>[${esc(t.tag)}] ${esc(t.name)}</b><span class="flex"><button class="btn small ghost" data-act="admteamedit" data-id="${t.id}">Editar</button><button class="btn small danger" data-act="delteam" data-id="${t.id}">Excluir</button></span></div>
-      <p class="muted small-t">Código ${esc(t.code)} • titulares ${startersCount(t)}/4</p>
-      ${Object.entries(t.members || {}).map(([id, nick]) => `<div class="rrow"><span>${esc(nick)} ${id === t.captainId ? "👑" : ""} ${t.starters && t.starters[id] ? '<span class="badge ok">T</span>' : '<span class="badge off">R</span>'}</span><span class="flex"><button class="btn small ghost" data-act="tog" data-id="${t.id}" data-id2="${esc(id)}">T/R</button>${id !== t.captainId ? `<button class="btn small ghost" data-act="admcap" data-id="${t.id}" data-id2="${esc(id)}">Capitão</button>` : ""}<button class="btn small danger" data-act="admkick" data-id="${t.id}" data-id2="${esc(id)}">Remover</button></span></div>`).join("") || '<p class="muted small-t">Sem jogadores.</p>'}
-      ${reqs.map(r => `<div class="rrow"><span>Pedido: <b>${esc(r.nick)}</b></span><span class="flex"><button class="btn small ok" data-act="accept" data-id="${t.id}" data-id2="${esc(r.uid)}">Aceitar</button><button class="btn small danger" data-act="reject" data-id="${t.id}" data-id2="${esc(r.uid)}">Rejeitar</button></span></div>`).join("")}</div>`;
-  }).join("") : '<div class="card empty">Nenhum time.</div>';
-  $("#adminUsers").innerHTML = arr(DB.get("users")).map(x => `<div class="card"><div class="flex between"><b>${esc(x.nick)}</b><span class="flex"><button class="btn small ghost" data-act="admuseredit" data-id="${x.id}">Editar</button><button class="btn small danger" data-act="deluser" data-id="${x.id}">Excluir</button></span></div><p class="muted small-t">ID: ${esc(x.ffid || "—")} • ${esc(x.role || "")}</p></div>`).join("") || '<div class="card empty">Nenhum jogador.</div>';
-  const logs = arr(DB.get("logs")).sort((a, b) => b.at - a.at).slice(0, 100);
-  $("#adminLogs2").innerHTML = logs.length ? logs.map(l => `<div class="rrow"><span><span class="muted small-t">${esc(new Date(l.at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }))}</span> • <b>${esc(l.who)}</b>: ${esc(l.text)}</span><button class="btn small danger" data-act="logdel" data-id="${l.id}">Excluir</button></div>`).join("") : '<p class="empty">Sem logs ainda.</p>';
-  const pf = $("#pointsForm"), box = $("#ptsInputs");
-  if (!box.children.length) box.innerHTML = Array.from({ length: 12 }, (_, i) => `<label>${i + 1}º lugar<input type="number" name="p${i + 1}" min="0" step="0.5"></label>`).join("");
-  if (!pf.contains(document.activeElement)){ pointsTable().forEach((p, i) => { if (pf["p" + (i + 1)]) pf["p" + (i + 1)].value = p; }); pf.kill.value = killPts(); }
-}
-
-/* =====================================================
-   INICIALIZAÇÃO
-   ===================================================== */
-let pendingRender = false;
-function safeRender(){
-  const a = document.activeElement;
-  if (a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)){ pendingRender = true; return; }
-  render();
-}
-document.addEventListener("focusout", () => { if (pendingRender) setTimeout(() => { const a = document.activeElement; if (!(a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))){ pendingRender = false; render(); } }, 80); });
-
-(async function init(){
-  $("#year").textContent=new Date().getFullYear();DB.load();AUTH.load();DB.status=DB.cloud?"error":"local";updatePill();
-  if(AUTH.refreshToken){try{await AUTH.refresh();}catch(e){AUTH.signOut();}}
-  fillConfig();render();show((location.hash||"#inicio").slice(1));
-  if(DB.cloud){if(await DB.pull()){fillConfig();render();}setInterval(async()=>{if(await DB.pull())safeRender();},CONFIG.pollMs);}
-})();
-</script>
-
-
-</body></html>
+      await DB.del(`teams/${id}/membe
