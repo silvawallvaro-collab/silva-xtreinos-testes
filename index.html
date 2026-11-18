@@ -960,6 +960,29 @@ function parseAutoKillText(raw){
   });
   return out;
 }
+function parseAutoKillWords(words){
+  const clean=(words||[]).map(w=>{const b=w.bbox||{};return {text:String(w.text||"").trim(),x:((b.x0||0)+(b.x1||0))/2,y:((b.y0||0)+(b.y1||0))/2,confidence:+w.confidence||0};}).filter(w=>w.text&&w.confidence>=18);
+  if(!clean.length)return [];
+  clean.sort((a,b)=>a.y-b.y||a.x-b.x);
+  const bands=[];
+  for(const w of clean){let band=bands.find(v=>Math.abs(v.y-w.y)<=17);if(!band){band={y:w.y,words:[]};bands.push(band);}band.words.push(w);band.y=band.words.reduce((n,v)=>n+v.y,0)/band.words.length;}
+  const found=[];
+  for(const band of bands){
+    const row=band.words.sort((a,b)=>a.x-b.x),labels=[];
+    row.forEach((w,i)=>{if(/abat/i.test(w.text.replace(/[^a-z]/gi,"")))labels.push(i);});
+    let start=0;
+    for(const labelIndex of labels){
+      const before=row.slice(start,labelIndex);start=labelIndex+1;if(!before.length)continue;
+      let killIndex=-1;
+      for(let i=before.length-1;i>=0;i--){const t=before[i].text.replace(/[^\d]/g,"");if(t&&/^\d{1,2}$/.test(t)){killIndex=i;break;}}
+      if(killIndex<0)continue;
+      const kills=Number(before[killIndex].text.replace(/[^\d]/g,""));if(kills>99)continue;
+      const nick=before.slice(0,killIndex).map(w=>w.text).filter(t=>/[A-Za-zÀ-ÿ]/.test(t)||/[_™®★☆✦✧々ツ]/.test(t)).join(" ").replace(/\s+/g," ").trim();
+      if(nick.length>=2)found.push({nick,kills});
+    }
+  }
+  const seen=new Set();return found.filter(r=>{const k=r.nick.toLocaleLowerCase("pt-BR")+"|"+r.kills;if(seen.has(k))return false;seen.add(k);return true;});
+}
 function renderAutoKillReview(){
   const box=$("#autoKillReview");
   if(!state.autoKillRows.length){box.innerHTML='<p class="empty">Nenhum jogador identificado. Ajuste o texto no formato Nick - kills.</p>';return;}
@@ -974,10 +997,13 @@ $("#autoKillRead").addEventListener("click",async()=>{
   const status=$("#autoKillStatus"),btn=$("#autoKillRead");btn.disabled=true;status.textContent="Lendo a imagem... isso pode levar alguns segundos.";
   try{
     if(!window.Tesseract) await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Não foi possível carregar o leitor de imagem. Verifique a internet."));document.head.appendChild(sc);});
-    const result=await Tesseract.recognize(file,"eng",{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo a foto: "+Math.round((m.progress||0)*100)+"%";}});
-    $("#autoKillText").value=(result.data.text||"").trim();
-    const parsed=parseAutoKillText($("#autoKillText").value);state.autoKillRows=parsed;renderAutoKillReview();
-    status.textContent=parsed.length?`Leitura concluída: ${parsed.length} linha(s) reconhecida(s). Confira e corrija antes de salvar.`:"A foto foi lida, mas não consegui separar automaticamente nome e kills. Edite o texto no formato Nick - kills e clique em PREPARAR.";
+    const result=await Tesseract.recognize(file,"eng",{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo o placar: "+Math.round((m.progress||0)*100)+"%";}});
+    const recognized=(result.data.text||"").trim();
+    const byLayout=parseAutoKillWords(result.data.words||[]);
+    const parsed=byLayout.length?byLayout:parseAutoKillText(recognized);
+    $("#autoKillText").value=parsed.map(r=>`${r.nick} - ${r.kills}`).join("\n")||recognized;
+    state.autoKillRows=parsed;renderAutoKillReview();
+    status.textContent=parsed.length?`Leitura concluída: ${parsed.length} jogador(es) separados. Confira os nomes e kills antes de salvar.`:"Não consegui separar os jogadores deste print. Tente uma imagem mais nítida ou corrija o texto manualmente.";
   }catch(err){status.textContent=err.message||"Falha ao ler a imagem.";toast(status.textContent,"err");}finally{btn.disabled=false;}
 });
 $("#autoKillPrepare").addEventListener("click",()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");state.autoKillRows=parseAutoKillText($("#autoKillText").value);renderAutoKillReview();if(!state.autoKillRows.length)toast("Não encontrei linhas no formato Nick - kills","err");});
