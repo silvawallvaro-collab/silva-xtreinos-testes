@@ -960,13 +960,26 @@ function parseAutoKillText(raw){
   return out;
 }
 function autoKillCropRects(w,h){
-  // Coordenadas normalizadas do placar Free Fire: duas colunas de jogadores por lado.
-  const leftY=[184,220,276,313,376,412,469,505,565,600];
-  const rightY=[185,220,266,303,350,386,450,486,520,555];
+  // Referência do placar enviado: 1600x720. As posições são escaladas
+  // pela altura real da imagem para não deslocar os recortes em outros tamanhos.
+  const refH=720;
+  const leftY=[185,220,280,315,375,410,470,505,565,600];
+  // O lado direito tem uma linha no rank 9; os demais têm duas.
+  const rightY=[185,220,285,320,350,385,445,510,545];
   const rects=[];
-  for(const y of leftY){rects.push([.185,y/900-.022,.345,y/900+.022]);rects.push([.365,y/900-.022,.535,y/900+.022]);}
-  for(const y of rightY){rects.push([.585,y/900-.022,.725,y/900+.022]);rects.push([.725,y/900-.022,.865,y/900+.022]);}
-  return rects.map(([x0,y0,x1,y1])=>({left:Math.round(x0*w),top:Math.max(0,Math.round(y0*h)),right:Math.min(w,Math.round(x1*w)),bottom:Math.min(h,Math.round(y1*h))}));
+  const add=(x0,x1,y)=>{
+    const cy=y/refH;
+    const half=.027;
+    rects.push([x0,cy-half,x1,cy+half]);
+  };
+  for(const y of leftY){add(.185,.345,y);add(.365,.535,y);}
+  for(const y of rightY){add(.585,.725,y);add(.725,.865,y);}
+  return rects.map(([x0,y0,x1,y1])=>({
+    left:Math.max(0,Math.round(x0*w)),
+    top:Math.max(0,Math.round(y0*h)),
+    right:Math.min(w,Math.round(x1*w)),
+    bottom:Math.min(h,Math.round(y1*h))
+  })).filter(r=>r.right>r.left&&r.bottom>r.top);
 }
 function parseAutoKillCell(text){
   const s=String(text||"").replace(/[|]/g," ").replace(/\s+/g," ").trim();
@@ -995,7 +1008,7 @@ $("#autoKillRead").addEventListener("click",async()=>{
     if(!window.Tesseract) await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Não foi possível carregar o leitor de imagem. Verifique a internet."));document.head.appendChild(sc);});
     const bitmap=await createImageBitmap(file);
     const rects=autoKillCropRects(bitmap.width,bitmap.height);
-    const worker=await Tesseract.createWorker("eng",1,{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo jogador "+Math.min(20,Math.max(1,Math.round((m.progress||0)*20)))+" de 20...";}});
+    const worker=await Tesseract.createWorker("eng",1,{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo jogador "+Math.min(38,Math.max(1,Math.round((m.progress||0)*38)))+" de 38...";}});
     const parsed=[],rawLines=[];
     try{
       await worker.setParameters({tessedit_pageseg_mode:"7",preserve_interword_spaces:"1"});
