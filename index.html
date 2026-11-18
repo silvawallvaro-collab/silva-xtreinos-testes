@@ -144,6 +144,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .modal-box .actions{margin-top:14px;justify-content:flex-end}
 [data-act=teamview]{cursor:pointer}[data-act=teamview]:hover{border-color:var(--blue2)}
 .rrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}
+.call-map{border:1px solid var(--line);border-radius:14px;padding:15px;background:var(--bg2)}
+.call-map textarea{min-height:130px;resize:vertical;font-family:Inter,system-ui,sans-serif}
+.call-slot{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.call-slot .num{font:700 1.2rem Rajdhani;color:var(--blue2);min-width:28px}
+.call-slot .teamname{font-weight:700;flex:1;min-width:0}
+.call-slot .callname{color:var(--cyan);font-weight:700;text-align:right}
 </style>
 
 <header>
@@ -154,6 +160,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <a data-go="times">Times</a>
     <a data-go="meutime">Meu time</a>
     <a data-go="ranking">Ranking</a>
+    <a data-go="calls">CALL</a>
     <a data-go="redes">Redes</a>
     <a data-go="perfil">Perfil</a>
     <a data-go="admin">Organizador</a>
@@ -175,6 +182,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <div class="actions center">
       <a class="btn" data-go="meutime">Montar meu time</a>
       <a class="btn ghost" data-go="treinos">Ver treinos</a>
+      <a class="btn ghost" data-go="calls">Ver CALLS</a>
     </div>
   </div>
 
@@ -190,6 +198,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   <h2 class="title">Ranking geral</h2>
   <div class="table-wrap"><table><thead><tr><th>#</th><th>Time</th><th>Quedas</th><th>Booyah</th><th>Abates</th><th>Pontos</th><th>Resultados das quedas</th></tr></thead><tbody id="homeRank"></tbody></table></div>
   <p class="muted small-t mt" id="homeRankInfo"></p>
+
+  <div class="card mt">
+    <div class="flex between wrap"><div><h3>CALL DO X-TREINO</h3><p class="muted small-t">Veja as calls sorteadas para cada equipe e mapa.</p></div><a class="btn small" data-go="calls">Abrir CALL</a></div>
+  </div>
 
   <h2 class="title">Avisos</h2>
   <div id="homeNews"></div>
@@ -293,6 +305,17 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   </div>
 </section>
 
+<!-- CALLS PÚBLICAS -->
+<section class="page" id="calls">
+  <h2 class="title">CALL — X-TREINO</h2>
+  <p class="sub">Confira a call de cada equipe confirmada no treino selecionado.</p>
+  <div class="card" style="margin-bottom:14px">
+    <label>Treino<select id="publicCallScrim"></select></label>
+    <div id="publicCallInfo" class="muted small-t mt"></div>
+  </div>
+  <div id="publicCallsList" class="grid"></div>
+</section>
+
 <!-- REDES -->
 <section class="page" id="redes">
   <h2 class="title">Redes</h2>
@@ -317,6 +340,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="tabs" id="adminTabs">
         <button data-tab="treinos" class="active">Treinos</button>
         <button data-tab="resultados">Queda</button>
+        <button data-tab="calls">Sorteio de call</button>
         <button data-tab="pessoas">Times e jogadores</button>
         <button data-tab="avisos">Avisos</button>
         <button data-tab="logs">Logs</button>
@@ -350,6 +374,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <label>Treino<select id="resScrim"></select></label>
         <div class="tabs" id="resRounds"></div>
         <div class="table-wrap" id="resTableWrap"></div>
+      </div>
+    </div>
+
+    <div class="atab" data-atab="calls" hidden>
+      <div class="card">
+        <h3>Sorteio de calls por mapa</h3>
+        <p class="muted small-t">Escolha o treino. Cadastre uma lista diferente para cada mapa e salve. O sorteio distribui calls sem repetir entre as equipes confirmadas (até 12 slots).</p>
+        <label class="mt">Treino<select id="callAdminScrim"></select></label>
+        <div id="callAdminMaps" class="grid mt"></div>
       </div>
     </div>
 
@@ -542,12 +575,18 @@ const DB = {
     }finally{this.pending--;updatePill();}
   },
   del(p){return this.set(p,undefined);},
-  async replaceAll(obj){this.data=obj||{};this.persist();if(!this.cloud)return;try{await this.request("","PUT",this.data);this.status="online";}catch(e){this.status="error";toast("Falha ao restaurar: "+e.message,"err");}updatePill();},
+  async replaceAll(obj){
+    const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults"];
+    this.data=obj||{};this.persist();if(!this.cloud)return;
+    try{for(const branch of branches){const value=this.data[branch];await this.request(branch,value===undefined?"DELETE":"PUT",value);}this.status="online";}
+    catch(e){this.status="error";toast("Falha ao restaurar: "+e.message,"err");}
+    updatePill();
+  },
   async pull(){
     if(!this.cloud||this.pending>0)return false;
     try{
       // Não lê a raiz inteira: cada coleção pública é consultada separadamente.
-      const branches=["users","teams","scrims","results","settings","news","admins","logs"];
+      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults"];
       let changed=false;
       for(const branch of branches){
         const r=await this.request(branch,"GET");
@@ -568,7 +607,7 @@ function updatePill(){
 /* =====================================================
    REGRAS DE NEGÓCIO
    ===================================================== */
-const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "" };
+const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "" };
 const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe"]);
 function adminSess(){
   try {
@@ -654,7 +693,7 @@ function settings(){ return DB.get("settings") || {}; }
 function render(){
   const st = settings(), brand = st.brand || "ZEUX X-TREINOS FF";
   $("#brandName").textContent = brand; $("#footBrand").textContent = brand; document.title = brand + " • Free Fire";
-  renderHome(); renderScrims(); renderTeams(); renderMyTeam(); renderProfile(); renderRanking(); renderSocial(); renderAdmin(); renderAdmin2();
+  renderHome(); renderScrims(); renderTeams(); renderMyTeam(); renderProfile(); renderRanking(); renderSocial(); renderCallsPublic(); renderAdmin(); renderAdmin2(); renderCallAdmin();
 }
 
 function scrimCard(s){
@@ -789,6 +828,7 @@ function renderAdmin(){
   }
   $$("#adminTabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === state.adminTab));
   $$(".atab").forEach(a => a.hidden = a.dataset.atab !== state.adminTab);
+  if (state.adminTab === "calls") renderCallAdmin();
 
   const scrims = scrimsSorted().reverse();
   $("#adminScrims").innerHTML = scrims.length ? scrims.map(s => {
@@ -858,7 +898,7 @@ document.addEventListener("click", async e => {
   if (roundBtn){ state.resRound = +roundBtn.dataset.round; renderResults(); return; }
 
   const b = e.target.closest("[data-act]"); if (!b) return;
-  const act = b.dataset.act, id = b.dataset.id, id2 = b.dataset.id2, u = me(), t = myTeam();
+  const act = b.dataset.act, id = b.dataset.id || b.dataset.round, id2 = b.dataset.id2, u = me(), t = myTeam();
   if (ADMIN_ACTS.has(act) && !isAdmin()){ render(); return toast("Sessão do organizador encerrada", "err"); }
   if (["admtoggle", "admdel", "logclear"].includes(act) && !isMaster()) return toast("Só o organizador principal pode fazer isso", "err");
   try {
@@ -910,6 +950,8 @@ document.addEventListener("change", async e => {
   const st = e.target.closest("[data-status]");
   if (st){ if (!isAdmin()) return render(); const sc = DB.get("scrims/" + st.dataset.status); await DB.set(`scrims/${st.dataset.status}/status`, st.value); await logAct(`Mudou o treino ${sc ? sc.title : ""} para ${({ open: "aberto", closed: "fechado", done: "finalizado" })[st.value]}`); render(); return; }
   if (e.target.id === "resScrim"){ state.resScrim = e.target.value; state.resRound = 1; renderResults(); return; }
+  if (e.target.id === "callAdminScrim"){ state.callScrim = e.target.value; renderCallAdmin(); return; }
+  if (e.target.id === "publicCallScrim"){ state.publicCallScrim = e.target.value; renderCallsPublic(); return; }
   if (e.target.id === "rankFilter"){ renderRanking(); return; }
 
 });
@@ -1118,6 +1160,39 @@ async function extraActs(act, id, id2, u, t){
   const canTeam = tid => { const tm = DB.get("teams/" + tid); return !!tm && (isAdmin() || (u && tm.captainId === u.id)); };
   const lg = txt => isAdmin() ? logAct(txt) : null;
   switch (act){
+    case "savecallpool": {
+      if (!isAdmin()) return no("Acesso restrito ao organizador");
+      const sc = selectedCallScrim(), round = Math.max(1, Math.min(5, +id || 1));
+      if (!sc) return no("Selecione um treino");
+      const raw = $("#callPool-r" + round)?.value || "";
+      const names = raw.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+      const unique = [...new Set(names.map(x => x.toLocaleLowerCase("pt-BR")))];
+      if (unique.length !== names.length) return no("Há nomes repetidos nessa lista");
+      await DB.set(`callPools/${sc.id}/r${round}`, names);
+      await logAct(`Salvou ${names.length} calls — Queda ${round} (${sc.title})`);
+      toast("Nomes salvos ✅"); return true;
+    }
+    case "drawcalls": {
+      if (!isAdmin()) return no("Acesso restrito ao organizador");
+      const sc = selectedCallScrim(), round = Math.max(1, Math.min(5, +id || 1));
+      if (!sc) return no("Selecione um treino");
+      const teams = confirmedRegs(sc).slice(0,12).filter(r => DB.get("teams/" + r.tid));
+      if (!teams.length) return no("Não há equipes confirmadas para sortear");
+      const pool = arr(DB.get(`callPools/${sc.id}/r${round}`)).map(x => String(x).trim()).filter(Boolean);
+      if (pool.length < teams.length) return no(`Cadastre pelo menos ${teams.length} calls diferentes para esta queda`);
+      const shuffled = [...pool];
+      for (let i = shuffled.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
+      const out = {}; teams.forEach((r, i) => { out[r.tid] = shuffled[i]; });
+      await DB.set(`callResults/${sc.id}/r${round}`, out);
+      await logAct(`Sorteou as calls da Queda ${round} — ${sc.title} (${teams.length} equipes)`);
+      toast(`Queda ${round} sorteada! ✅`); return true;
+    }
+    case "clearcalls": {
+      if (!isAdmin()) return no("Acesso restrito ao organizador");
+      const sc = selectedCallScrim(), round = Math.max(1, Math.min(5, +id || 1));
+      if (!sc || !await ask(`Apagar o resultado da Queda ${round}?`)) return true;
+      await DB.del(`callResults/${sc.id}/r${round}`); await logAct(`Apagou o sorteio da Queda ${round} — ${sc.title}`); toast("Resultado apagado"); return true;
+    }
     case "teamview": state.viewTeam = id; window.scrollTo(0, 0); return true;
     case "teamclose": state.viewTeam = ""; return true;
     case "reqjoin": {
@@ -1227,6 +1302,61 @@ $("#pointsForm").addEventListener("submit", async e => {
   await DB.set("settings/points", pts); await DB.set("settings/killPts", Math.max(0, Number(f.get("kill")) || 0));
   await logAct("Alterou a tabela de pontuação"); toast("Pontuação salva — ranking recalculado ✅"); render();
 });
+const CALL_MAPS = [
+  { name: "Bermuda", round: 1 },
+  { name: "Purgatório", round: 2 },
+  { name: "Kalahari", round: 3 },
+  { name: "Nova Terra", round: 4 },
+  { name: "Solara", round: 5 }
+];
+function selectedCallScrim(){
+  const all = scrimsSorted().slice().reverse();
+  if (!all.some(x => x.id === state.callScrim)) state.callScrim = (nextScrim() || all[0] || {}).id || "";
+  return DB.get("scrims/" + state.callScrim) || null;
+}
+function renderCallAdmin(){
+  if (!isAdmin()) return;
+  const sel = $("#callAdminScrim");
+  if (!sel) return;
+  const all = scrimsSorted().slice().reverse();
+  const current = state.callScrim;
+  sel.innerHTML = all.length ? all.map(x => `<option value="${esc(x.id)}">${esc(x.title)} — ${esc(x.date)}</option>`).join("") : '<option value="">Nenhum treino criado</option>';
+  if (!all.some(x => x.id === current)) state.callScrim = (nextScrim() || all[0] || {}).id || "";
+  sel.value = state.callScrim;
+  const wrap = $("#callAdminMaps");
+  const sc = selectedCallScrim();
+  if (!sc){ wrap.innerHTML = '<div class="empty">Crie um treino primeiro para configurar as calls.</div>'; return; }
+  const regs = confirmedRegs(sc).slice(0, 12).filter(r => DB.get("teams/" + r.tid));
+  wrap.innerHTML = CALL_MAPS.map(m => {
+    const pool = arr(DB.get(`callPools/${sc.id}/r${m.round}`));
+    const result = DB.get(`callResults/${sc.id}/r${m.round}`) || {};
+    const done = Object.keys(result).length;
+    return `<div class="call-map">
+      <div class="flex between wrap"><h3>Queda ${m.round} — ${m.name}</h3><span class="badge ${done ? "ok" : "off"}">${done ? done + " call(s) sorteada(s)" : "Aguardando sorteio"}</span></div>
+      <p class="muted small-t mt">Cadastre um nome por linha. Para ${regs.length} equipe(s) confirmada(s), é necessário ter pelo menos ${regs.length} nomes diferentes.</p>
+      <label class="mt">Nomes das calls<textarea id="callPool-r${m.round}" placeholder="Exemplo:\nRED ZONE\nHANGAR\nSENTOSA">${esc(pool.join("\n"))}</textarea></label>
+      <div class="actions mt"><button class="btn ghost small" data-act="savecallpool" data-round="${m.round}">Salvar nomes</button><button class="btn small" data-act="drawcalls" data-round="${m.round}" ${regs.length ? "" : "disabled"}>Sortear Queda ${m.round}</button><button class="btn danger small" data-act="clearcalls" data-round="${m.round}" ${done ? "" : "disabled"}>Apagar resultado</button></div>
+      ${done ? `<p class="muted small-t mt">Resultado salvo para ${done} equipe(s). Um novo sorteio substituirá apenas esta queda.</p>` : ""}
+    </div>`;
+  }).join("");
+}
+function renderCallsPublic(){
+  const sel = $("#publicCallScrim"); if (!sel) return;
+  const all = scrimsSorted().slice().reverse();
+  sel.innerHTML = all.length ? all.map(x => `<option value="${esc(x.id)}">${esc(x.title)} — ${esc(x.date)}</option>`).join("") : '<option value="">Nenhum treino disponível</option>';
+  if (!all.some(x => x.id === state.publicCallScrim)) state.publicCallScrim = (nextScrim() || all[0] || {}).id || "";
+  sel.value = state.publicCallScrim;
+  const sc = DB.get("scrims/" + state.publicCallScrim), info = $("#publicCallInfo"), wrap = $("#publicCallsList");
+  if (!sc){ info.textContent = "Ainda não há treino cadastrado."; wrap.innerHTML = ""; return; }
+  const teams = confirmedRegs(sc).slice(0,12).filter(r => DB.get("teams/" + r.tid));
+  info.textContent = `${sc.title} • ${sc.date} • ${teams.length} equipe(s) confirmada(s)`;
+  wrap.innerHTML = CALL_MAPS.map(m => {
+    const result = DB.get(`callResults/${sc.id}/r${m.round}`) || {};
+    const rows = teams.map((r,i) => { const tm=DB.get("teams/"+r.tid), call=result[r.tid]; return `<div class="call-slot"><span class="num">${i+1}</span><span class="teamname">[${esc(tm.tag)}] ${esc(tm.name)}</span><span class="callname">${call ? esc(call) : "Aguardando"}</span></div>`; }).join("");
+    return `<div class="card"><div class="flex between wrap"><h3>Queda ${m.round} — ${m.name}</h3><span class="badge ${Object.keys(result).length ? "ok" : "wait"}">${Object.keys(result).length ? "Sorteado" : "Pendente"}</span></div><div class="grid mt">${rows || '<p class="empty">Nenhuma equipe confirmada neste treino.</p>'}</div></div>`;
+  }).join("");
+}
+
 function renderAdmin2(){
   if (!isAdmin()) return;
   const ln = id => esc(DB.get("teams/" + id) ? DB.get("teams/" + id).name : "?");
