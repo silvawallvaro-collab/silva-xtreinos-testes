@@ -150,6 +150,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .call-slot .num{font:700 1.2rem Rajdhani;color:var(--blue2);min-width:28px}
 .call-slot .teamname{font-weight:700;flex:1;min-width:0}
 .call-slot .callname{color:var(--cyan);font-weight:700;text-align:right}
+.room-publish{max-width:620px;margin:28px auto 30px;text-align:center;padding:24px;border:1px solid rgba(34,211,238,.45);border-radius:20px;background:linear-gradient(145deg,rgba(26,79,214,.24),rgba(16,25,51,.96));box-shadow:0 16px 48px rgba(0,0,0,.28)}
+.room-publish h2{font-size:clamp(1.8rem,6vw,2.5rem);color:var(--cyan);margin-bottom:8px}
+.room-value{margin:16px auto 0;padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(6,10,22,.72);max-width:440px}
+.room-value small{display:block;color:var(--muted);font-weight:700;letter-spacing:.14em;margin-bottom:5px}
+.room-value strong{display:block;font:700 clamp(1.8rem,7vw,2.7rem) Rajdhani;letter-spacing:.08em;overflow-wrap:anywhere;color:#fff;margin-bottom:12px}
+.room-copy{min-width:145px}
 </style>
 
 <header>
@@ -185,6 +191,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <a class="btn ghost" data-go="calls">Ver CALLS</a>
     </div>
   </div>
+
+  <div id="homeRoomCredentials" hidden></div>
 
   <h2 class="title">Próximo treino</h2>
   <div class="card" style="text-align:center" id="homeNext"></div>
@@ -341,6 +349,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <button data-tab="treinos" class="active">Treinos</button>
         <button data-tab="resultados">Queda</button>
         <button data-tab="calls">Sorteio de call</button>
+        <button data-tab="sala">ID / Senha</button>
         <button data-tab="pessoas">Times e jogadores</button>
         <button data-tab="avisos">Avisos</button>
         <button data-tab="logs">Logs</button>
@@ -383,6 +392,20 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <p class="muted small-t">Escolha o treino. Cadastre uma lista diferente para cada mapa e salve. O sorteio distribui calls sem repetir entre as equipes confirmadas (até 12 slots).</p>
         <label class="mt">Treino<select id="callAdminScrim"></select></label>
         <div id="callAdminMaps" class="grid mt"></div>
+      </div>
+    </div>
+
+    <div class="atab" data-atab="sala" hidden>
+      <div class="card" style="max-width:620px">
+        <h3>Publicar ID / Senha da sala</h3>
+        <p class="muted small-t mt">Preencha os dados da sala. Ao publicar, eles aparecem em destaque no centro da página inicial para todos os participantes.</p>
+        <form id="roomCredentialsForm" class="mt">
+          <label>ID da sala<input name="roomId" required maxlength="30" inputmode="numeric" placeholder="Digite o ID da sala"></label>
+          <label>Senha da sala<input name="roomPassword" required maxlength="30" placeholder="Digite a senha da sala"></label>
+          <button class="btn" type="submit">PUBLICAR ID / SENHA</button>
+        </form>
+        <div class="actions mt"><button class="btn danger small" type="button" data-act="clearRoomCredentials">Remover da página inicial</button></div>
+        <p class="muted small-t mt" id="roomCredentialsStatus"></p>
       </div>
     </div>
 
@@ -608,7 +631,7 @@ function updatePill(){
    REGRAS DE NEGÓCIO
    ===================================================== */
 const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "" };
-const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe"]);
+const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","clearRoomCredentials"]);
 function adminSess(){
   try {
     const s = JSON.parse(session.get("xt_admin") || "null");
@@ -730,6 +753,12 @@ function renderHome(){
       <div class="countdown" id="countdown" data-t="${esc(s.date)}T${esc(s.time)}"></div>
       <div class="actions center mt"><a class="btn small" data-go="treinos">Ver / inscrever</a></div>`
     : '<p class="empty">Nenhum treino marcado ainda. Fique de olho nos avisos!</p>';
+  const room = DB.get("roomCredentials") || {};
+  const roomBox = $("#homeRoomCredentials");
+  if (room.id && room.password){
+    roomBox.hidden = false;
+    roomBox.innerHTML = `<div class="room-publish"><span class="tag">ACESSO À SALA</span><h2>ID / SENHA DA SALA</h2><p class="muted small-t">Use os botões para copiar os dados da partida.</p><div class="room-value"><small>ID DA SALA</small><strong>${esc(room.id)}</strong><button class="btn room-copy" data-act="copyRoomId">COPIAR ID</button></div><div class="room-value"><small>SENHA DA SALA</small><strong>${esc(room.password)}</strong><button class="btn room-copy" data-act="copyRoomPassword">COPIAR SENHA</button></div></div>`;
+  } else { roomBox.hidden = true; roomBox.innerHTML = ""; }
   $("#sTeams").textContent = teams.length; $("#sPlayers").textContent = users.length;
   $("#sScrims").textContent = arr(DB.get("scrims")).filter(x => x.status === "done").length;
   const rk = standings(); $("#homeRank").innerHTML = rankRows(rk, true);
@@ -1076,6 +1105,23 @@ $("#adminOut").addEventListener("click", () => {
   AUTH.signOut();
   render();
 });
+$("#roomCredentialsForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!isAdmin()) return toast("Acesso restrito ao organizador", "err");
+  const f = new FormData(e.target);
+  const id = String(f.get("roomId") || "").trim();
+  const password = String(f.get("roomPassword") || "").trim();
+  if (!id || !password) return toast("Preencha o ID e a senha", "err");
+  try {
+    await DB.set("roomCredentials", { id, password, updatedAt: Date.now() });
+    if (DB.status === "error") throw new Error("Não foi possível salvar no banco online.");
+    await logAct("Publicou o ID / senha da sala");
+    e.target.reset();
+    toast("ID / senha publicados na página inicial! ✅");
+    render();
+  } catch(err) { toast(err.message || "Não foi possível publicar", "err"); }
+});
+
 $("#scrimForm").addEventListener("submit", async e => {
   e.preventDefault();
   const f = Object.fromEntries(new FormData(e.target)), id = uid();
@@ -1160,6 +1206,23 @@ async function extraActs(act, id, id2, u, t){
   const canTeam = tid => { const tm = DB.get("teams/" + tid); return !!tm && (isAdmin() || (u && tm.captainId === u.id)); };
   const lg = txt => isAdmin() ? logAct(txt) : null;
   switch (act){
+    case "copyRoomId":
+    case "copyRoomPassword": {
+      const room = DB.get("roomCredentials") || {};
+      const value = act === "copyRoomId" ? room.id : room.password;
+      if (!value) return no("Ainda não há dado publicado");
+      try { await navigator.clipboard.writeText(String(value)); toast(act === "copyRoomId" ? "ID copiado!" : "Senha copiada!"); }
+      catch(e){ return no("Não foi possível copiar automaticamente neste navegador"); }
+      return true;
+    }
+    case "clearRoomCredentials": {
+      if (!isAdmin()) return no("Acesso restrito ao organizador");
+      if (!await ask("Remover o ID e a senha da página inicial?")) return true;
+      await DB.del("roomCredentials");
+      await logAct("Removeu o ID / senha da sala da página inicial");
+      toast("ID / senha removidos");
+      return true;
+    }
     case "savecallpool": {
       if (!isAdmin()) return no("Acesso restrito ao organizador");
       const sc = selectedCallScrim(), round = Math.max(1, Math.min(5, +id || 1));
