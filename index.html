@@ -426,7 +426,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 NickPlayer - 8
 OutroNick - 5"></textarea></label>
         <p class="muted small-t">O leitor separa cada espaço de jogador do placar. Confira os nicks e abates identificados; corrija qualquer erro antes de salvar.</p>
-        <div class="actions mt"><button class="btn ghost" id="autoKillPrepare" type="button">PREPARAR / ATUALIZAR LISTA</button><button class="btn" id="autoKillSaveRound" type="button">SALVAR ESTA QUEDA</button></div>
+        <div class="actions mt"><button class="btn ghost" id="autoKillPrepare" type="button">PREPARAR / ATUALIZAR LISTA</button><button class="btn" id="autoKillSaveRound" type="button">SALVAR ESTA QUEDA</button><button class="btn danger small" id="autoKillClearRound" type="button">APAGAR ESTA QUEDA</button><button class="btn danger small" id="autoKillResetAll" type="button">REINICIAR AS 5 QUEDAS</button></div>
         <div id="autoKillReview" class="mt"></div>
         <div class="divider mt"></div>
         <h3 class="mt">Resumo das 5 quedas</h3>
@@ -1071,6 +1071,35 @@ $("#autoKillRead").addEventListener("click",async()=>{
 });
 $("#autoKillPrepare").addEventListener("click",()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");state.autoKillRows=parseAutoKillText($("#autoKillText").value);renderAutoKillReview();if(!state.autoKillRows.length)toast("Não encontrei linhas no formato Nick - kills","err");});
 $("#autoKillReview").addEventListener("input",e=>{const n=e.target.dataset.akNick,k=e.target.dataset.akKills;if(n!==undefined)state.autoKillRows[+n].nick=e.target.value;if(k!==undefined)state.autoKillRows[+k].kills=Math.max(0,Math.min(99,+e.target.value||0));});
+$("#autoKillClearRound").addEventListener("click",async()=>{
+  if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  if(!state.autoKillScrim)return toast("Selecione um X-Treino","err");
+  const round=Number(state.autoKillRound)||1;
+  if(!await ask(`Apagar somente os dados salvos da Queda ${round} deste X-Treino?`))return;
+  try{
+    await DB.del(`automaticKillDrafts/${state.autoKillScrim}/r${round}`);
+    state.autoKillRows=[];
+    $("#autoKillText").value="";
+    renderAutomaticKillAdmin();
+    $("#autoKillReview").innerHTML='<p class="muted small-t">Queda apagada. Você pode enviar um novo print.</p>';
+    toast(`Queda ${round} apagada. ✅`);
+  }catch(err){toast("Não foi possível apagar a queda: "+err.message,"err");}
+});
+$("#autoKillResetAll").addEventListener("click",async()=>{
+  if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  if(!state.autoKillScrim)return toast("Selecione um X-Treino","err");
+  if(!await ask("REINICIAR este X-Treino? Isso apagará as 5 quedas salvas e também removerá a publicação dos abates da página inicial. Essa ação não pode ser desfeita."))return;
+  try{
+    await DB.del(`automaticKillDrafts/${state.autoKillScrim}`);
+    await DB.del(`automaticKills/${state.autoKillScrim}`);
+    state.autoKillRows=[];
+    $("#autoKillText").value="";
+    renderAutomaticKillAdmin();
+    $("#autoKillReview").innerHTML='<p class="muted small-t">As cinco quedas foram reiniciadas. Envie o print da Queda 1 para começar novamente.</p>';
+    renderHome();
+    toast("As 5 quedas foram reiniciadas. ✅");
+  }catch(err){toast("Não foi possível reiniciar: "+err.message,"err");}
+});
 $("#autoKillSaveRound").addEventListener("click",async()=>{
   if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
   if(!state.autoKillScrim)return toast("Selecione um X-Treino","err");
