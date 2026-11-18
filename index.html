@@ -422,10 +422,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <div id="autoKillImagePreview" class="mt"></div>
         <div class="actions mt"><button class="btn" id="autoKillRead" type="button">LER FOTO AUTOMATICAMENTE</button></div>
         <p id="autoKillStatus" class="muted small-t mt">Selecione uma imagem para começar. A leitura depende da nitidez do print.</p>
-        <label class="mt">Texto reconhecido (uma linha por jogador: Nick - kills)<textarea id="autoKillText" rows="8" placeholder="Exemplo:
+        <label class="mt">Jogadores identificados (confira e corrija se necessário)<textarea id="autoKillText" rows="8" placeholder="Exemplo:
 NickPlayer - 8
 OutroNick - 5"></textarea></label>
-        <p class="muted small-t">Se o reconhecimento separar os nomes e números, ajuste o texto aqui. O formato aceito é: nome do jogador, hífen e quantidade de kills.</p>
+        <p class="muted small-t">O leitor separa cada espaço de jogador do placar. Confira os nicks e abates identificados; corrija qualquer erro antes de salvar.</p>
         <div class="actions mt"><button class="btn ghost" id="autoKillPrepare" type="button">PREPARAR / ATUALIZAR LISTA</button><button class="btn" id="autoKillSaveRound" type="button">SALVAR ESTA QUEDA</button></div>
         <div id="autoKillReview" class="mt"></div>
         <div class="divider mt"></div>
@@ -954,35 +954,31 @@ function renderAutomaticKillAdmin(){
 function parseAutoKillText(raw){
   const out=[];
   raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{
-    let m=line.match(/^(.+?)\s*(?:[-–—,:;|]|\t)\s*(\d{1,2})\s*$/);
-    if(!m) m=line.match(/^(.+?)\s{2,}(\d{1,2})\s*$/);
+    const m=line.match(/^(.+?)\s*(?:[-–—,:;|]|\t)\s*(\d{1,2})\s*$/) || line.match(/^(.+?)\s{2,}(\d{1,2})\s*$/);
     if(m){const nick=m[1].trim().replace(/^\d+[.)\s]+/,"");const kills=Number(m[2]);if(nick&&Number.isInteger(kills)&&kills>=0&&kills<=99)out.push({nick,kills});}
   });
   return out;
 }
-function parseAutoKillWords(words){
-  const clean=(words||[]).map(w=>{const b=w.bbox||{};return {text:String(w.text||"").trim(),x:((b.x0||0)+(b.x1||0))/2,y:((b.y0||0)+(b.y1||0))/2,confidence:+w.confidence||0};}).filter(w=>w.text&&w.confidence>=18);
-  if(!clean.length)return [];
-  clean.sort((a,b)=>a.y-b.y||a.x-b.x);
-  const bands=[];
-  for(const w of clean){let band=bands.find(v=>Math.abs(v.y-w.y)<=17);if(!band){band={y:w.y,words:[]};bands.push(band);}band.words.push(w);band.y=band.words.reduce((n,v)=>n+v.y,0)/band.words.length;}
-  const found=[];
-  for(const band of bands){
-    const row=band.words.sort((a,b)=>a.x-b.x),labels=[];
-    row.forEach((w,i)=>{if(/abat/i.test(w.text.replace(/[^a-z]/gi,"")))labels.push(i);});
-    let start=0;
-    for(const labelIndex of labels){
-      const before=row.slice(start,labelIndex);start=labelIndex+1;if(!before.length)continue;
-      let killIndex=-1;
-      for(let i=before.length-1;i>=0;i--){const t=before[i].text.replace(/[^\d]/g,"");if(t&&/^\d{1,2}$/.test(t)){killIndex=i;break;}}
-      if(killIndex<0)continue;
-      const kills=Number(before[killIndex].text.replace(/[^\d]/g,""));if(kills>99)continue;
-      const nick=before.slice(0,killIndex).map(w=>w.text).filter(t=>/[A-Za-zÀ-ÿ]/.test(t)||/[_™®★☆✦✧々ツ]/.test(t)).join(" ").replace(/\s+/g," ").trim();
-      if(nick.length>=2)found.push({nick,kills});
-    }
-  }
-  const seen=new Set();return found.filter(r=>{const k=r.nick.toLocaleLowerCase("pt-BR")+"|"+r.kills;if(seen.has(k))return false;seen.add(k);return true;});
+function autoKillCropRects(w,h){
+  // Coordenadas normalizadas do placar Free Fire: duas colunas de jogadores por lado.
+  const leftY=[184,220,276,313,376,412,469,505,565,600];
+  const rightY=[185,220,266,303,350,386,450,486,520,555];
+  const rects=[];
+  for(const y of leftY){rects.push([.185,y/900-.022,.345,y/900+.022]);rects.push([.365,y/900-.022,.535,y/900+.022]);}
+  for(const y of rightY){rects.push([.585,y/900-.022,.725,y/900+.022]);rects.push([.725,y/900-.022,.865,y/900+.022]);}
+  return rects.map(([x0,y0,x1,y1])=>({left:Math.round(x0*w),top:Math.max(0,Math.round(y0*h)),right:Math.min(w,Math.round(x1*w)),bottom:Math.min(h,Math.round(y1*h))}));
 }
+function parseAutoKillCell(text){
+  const s=String(text||"").replace(/[|]/g," ").replace(/\s+/g," ").trim();
+  const m=s.match(/^(.*?)\s*([0-9])\s*(?:A?bates?|Abat[eé]s?)\b/i);
+  if(!m)return null;
+  let nick=m[1].replace(/[•·.,:;]+$/g,"").trim();
+  nick=nick.replace(/^[^A-Za-zÀ-ÿ0-9@<]+/,"").trim();
+  const kills=Number(m[2]);
+  if(!nick||nick.length<2||kills<0||kills>99)return null;
+  return {nick,kills};
+}
+
 function renderAutoKillReview(){
   const box=$("#autoKillReview");
   if(!state.autoKillRows.length){box.innerHTML='<p class="empty">Nenhum jogador identificado. Ajuste o texto no formato Nick - kills.</p>';return;}
@@ -997,13 +993,28 @@ $("#autoKillRead").addEventListener("click",async()=>{
   const status=$("#autoKillStatus"),btn=$("#autoKillRead");btn.disabled=true;status.textContent="Lendo a imagem... isso pode levar alguns segundos.";
   try{
     if(!window.Tesseract) await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Não foi possível carregar o leitor de imagem. Verifique a internet."));document.head.appendChild(sc);});
-    const result=await Tesseract.recognize(file,"eng",{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo o placar: "+Math.round((m.progress||0)*100)+"%";}});
-    const recognized=(result.data.text||"").trim();
-    const byLayout=parseAutoKillWords(result.data.words||[]);
-    const parsed=byLayout.length?byLayout:parseAutoKillText(recognized);
-    $("#autoKillText").value=parsed.map(r=>`${r.nick} - ${r.kills}`).join("\n")||recognized;
-    state.autoKillRows=parsed;renderAutoKillReview();
-    status.textContent=parsed.length?`Leitura concluída: ${parsed.length} jogador(es) separados. Confira os nomes e kills antes de salvar.`:"Não consegui separar os jogadores deste print. Tente uma imagem mais nítida ou corrija o texto manualmente.";
+    const bitmap=await createImageBitmap(file);
+    const rects=autoKillCropRects(bitmap.width,bitmap.height);
+    const worker=await Tesseract.createWorker("eng",1,{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo jogador "+Math.min(20,Math.max(1,Math.round((m.progress||0)*20)))+" de 20...";}});
+    const parsed=[],rawLines=[];
+    try{
+      await worker.setParameters({tessedit_pageseg_mode:"7",preserve_interword_spaces:"1"});
+      for(let i=0;i<rects.length;i++){
+        const r=rects[i],cw=r.right-r.left,ch=r.bottom-r.top;
+        if(cw<10||ch<10)continue;
+        const crop=document.createElement("canvas");crop.width=cw*3;crop.height=ch*3;
+        const cctx=crop.getContext("2d");cctx.imageSmoothingEnabled=true;cctx.imageSmoothingQuality="high";
+        cctx.drawImage(bitmap,r.left,r.top,cw,ch,0,0,crop.width,crop.height);
+        const result=await worker.recognize(crop);
+        const text=(result.data.text||"").trim();if(text)rawLines.push(text);
+        const row=parseAutoKillCell(text);if(row)parsed.push(row);
+      }
+    }finally{await worker.terminate();bitmap.close?.();}
+    const unique=[];const seen=new Set();for(const row of parsed){const key=row.nick.toLocaleLowerCase("pt-BR");if(!seen.has(key)){seen.add(key);unique.push(row);}}
+    state.autoKillRows=unique;
+    $("#autoKillText").value=unique.map(r=>r.nick+" - "+r.kills).join("\n") || rawLines.join("\n");
+    renderAutoKillReview();
+    status.textContent=unique.length?`Identifiquei ${unique.length} jogador(es) em áreas separadas do placar. Confira os nomes e abates antes de salvar.`:"Não consegui identificar os campos neste print. Confira se a imagem mostra o placar inteiro e tente novamente.";
   }catch(err){status.textContent=err.message||"Falha ao ler a imagem.";toast(status.textContent,"err");}finally{btn.disabled=false;}
 });
 $("#autoKillPrepare").addEventListener("click",()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");state.autoKillRows=parseAutoKillText($("#autoKillText").value);renderAutoKillReview();if(!state.autoKillRows.length)toast("Não encontrei linhas no formato Nick - kills","err");});
