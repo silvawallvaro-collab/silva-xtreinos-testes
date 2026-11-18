@@ -960,29 +960,38 @@ function parseAutoKillText(raw){
   return out;
 }
 function autoKillPlayerRects(w,h){
-  // Coordenadas medidas no placar de referência 1600x720.
-  // Cada jogador tem duas áreas independentes: nick e número de abates.
+  // Posições conferidas no print de referência 1600x720.
+  // O lado esquerdo tem 20 jogadores; o direito tem 17 (uma vaga vazia no rank 8).
   const leftRows=[185,222,280,319,376,414,470,509,565,603];
-  const rightRows=[185,220,285,320,350,385,445,510,545];
+  const rightRows=[
+    [185,[2,3]],[220,[2,3]],
+    [285,[2,3]],[320,[2,3]],
+    [375,[2,3]],[410,[2]],
+    [470,[2,3]],
+    [510,[2,3]],[545,[2,3]]
+  ];
   const columns=[
-    {nick:[.190,.278],kills:[.278,.326]},
-    {nick:[.375,.445],kills:[.445,.505]},
+    {nick:[.205,.278],kills:[.278,.326]},
+    {nick:[.375,.440],kills:[.440,.505]},
     {nick:[.598,.675],kills:[.675,.725]},
     {nick:[.720,.810],kills:[.810,.865]}
   ];
   const players=[];
-  const add=(y,col)=>{
-    const c=columns[col], cy=y/720, half=.018;
-    const rect=([x0,x1])=>({
+  const makeRect=([x0,x1],y)=>{
+    const cy=y/720, half=.024;
+    return {
       left:Math.max(0,Math.round(x0*w)),
       top:Math.max(0,Math.round((cy-half)*h)),
       right:Math.min(w,Math.round(x1*w)),
       bottom:Math.min(h,Math.round((cy+half)*h))
-    });
-    players.push({nick:rect(c.nick),kills:rect(c.kills)});
+    };
+  };
+  const add=(y,col)=>{
+    const c=columns[col];
+    players.push({nick:makeRect(c.nick,y),kills:makeRect(c.kills,y)});
   };
   for(const y of leftRows){add(y,0);add(y,1);}
-  for(const y of rightRows){add(y,2);add(y,3);}
+  for(const [y,cols] of rightRows){for(const col of cols)add(y,col);}
   return players;
 }
 function cleanAutoKillNick(text,index){
@@ -1033,8 +1042,14 @@ $("#autoKillRead").addEventListener("click",async()=>{
       cctx.imageSmoothingEnabled=true;cctx.imageSmoothingQuality="high";
       cctx.drawImage(bitmap,r.left,r.top,cw,ch,0,0,crop.width,crop.height);
       await worker.setParameters({tessedit_pageseg_mode:"7",preserve_interword_spaces:"1",tessedit_char_whitelist:whitelist||""});
-      const result=await worker.recognize(crop);
-      return String(result.data.text||"").trim();
+      let result=await worker.recognize(crop);
+      let recognized=String(result.data.text||"").trim();
+      if(!recognized && !whitelist){
+        await worker.setParameters({tessedit_pageseg_mode:"6",preserve_interword_spaces:"1",tessedit_char_whitelist:""});
+        result=await worker.recognize(crop);
+        recognized=String(result.data.text||"").trim();
+      }
+      return recognized;
     };
     try{
       for(let i=0;i<players.length;i++){
