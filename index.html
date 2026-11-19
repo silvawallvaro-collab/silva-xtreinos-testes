@@ -1,145 +1,1824 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ZEUX NEXUS — Esports Control</title>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ZEUX X-TREINOS FF</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#080b12;--panel:#101722;--panel2:#151f2d;--line:#263447;--text:#edf4ff;--muted:#8ea0b8;--cyan:#48e0d0;--blue:#5d8cff;--gold:#f3c969;--red:#ff647c;--green:#63dfa1;--shadow:0 18px 50px #0008}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 500px at 75% -10%,#153b4c66,transparent 60%),var(--bg);color:var(--text);font:14px Inter,system-ui,Arial}
-button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}.side{background:#0b111b;border-right:1px solid var(--line);padding:24px 16px;position:sticky;top:0;height:100vh}.brand{display:flex;gap:12px;align-items:center;padding:4px 10px 28px}.mark{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,var(--cyan),var(--blue));display:grid;place-items:center;color:#061016;font-weight:1000;font-size:19px}.brand b{font-size:17px;letter-spacing:2px}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2px;margin-top:3px}.navlabel{color:#62738b;font-size:10px;letter-spacing:2px;padding:14px 12px 8px}.nav button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:transparent;color:#9dafc5;padding:12px;border-radius:10px;margin:2px 0}.nav button.active,.nav button:hover{background:#172638;color:#fff}.nav button.active{box-shadow:inset 3px 0 var(--cyan)}.nav i{width:20px;text-align:center;font-style:normal;color:var(--cyan)}.sidefoot{position:absolute;bottom:18px;left:18px;right:18px;border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:11px}.main{min-width:0}.top{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:#0b111bcc;position:sticky;top:0;z-index:5;backdrop-filter:blur(16px)}.crumb{color:var(--muted)}.crumb b{color:white}.topright{display:flex;align-items:center;gap:12px}.live{border:1px solid #2b554d;background:#10271f;color:var(--green);border-radius:30px;padding:7px 11px;font-size:11px}.avatar{width:34px;height:34px;border-radius:11px;background:#24364a;display:grid;place-items:center;font-weight:800}.content{padding:30px;max-width:1500px;margin:auto}.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:25px}.eyebrow{color:var(--cyan);font-size:10px;letter-spacing:2.5px;font-weight:800}.hero h1{font-size:clamp(26px,4vw,38px);margin:8px 0}.hero p{color:var(--muted);margin:0}.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{padding:10px 15px;border-radius:9px;font-weight:750;background:#1c2b3d;color:white;border:1px solid #31445b}.btn.primary{background:linear-gradient(110deg,var(--cyan),#71b5ff);color:#07131a;border:0}.btn.ghost{background:transparent}.btn.danger{color:#ff91a1;border-color:#693545;background:#2a1720}.grid{display:grid;gap:15px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}.card{background:linear-gradient(145deg,#121c29,#0e1621);border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:var(--shadow)}.stat{display:flex;justify-content:space-between;align-items:flex-start}.stat small{color:var(--muted)}.stat strong{display:block;font-size:28px;margin-top:8px}.stat .ico{width:38px;height:38px;border-radius:11px;background:#1b3441;color:var(--cyan);display:grid;place-items:center;font-size:18px}.split{grid-template-columns:1.45fr 1fr}.cardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.cardhead h3{margin:0;font-size:15px}.muted{color:var(--muted)}.tag{font-size:10px;border-radius:30px;padding:5px 9px;background:#1b2939;color:#a9bdd4}.tag.green{background:#153329;color:var(--green)}.tag.gold{background:#342b19;color:var(--gold)}.match{display:flex;align-items:center;gap:14px;padding:13px 0;border-top:1px solid #243144}.match:first-of-type{border-top:0}.datebox{width:48px;text-align:center;border:1px solid #304257;border-radius:10px;padding:7px 3px}.datebox b{font-size:18px;display:block}.datebox small{font-size:9px;color:var(--muted)}.matchinfo{flex:1;min-width:0}.matchinfo b{display:block}.matchinfo small{color:var(--muted)}.bar{height:6px;background:#263446;border-radius:8px;overflow:hidden;margin-top:12px}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));width:68%}table{width:100%;border-collapse:collapse}th{text-align:left;color:#8195ad;font-size:10px;letter-spacing:1px;font-weight:700;padding:11px 9px;border-bottom:1px solid var(--line)}td{padding:13px 9px;border-bottom:1px solid #202c3b}tr:last-child td{border-bottom:0}.rank{color:var(--gold);font-weight:900}.team{display:flex;align-items:center;gap:9px}.crest{width:30px;height:30px;border-radius:9px;background:#24394c;display:grid;place-items:center;color:var(--cyan);font-weight:900}.page{display:none}.page.active{display:block}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{color:#a9bbcf;font-size:11px;font-weight:700}.field input,.field select,.field textarea{width:100%;background:#0a121d;border:1px solid #304157;color:white;border-radius:9px;padding:11px;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan)}.field textarea{min-height:85px;resize:vertical}.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:15px}.toolbar input{background:#0a121d;border:1px solid var(--line);color:white;border-radius:9px;padding:10px;min-width:220px}.empty{padding:28px;text-align:center;color:var(--muted)}.mapgrid{grid-template-columns:repeat(5,minmax(0,1fr))}.maptile{background:#111d2a;border:1px solid var(--line);border-radius:12px;padding:14px}.maptile b{display:block;margin:7px 0}.maptile small{color:var(--muted)}.switchrow{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}.switchrow:last-child{border:0}.switch{accent-color:var(--cyan);width:18px;height:18px}.notice{border-left:3px solid var(--cyan);background:#132330;padding:13px;border-radius:7px;color:#c9d9e9;margin:10px 0}.modal{display:none;position:fixed;inset:0;background:#000b;z-index:20;align-items:center;justify-content:center;padding:16px}.modal.open{display:flex}.modalbox{width:min(620px,100%);max-height:90vh;overflow:auto;background:#101a27;border:1px solid #34475e;border-radius:17px;padding:22px;box-shadow:var(--shadow)}.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modalhead h2{margin:0}.close{background:transparent;color:#b9c7d8;font-size:24px}.toast{position:fixed;right:20px;bottom:20px;background:#17382f;border:1px solid #32745d;color:#c7ffe4;padding:13px 17px;border-radius:10px;display:none;z-index:40}.mobilebar{display:none}
-@media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;position:relative;padding:12px;border-right:0;border-bottom:1px solid var(--line)}.brand{padding:5px 8px 12px}.nav{display:flex;overflow:auto;gap:5px}.navlabel,.sidefoot{display:none}.nav button{white-space:nowrap;width:auto;padding:9px}.top{padding:0 16px;height:60px}.content{padding:18px}.stats{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.mapgrid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:520px){.hero{display:block}.hero .actions{margin-top:15px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.topright .live{display:none}table{font-size:11px}th,td{padding:10px 5px}}
+:root{
+  --bg:#060a16; --bg2:#0c1326; --card:#101933; --line:#1f2c52;
+  --blue:#1a4fd6; --blue2:#3b82ff; --cyan:#22d3ee; --gold:#fbbf24; --silver:#cbd5e1; --bronze:#f59e0b;
+  --text:#e8eeff; --muted:#8fa0c9; --danger:#ef4444; --ok:#22c55e; color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;
+  background-image:radial-gradient(900px 500px at 85% -10%,rgba(26,79,214,.38),transparent 60%),
+                   radial-gradient(700px 400px at -10% 35%,rgba(34,211,238,.10),transparent 60%);
+  background-attachment:fixed;
+}
+h1,h2,h3,.brand,.btn,.nav a,.tabs button,th{font-family:Rajdhani,system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+a{color:inherit;text-decoration:none}
+[hidden]{display:none!important}
+
+header{
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:50;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));background:rgba(6,10,22,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+}
+.brand{font-size:1.45rem;font-weight:700;display:flex;align-items:center;gap:8px;cursor:pointer;white-space:nowrap}
+.brand i{display:grid;place-items:center;width:32px;height:32px;border-radius:8px;font-style:normal;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));font-size:1.1rem}
+.nav{display:flex;gap:2px;flex-wrap:wrap;justify-content:center}
+.nav a{padding:8px 11px;border-radius:8px;font-size:.98rem;font-weight:600;color:var(--muted);transition:.2s;cursor:pointer}
+.nav a:hover,.nav a.active{color:#fff;background:rgba(59,130,255,.18)}
+.hright{display:flex;align-items:center;gap:8px}
+.pill{font-size:.72rem;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.pill b{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.pill.online b{background:var(--ok)} .pill.error b{background:var(--danger)} .pill.local b{background:var(--gold)}
+.menu-btn{display:none;background:none;border:1px solid var(--line);color:var(--text);width:42px;height:42px;border-radius:10px;font-size:1.3rem;cursor:pointer}
+@media(max-width:980px){
+  .menu-btn{display:block}
+  .nav{position:fixed;inset:calc(62px + env(safe-area-inset-top,0px)) 0 auto 0;flex-direction:column;background:var(--bg2);padding:12px;border-bottom:1px solid var(--line);
+    transform:translateY(-130%);transition:.3s;z-index:40;flex-wrap:nowrap}
+  .nav.open{transform:none}
+  .nav a{padding:14px;font-size:1.15rem}
+}
+
+main{max-width:1020px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-right,0px)) 90px max(16px,env(safe-area-inset-left,0px))}
+section.page{display:none;animation:fade .35s ease}
+section.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.hero{text-align:center;padding:54px 16px 40px;border:1px solid var(--line);border-radius:22px;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,rgba(26,79,214,.30),rgba(12,19,38,.92))}
+.hero::before{content:"";position:absolute;inset:0;opacity:.16;background:repeating-linear-gradient(135deg,transparent 0 18px,#3b82ff 18px 19px)}
+.hero>*{position:relative}
+.tag{display:inline-block;padding:4px 14px;border:1px solid var(--blue2);border-radius:99px;color:var(--cyan);
+  font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}
+.hero h1{font-size:clamp(2.8rem,10vw,5.2rem);line-height:.95;font-weight:700}
+.hero h1 span{background:linear-gradient(90deg,var(--blue2),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);max-width:480px;margin:16px auto 26px;font-size:1.05rem}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.actions.center{justify-content:center}
+
+.btn{border:0;cursor:pointer;padding:12px 24px;border-radius:12px;font-size:1.02rem;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));box-shadow:0 8px 24px rgba(26,79,214,.4);transition:.2s;display:inline-block}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn.ghost{background:transparent;border:1px solid var(--line);box-shadow:none;color:var(--text)}
+.btn.danger{background:var(--danger);box-shadow:none}
+.btn.ok{background:var(--ok);box-shadow:none}
+.btn.small{padding:6px 13px;font-size:.88rem;border-radius:8px}
+
+h2.title{font-size:2rem;margin:30px 0 4px}
+h3.sec{font-size:1.35rem;margin:22px 0 10px}
+.sub{color:var(--muted);margin-bottom:16px}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h3{font-size:1.2rem;margin-bottom:2px}
+.stat{font-family:Rajdhani;font-size:2.4rem;font-weight:700;color:var(--blue2);line-height:1}
+.muted{color:var(--muted)} .small-t{font-size:.85rem}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+.flex{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.wrap{flex-wrap:wrap}
+.mt{margin-top:14px}
+
+.countdown{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.countdown div{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:64px}
+.countdown b{font-family:Rajdhani;font-size:1.8rem;display:block;line-height:1}
+.countdown small{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em}
+
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.72rem;font-weight:600;white-space:nowrap}
+.badge.ok{background:rgba(34,197,94,.15);color:var(--ok)}
+.badge.wait{background:rgba(251,191,36,.15);color:var(--gold)}
+.badge.off{background:rgba(143,160,201,.15);color:var(--muted)}
+.badge.err{background:rgba(239,68,68,.15);color:var(--danger)}
+
+form{display:grid;gap:12px}
+label{font-size:.82rem;color:var(--muted);display:grid;gap:5px}
+input,select,textarea{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--text);font:inherit;outline:none;transition:.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(59,130,255,.2)}
+.row{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+@media(max-width:520px){.row{grid-template-columns:1fr}}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0}
+.tabs button{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:9px 16px;border-radius:10px;cursor:pointer;font-size:.95rem;font-weight:600}
+.tabs button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+.team{display:flex;align-items:center;gap:14px}
+.team .num{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;flex:none;font-family:Rajdhani;font-weight:700;font-size:1.15rem;background:rgba(59,130,255,.15);color:var(--blue2)}
+.team .info{flex:1;min-width:0}
+.team .info b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar{height:8px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width .5s}
+
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{padding:11px 13px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-size:.82rem;background:var(--bg2)}
+tr:last-child td{border-bottom:0}
+td input{padding:7px 9px;width:80px}
+.p1{color:var(--gold);font-weight:700}.p2{color:var(--silver);font-weight:700}.p3{color:var(--bronze);font-weight:700}
+
+.podium{display:grid;gap:12px;grid-template-columns:repeat(3,1fr);align-items:end}
+.podium .card{text-align:center;padding:16px 8px}
+.podium .card.first{padding-top:28px;border-color:var(--gold);background:linear-gradient(180deg,rgba(251,191,36,.12),var(--card))}
+.podium .medal{font-size:2rem}
+.podium b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.podium .pts{font-family:Rajdhani;font-size:1.6rem;font-weight:700;color:var(--blue2)}
+
+.social{display:flex;align-items:center;gap:14px;transition:.2s}
+.social:hover{transform:translateY(-3px);border-color:var(--blue2)}
+.social .ic{font-size:1.8rem}
+
+.news{border-left:3px solid var(--blue2);padding:4px 0 4px 14px;margin-bottom:12px}
+.code{font-family:Rajdhani;font-size:1.5rem;letter-spacing:.2em;color:var(--cyan);background:var(--bg2);padding:4px 14px;border-radius:8px;display:inline-block}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,140px);background:var(--blue);color:#fff;padding:12px 22px;border-radius:12px;font-weight:600;transition:.35s;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:92vw;text-align:center}
+.toast.show{transform:translate(-50%,0)} .toast.err{background:var(--danger)}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:30px max(16px,env(safe-area-inset-right,0px)) 30px max(16px,env(safe-area-inset-left,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:55;background:var(--bg)}
+.modal{position:fixed;inset:0;background:rgba(3,6,14,.78);display:grid;place-items:center;padding:16px;z-index:90}
+.modal-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;width:min(520px,100%);max-height:90%;overflow:auto}
+.modal-box textarea{margin-top:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem;min-height:180px;resize:vertical}
+.modal-box .actions{margin-top:14px;justify-content:flex-end}
+[data-act=teamview]{cursor:pointer}[data-act=teamview]:hover{border-color:var(--blue2)}
+.rrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}
+.call-map{border:1px solid var(--line);border-radius:14px;padding:15px;background:var(--bg2)}
+.call-map textarea{min-height:130px;resize:vertical;font-family:Inter,system-ui,sans-serif}
+.call-slot{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.call-slot .num{font:700 1.2rem Rajdhani;color:var(--blue2);min-width:28px}
+.call-slot .teamname{font-weight:700;flex:1;min-width:0}
+.call-slot .callname{color:var(--cyan);font-weight:700;text-align:right}
+.room-publish{max-width:620px;margin:28px auto 30px;text-align:center;padding:24px;border:1px solid rgba(34,211,238,.45);border-radius:20px;background:linear-gradient(145deg,rgba(26,79,214,.24),rgba(16,25,51,.96));box-shadow:0 16px 48px rgba(0,0,0,.28)}
+.room-publish h2{font-size:clamp(1.8rem,6vw,2.5rem);color:var(--cyan);margin-bottom:8px}
+.room-value{margin:16px auto 0;padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(6,10,22,.72);max-width:440px}
+.room-value small{display:block;color:var(--muted);font-weight:700;letter-spacing:.14em;margin-bottom:5px}
+.room-value strong{display:block;font:700 clamp(1.8rem,7vw,2.7rem) Rajdhani;letter-spacing:.08em;overflow-wrap:anywhere;color:#fff;margin-bottom:12px}
+.room-copy{min-width:145px}
+
+/* =====================================================
+   ZEUX X-TREINOS FF — IDENTIDADE RED & BLACK COMPETITIVA
+   Redesign visual apenas: nenhuma lógica ou função alterada.
+   ===================================================== */
+:root{
+  --bg:#080809; --bg2:#111114; --card:#17171b; --line:#343039;
+  --blue:#b51222; --blue2:#ff2638; --cyan:#ff6873;
+  --gold:#ffcc66; --silver:#d7d7df; --bronze:#d98b55;
+  --text:#f6f3f4; --muted:#aaa3aa; --danger:#ff3548; --ok:#31c879;
+  color-scheme:dark;
+}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(900px 520px at 88% -8%,rgba(181,18,34,.25),transparent 62%),
+    radial-gradient(680px 440px at -12% 38%,rgba(255,38,56,.09),transparent 64%),
+    linear-gradient(180deg,#09090b 0%,#0d0c0f 48%,#080809 100%);
+  background-attachment:fixed;
+}
+header{
+  background:rgba(9,9,11,.88);border-bottom:1px solid rgba(255,53,72,.24);
+  box-shadow:0 10px 34px rgba(0,0,0,.28);backdrop-filter:blur(18px);
+}
+.brand{font-size:1.52rem;letter-spacing:.07em}
+.brand i{
+  border-radius:10px;background:linear-gradient(145deg,#ff3548,#8d0716);
+  box-shadow:0 0 22px rgba(255,38,56,.28);border:1px solid rgba(255,255,255,.13)
+}
+.nav a{border:1px solid transparent;transition:background .2s,border-color .2s,color .2s}
+.nav a:hover,.nav a.active{color:#fff;background:rgba(255,38,56,.13);border-color:rgba(255,53,72,.25)}
+.pill{background:rgba(255,255,255,.035)}
+.menu-btn{background:#171317;border-color:#493039}
+main{max-width:1180px;padding-top:28px}
+.hero{
+  text-align:left;min-height:330px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  padding:clamp(32px,6vw,72px);border:1px solid rgba(255,67,82,.34);border-radius:24px;
+  background:linear-gradient(112deg,rgba(117,7,21,.72) 0%,rgba(35,13,19,.94) 48%,rgba(17,17,21,.97) 100%);
+  box-shadow:0 24px 70px rgba(0,0,0,.36),inset 0 1px rgba(255,255,255,.05);
+}
+.hero::before{
+  opacity:.25;background:repeating-linear-gradient(135deg,transparent 0 24px,rgba(255,65,82,.25) 24px 25px);
+  mask-image:linear-gradient(90deg,#000,transparent 85%);
+}
+.hero::after{content:"X";position:absolute;right:5%;top:50%;transform:translateY(-54%);font:900 clamp(150px,28vw,330px)/1 Rajdhani,sans-serif;color:rgba(255,255,255,.035);pointer-events:none}
+.hero>*{position:relative;z-index:1}
+.hero .tag{border-color:rgba(255,113,124,.55);color:#ffb1b8;background:rgba(0,0,0,.18)}
+.hero h1{font-size:clamp(3rem,8vw,6.2rem);max-width:760px;text-shadow:0 8px 35px rgba(0,0,0,.35)}
+.hero h1 span{background:linear-gradient(90deg,#fff 0%,#ff9aa2 34%,#ff2638 100%);-webkit-background-clip:text;background-clip:text}
+.hero p{margin:18px 0 28px;max-width:550px;color:#d0c4c8;font-size:1.08rem}
+.tag{border-color:rgba(255,53,72,.48);color:#ff9ba4;background:rgba(255,38,56,.07)}
+.btn{
+  background:linear-gradient(135deg,#d51b2d 0%,#ff3548 58%,#a80d20 100%);
+  box-shadow:0 9px 25px rgba(190,15,36,.26),inset 0 1px rgba(255,255,255,.2);
+  border:1px solid rgba(255,135,145,.25);border-radius:11px;
+}
+.btn:hover{filter:brightness(1.12);box-shadow:0 12px 30px rgba(190,15,36,.34)}
+.btn.ghost{background:rgba(255,255,255,.035);border:1px solid #51434a;color:#f5ecee;box-shadow:none}
+.btn.danger{background:linear-gradient(135deg,#a80d20,#f02c40)}
+.btn.ok{background:linear-gradient(135deg,#16834e,#2bbf79)}
+h2.title{font-size:2.05rem;letter-spacing:.065em}
+h2.title::after{content:"";display:block;width:54px;height:3px;margin-top:7px;border-radius:5px;background:linear-gradient(90deg,var(--blue2),transparent)}
+.card,.modal-box,.call-map{
+  background:linear-gradient(155deg,rgba(28,26,31,.98),rgba(17,17,21,.98));
+  border:1px solid #393139;border-radius:17px;box-shadow:0 12px 32px rgba(0,0,0,.19);
+}
+.card:hover{border-color:rgba(255,53,72,.34)}
+.stat{color:#ff5968;text-shadow:0 0 22px rgba(255,38,56,.2)}
+.countdown div{background:rgba(255,255,255,.045);border-color:#41353c}
+.countdown b{color:#ff6471}
+.badge.ok{background:rgba(49,200,121,.13);color:#54df98}
+.badge.wait{background:rgba(255,204,102,.13);color:#ffd27f}
+.badge.err{background:rgba(255,53,72,.14);color:#ff7b86}
+input,select,textarea{background:#101014;border-color:#41353d;border-radius:10px}
+input:focus,select:focus,textarea:focus{border-color:#ff4658;box-shadow:0 0 0 3px rgba(255,53,72,.15)}
+.tabs button{background:#171519;border-color:#3d333a}
+.tabs button.active{background:linear-gradient(135deg,#a90e21,#ef293e);border-color:#f04a5b}
+.team .num{background:rgba(255,53,72,.13);color:#ff6471}
+.bar{background:#29242a}.bar i{background:linear-gradient(90deg,#a80d20,#ff5261)}
+.table-wrap{background:#151418;border-color:#3a3037;box-shadow:0 12px 30px rgba(0,0,0,.16)}
+th{background:#211b20;color:#d6cbd0}
+td,th{border-bottom-color:#302830}
+tbody tr{transition:background .18s}
+tbody tr:hover{background:rgba(255,53,72,.055)}
+.podium .card.first{border-color:rgba(255,204,102,.55);background:linear-gradient(180deg,rgba(255,204,102,.09),#19171b)}
+.podium .pts{color:#ff6673}
+.social:hover{border-color:#ff5261}
+.news{border-left-color:#ff4355}
+.code{color:#ff7782;background:#21171c}
+.toast{background:linear-gradient(135deg,#a80d20,#f02c40);box-shadow:0 12px 35px rgba(0,0,0,.45)}
+.room-publish{border-color:rgba(255,75,91,.48);background:linear-gradient(145deg,rgba(129,10,27,.26),rgba(23,20,25,.98));box-shadow:0 18px 48px rgba(0,0,0,.32)}
+.room-publish h2{color:#ff6875}
+.room-value{background:rgba(5,5,7,.58);border-color:#49363e}
+.call-slot{background:#1a171c;border-color:#40343c}
+.call-slot .num,.call-slot .callname{color:#ff6875}
+.rrow{border-bottom-color:#383039}
+footer{border-top:1px solid rgba(255,53,72,.13);margin-top:30px}
+::selection{background:rgba(255,53,72,.35);color:#fff}
+:focus-visible{outline:2px solid #ff6875;outline-offset:3px}
+@media(max-width:980px){
+  .nav{background:rgba(15,13,17,.98);border-bottom:1px solid rgba(255,53,72,.28);box-shadow:0 20px 35px rgba(0,0,0,.35)}
+}
+@media(max-width:680px){
+  main{padding:16px 13px 70px}
+  .hero{min-height:290px;padding:30px 22px;border-radius:18px}
+  .hero::after{right:-5%;font-size:190px}
+  .hero h1{font-size:clamp(2.8rem,13vw,4.2rem)}
+  .hero p{font-size:.98rem}
+  .hero .actions{width:100%}
+  .hero .actions .btn{flex:1;text-align:center;padding:12px 14px}
+  .card{padding:15px}
+  h2.title{font-size:1.75rem}
+  .podium{gap:7px}.podium .card{padding:12px 5px}.podium .card.first{padding-top:20px}
+  .podium b{font-size:.88rem}.podium .pts{font-size:1.35rem}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
 </style>
-</head>
-<body>
-<div class="app">
-<aside class="side">
- <div class="brand"><div class="mark">N</div><div><b>ZEUX NEXUS</b><small>ESPORTS CONTROL CENTER</small></div></div>
- <div class="navlabel">CENTRAL DE OPERAÇÕES</div>
- <nav class="nav" id="nav">
-  <button class="active" data-page="overview"><i>◈</i> Visão geral</button>
-  <button data-page="events"><i>◷</i> X-Treinos</button>
-  <button data-page="teams"><i>⬡</i> Equipes</button>
-  <button data-page="players"><i>♙</i> Jogadores</button>
-  <button data-page="ranking"><i>♛</i> Ranking</button>
-  <button data-page="calendar"><i>▦</i> Calendário</button>
-  <button data-page="calls"><i>⌁</i> Sorteio de calls</button>
-  <button data-page="rooms"><i>▣</i> Salas</button>
-  <button data-page="results"><i>▤</i> Resultados</button>
-  <button data-page="news"><i>◉</i> Comunicados</button>
-  <div class="navlabel">ADMINISTRAÇÃO</div>
-  <button data-page="admin"><i>⚙</i> Painel organizador</button>
- </nav>
- <div class="sidefoot">ZEUX NEXUS • BUILD 02.0<br>Protótipo local para testes</div>
-</aside>
-<main class="main">
-<header class="top"><div class="crumb">Workspace / <b id="crumb">Visão geral</b></div><div class="topright"><span class="live">● SISTEMA OPERACIONAL</span><div class="avatar">ZX</div></div></header>
-<div class="content">
-<section class="page active" id="overview">
- <div class="hero"><div><div class="eyebrow">COMPETITIVE OPERATIONS</div><h1>Controle sua arena.</h1><p>Gerencie campeonatos, equipes e desempenho em um só lugar.</p></div><div class="actions"><button class="btn" onclick="go('events')">Ver agenda</button><button class="btn primary" onclick="openModal()">＋ Novo X-Treino</button></div></div>
- <div class="grid stats">
-  <div class="card stat"><div><small>X-Treinos cadastrados</small><strong id="sEvents">04</strong><small class="muted">na plataforma</small></div><div class="ico">◷</div></div>
-  <div class="card stat"><div><small>Equipes registradas</small><strong id="sTeams">12</strong><small class="muted">participantes</small></div><div class="ico">⬡</div></div>
-  <div class="card stat"><div><small>Jogadores</small><strong id="sPlayers">48</strong><small class="muted">no elenco</small></div><div class="ico">♙</div></div>
-  <div class="card stat"><div><small>Partidas realizadas</small><strong id="sMatches">18</strong><small class="muted">histórico de quedas</small></div><div class="ico">▤</div></div>
- </div>
- <div class="grid split">
-  <div class="card"><div class="cardhead"><h3>Próximos X-Treinos</h3><button class="btn ghost" onclick="go('events')">Ver todos →</button></div><div id="upcoming"></div></div>
-  <div class="card"><div class="cardhead"><h3>Central de avisos</h3><span class="tag green">ATIVO</span></div><div class="notice">Bem-vindo ao ZEUX NEXUS. Configure a agenda e publique o próximo evento.</div><div class="switchrow"><span>Inscrições automáticas</span><span class="tag gold">Por agendamento</span></div><div class="switchrow"><span>Modo competitivo</span><span class="tag green">Habilitado</span></div><div class="switchrow"><span>Integridade dos dados</span><span class="tag">Local</span></div></div>
- </div>
- <div class="card" style="margin-top:16px"><div class="cardhead"><h3>Top equipes — temporada atual</h3><button class="btn ghost" onclick="go('ranking')">Ranking completo →</button></div><div id="topTeams"></div></div>
+
+<header>
+  <div class="brand" data-go="inicio"><i>X</i><span id="brandName">ZEUX X-TREINOS FF</span></div>
+  <nav class="nav" id="nav">
+    <a data-go="inicio">Início</a>
+    <a data-go="treinos">Treinos</a>
+    <a data-go="times">Times</a>
+    <a data-go="meutime">Meu time</a>
+    <a data-go="ranking">Ranking</a>
+    <a data-go="calls">CALL</a>
+    <a data-go="redes">Redes</a>
+    <a data-go="perfil">Perfil</a>
+    <a data-go="admin">Organizador</a>
+  </nav>
+  <div class="hright">
+    <span class="pill local" id="syncPill"><b></b><span>Local</span></span>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main>
+
+<!-- INÍCIO -->
+<section class="page" id="inicio">
+  <div class="hero">
+    <span class="tag">Free Fire • X-Treino</span>
+    <h1>Rumo ao <span>Top 1</span></h1>
+    <p>Treine com os melhores, evolua seu time e venha ser champion. Aqui todo mundo se diverte.</p>
+    <div class="actions center">
+      <a class="btn" data-go="meutime">Montar meu time</a>
+      <a class="btn ghost" data-go="treinos">Ver treinos</a>
+      <a class="btn ghost" data-go="calls">Ver CALLS</a>
+    </div>
+  </div>
+
+  <div id="homeRoomCredentials" hidden></div>
+
+  <h2 class="title">Próximo treino</h2>
+  <div class="card" style="text-align:center" id="homeNext"></div>
+
+  <div class="grid g3 mt">
+    <div class="card"><div class="stat" id="sTeams">0</div><p class="muted">Times cadastrados</p></div>
+    <div class="card"><div class="stat" id="sPlayers">0</div><p class="muted">Jogadores</p></div>
+    <div class="card"><div class="stat" id="sScrims">0</div><p class="muted">Treinos realizados</p></div>
+  </div>
+
+  <div id="homeAutomaticKills" class="mt"></div>
+
+  <h2 class="title">Ranking geral</h2>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Time</th><th>Quedas</th><th>Booyah</th><th>Abates</th><th>Pontos</th><th>Resultados das quedas</th></tr></thead><tbody id="homeRank"></tbody></table></div>
+  <p class="muted small-t mt" id="homeRankInfo"></p>
+
+  <div class="card mt">
+    <div class="flex between wrap"><div><h3>CALL DO X-TREINO</h3><p class="muted small-t">Veja as calls sorteadas para cada equipe e mapa.</p></div><a class="btn small" data-go="calls">Abrir CALL</a></div>
+  </div>
+
+  <h2 class="title">Avisos</h2>
+  <div id="homeNews"></div>
 </section>
 
-<section class="page" id="events">
- <div class="hero"><div><div class="eyebrow">EVENT MANAGEMENT</div><h1>Gestão de X-Treinos</h1><p>Crie eventos, controle vagas e programe a abertura de inscrições.</p></div><button class="btn primary" onclick="openModal()">＋ Criar X-Treino</button></div>
- <div class="toolbar"><input id="eventSearch" placeholder="Buscar X-Treino..." oninput="renderEvents()"><select id="eventFilter" onchange="renderEvents()"><option value="all">Todos os status</option><option>Agendado</option><option>Inscrições abertas</option><option>Encerrado</option></select></div>
- <div class="card"><div id="eventTable"></div></div>
+<!-- TREINOS -->
+<section class="page" id="treinos">
+  <h2 class="title">Treinos</h2>
+  <p class="sub">Inscreva seu time, faça o check-in e acompanhe os resultados.</p>
+  <div class="grid g2" id="scrimList"></div>
 </section>
-<section class="page" id="teams">
- <div class="hero"><div><div class="eyebrow">ROSTER MANAGEMENT</div><h1>Equipes</h1><p>Organize elencos, tags, capitães e situação competitiva.</p></div><button class="btn primary" onclick="addTeam()">＋ Adicionar equipe</button></div>
- <div class="card"><div id="teamTable"></div></div>
+
+<!-- TIMES -->
+<section class="page" id="times">
+  <h2 class="title">Times</h2>
+  <p class="sub">Todos os times cadastrados na plataforma.</p>
+  <div class="grid g2" id="teamList"></div>
 </section>
-<section class="page" id="players">
- <div class="hero"><div><div class="eyebrow">PLAYER DATABASE</div><h1>Jogadores</h1><p>Base de jogadores e vínculo com as equipes.</p></div><button class="btn primary" onclick="addPlayer()">＋ Adicionar jogador</button></div>
- <div class="card"><div id="playerTable"></div></div>
+
+<!-- MEU TIME -->
+<section class="page" id="meutime">
+  <h2 class="title">Meu time</h2>
+  <div id="teamNeedLogin" class="card empty">Entre na sua conta para criar ou entrar em um time.<br><br><a class="btn" data-go="perfil">Entrar / Criar conta</a></div>
+  <div id="teamNone" hidden>
+    <p class="sub">Crie um time novo ou entre em um existente com o código de convite.</p>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Criar time</h3>
+        <form id="teamForm" class="mt">
+          <div class="row">
+            <label>Nome do time<input name="name" required maxlength="24" placeholder="Ex: Alpha Squad"></label>
+            <label>Tag (2–4 letras)<input name="tag" required minlength="2" maxlength="4" placeholder="ALPH"></label>
+          </div>
+          <button class="btn" type="submit">Criar time</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Entrar com código</h3>
+        <form id="joinForm" class="mt">
+          <label>Código de convite<input name="code" required maxlength="6" placeholder="ABC123" style="text-transform:uppercase"></label>
+          <button class="btn" type="submit">Entrar no time</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div id="teamBox" hidden></div>
 </section>
+
+<!-- PERFIL -->
+<section class="page" id="perfil">
+  <h2 class="title">Perfil</h2>
+  <div id="authBox" class="grid g2">
+    <div class="card">
+      <h3>Entrar</h3>
+      <form id="loginForm" class="mt">
+        <label>E-mail<input name="email" type="email" required autocomplete="email" placeholder="voce@email.com"></label>
+        <label>Senha<input name="pass" type="password" required autocomplete="current-password"></label>
+        <button class="btn" type="submit">Entrar</button>
+        <button class="btn ghost small" id="forgotPass" type="button">Esqueci minha senha</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>Criar conta</h3>
+      <form id="registerForm" class="mt">
+        <label>Nick no Free Fire<input name="nick" required minlength="3" maxlength="20" autocomplete="nickname"></label>
+        <label>E-mail<input name="email" type="email" required autocomplete="email" placeholder="voce@email.com"></label>
+        <div class="row">
+          <label>ID do Free Fire<input name="ffid" inputmode="numeric" maxlength="14" placeholder="opcional"></label>
+          <label>Senha (mín. 6)<input name="pass" type="password" required minlength="6" autocomplete="new-password"></label>
+        </div>
+        <button class="btn" type="submit">Criar conta</button>
+      </form>
+    </div>
+  </div>
+  <div id="profileBox" hidden>
+    <div class="card">
+      <div class="flex between wrap"><h3 id="profNick"></h3><button class="btn ghost small" id="logoutUser">Sair da conta</button></div>
+      <p class="muted small-t" id="profTeam"></p>
+      <form id="profileForm" class="mt">
+        <div class="row">
+          <label>ID do Free Fire<input name="ffid" inputmode="numeric" maxlength="14"></label>
+          <label>Função<select name="role"><option>Rush</option><option>Suporte</option><option>Sniper</option><option>Granadeiro</option><option>Capitão</option></select></label>
+        </div>
+        <label>Servidor<select name="server"><option>Brasil</option><option>América Latina</option></select></label>
+        <button class="btn" type="submit">Salvar perfil</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- RANKING -->
 <section class="page" id="ranking">
- <div class="hero"><div><div class="eyebrow">SEASON PERFORMANCE</div><h1>Ranking competitivo</h1><p>Pontuação demonstrativa por equipe.</p></div><span class="tag gold">TEMPORADA 2026</span></div>
- <div class="card"><div id="rankingTable"></div></div>
+  <h2 class="title">Ranking</h2>
+  <p class="sub" id="rankSub"></p>
+  <label style="max-width:320px;margin-bottom:14px">Filtrar<select id="rankFilter"></select></label>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Time</th><th>Quedas</th><th>Booyah</th><th>Abates</th><th>Pontos</th><th>Resultados das quedas</th></tr></thead>
+      <tbody id="rankBody"></tbody>
+    </table>
+  </div>
 </section>
-<section class="page" id="calendar">
- <div class="hero"><div><div class="eyebrow">SCHEDULE PLANNER</div><h1>Calendário</h1><p>Visualize os eventos e suas janelas de inscrição.</p></div></div>
- <div class="card"><div id="calendarList"></div></div>
-</section>
+
+<!-- CALLS PÚBLICAS -->
 <section class="page" id="calls">
- <div class="hero"><div><div class="eyebrow">DROP DISTRIBUTION</div><h1>Sorteio de calls</h1><p>Cadastre pools independentes e distribua calls sem repetição.</p></div><button class="btn primary" onclick="drawCalls()">Sortear calls</button></div>
- <div class="grid mapgrid" id="mapPools"></div><div class="card" style="margin-top:15px"><div class="cardhead"><h3>Resultado do último sorteio</h3><span class="tag">DEMONSTRAÇÃO</span></div><div id="drawOutput" class="empty">Adicione calls aos mapas e clique em sortear.</div></div>
+  <h2 class="title">CALL — X-TREINO</h2>
+  <p class="sub">Confira a call de cada equipe confirmada no treino selecionado.</p>
+  <div class="card" style="margin-bottom:14px">
+    <label>Treino<select id="publicCallScrim"></select></label>
+    <div id="publicCallInfo" class="muted small-t mt"></div>
+  </div>
+  <div id="publicCallsList" class="grid"></div>
 </section>
-<section class="page" id="rooms">
- <div class="hero"><div><div class="eyebrow">ROOM OPERATIONS</div><h1>Salas e partidas</h1><p>Centralize dados da sala e organização das quedas.</p></div></div>
- <div class="card"><div class="formgrid"><div class="field"><label>X-TREINO</label><select id="roomEvent"></select></div><div class="field"><label>MAPA / QUEDA</label><select id="roomMap"><option>Bermuda</option><option>Purgatório</option><option>Kalahari</option><option>Nova Terra</option><option>Solara</option></select></div><div class="field"><label>ID DA SALA</label><input id="roomId" placeholder="ID da sala"></div><div class="field"><label>SENHA</label><input id="roomPass" placeholder="Senha da sala"></div><div class="field full"><button class="btn primary" onclick="saveRoom()">Salvar dados da sala</button></div></div><div id="roomList" style="margin-top:18px"></div></div>
+
+<!-- REDES -->
+<section class="page" id="redes">
+  <h2 class="title">Redes</h2>
+  <p class="sub">Acompanhe e fale com a gente.</p>
+  <div class="grid g2" id="socialList"></div>
 </section>
-<section class="page" id="results">
- <div class="hero"><div><div class="eyebrow">MATCH REPORTS</div><h1>Resultados</h1><p>Lance pontos, abates e posição de cada equipe.</p></div><button class="btn primary" onclick="addResult()">＋ Lançar resultado</button></div>
- <div class="card"><div id="resultTable"></div></div>
-</section>
-<section class="page" id="news">
- <div class="hero"><div><div class="eyebrow">COMMUNITY BULLETIN</div><h1>Comunicados</h1><p>Publique avisos e informações importantes.</p></div><button class="btn primary" onclick="addNews()">＋ Novo comunicado</button></div>
- <div class="card" id="newsList"></div>
-</section>
+
+<!-- ORGANIZADOR -->
 <section class="page" id="admin">
- <div class="hero"><div><div class="eyebrow">ADMIN CONSOLE</div><h1>Painel organizador</h1><p>Ferramentas administrativas e parâmetros da competição.</p></div><span class="tag gold">MODO DEMONSTRAÇÃO</span></div>
- <div class="grid split"><div class="card"><div class="cardhead"><h3>Configurações da competição</h3></div><div class="switchrow"><span>Permitir inscrições</span><input class="switch" type="checkbox" checked></div><div class="switchrow"><span>Exigir elenco completo</span><input class="switch" type="checkbox" checked></div><div class="switchrow"><span>Exibir ranking público</span><input class="switch" type="checkbox" checked></div><div class="switchrow"><span>Notificações de eventos</span><input class="switch" type="checkbox" checked></div></div><div class="card"><div class="cardhead"><h3>Ferramentas rápidas</h3></div><button class="btn" style="width:100%;margin-bottom:8px" onclick="go('events')">Gerenciar eventos</button><button class="btn" style="width:100%;margin-bottom:8px" onclick="go('calls')">Gerenciar pools de calls</button><button class="btn" style="width:100%;margin-bottom:8px" onclick="exportData()">Exportar dados JSON</button><button class="btn danger" style="width:100%" onclick="resetDemo()">Restaurar dados de demonstração</button></div></div>
- <div class="notice">A proteção real do organizador precisa ser implementada no servidor/Firebase. Os controles desta versão são apenas demonstrativos e não devem ser usados para administrar dados reais.</div>
+  <h2 class="title">Área do organizador</h2>
+  <div id="adminLock" class="card" style="max-width:420px">
+    <form id="adminForm">
+      <label>E-mail do organizador principal ou usuário da equipe<input id="adminUser" autocomplete="username" required placeholder="E-mail ou usuário"></label>
+      <label>Senha<input type="password" id="adminPass" autocomplete="current-password" required></label>
+      <button class="btn" type="submit">Entrar</button>
+    </form>
+  </div>
+
+  <div id="adminPanel" hidden>
+    <p class="muted small-t" id="adminWho"></p>
+    <div class="flex between wrap">
+      <div class="tabs" id="adminTabs">
+        <button data-tab="treinos" class="active">Treinos</button>
+        <button data-tab="resultados">Queda</button>
+        <button data-tab="calls">Sorteio de call</button>
+        <button data-tab="sala">ID / Senha</button>
+        <button data-tab="automaticKill" id="tabAutomaticKill" hidden>AUTOMATIC.KILL</button>
+        <button data-tab="pessoas">Times e jogadores</button>
+        <button data-tab="avisos">Avisos</button>
+        <button data-tab="logs">Logs</button>
+        <button data-tab="config">Config e backup</button>
+        <button data-tab="equipe" id="tabEquipe" hidden>Organizadores</button>
+      </div>
+      <button class="btn ghost small" id="adminOut">Sair</button>
+    </div>
+
+    <div class="atab" data-atab="treinos">
+      <div class="card">
+        <h3>Novo treino</h3>
+        <form id="scrimForm" class="mt">
+          <label>Título<input name="title" required maxlength="40" placeholder="X-Treino da Noite"></label>
+          <div class="row">
+            <label>Data do X-Treino<input type="date" name="date" required></label>
+            <label>Hora do X-Treino<input type="time" name="time" required value="20:00"></label>
+          </div>
+          <label class="mt">Abrir inscrições automaticamente em (data e hora)<input type="datetime-local" name="registrationOpensAt"><small class="muted">Deixe vazio para abrir as inscrições imediatamente. Se escolher uma data futura, o site libera as inscrições nesse horário.</small></label>
+          <div class="row">
+            <label>Modo<select name="mode"><option>Squad</option><option>Duo</option><option>Solo</option></select></label>
+            <label>Total de vagas<input type="number" name="slots" min="2" max="48" value="12" required></label>
+          </div>
+          <button class="btn" type="submit">Criar treino</button>
+        </form>
+      </div>
+      <div id="adminScrims" class="grid mt"></div>
+    </div>
+
+    <div class="atab" data-atab="resultados" hidden>
+      <div class="card">
+        <label>Treino<select id="resScrim"></select></label>
+        <div class="tabs" id="resRounds"></div>
+        <div class="table-wrap" id="resTableWrap"></div>
+      </div>
+    </div>
+
+    <div class="atab" data-atab="calls" hidden>
+      <div class="card">
+        <h3>Sorteio de calls por mapa</h3>
+        <p class="muted small-t">Escolha o treino. Cadastre uma lista diferente para cada mapa e salve. O sorteio distribui calls sem repetir entre as equipes confirmadas (até 12 slots).</p>
+        <label class="mt">Treino<select id="callAdminScrim"></select></label>
+        <div id="callAdminMaps" class="grid mt"></div>
+      </div>
+    </div>
+
+    <div class="atab" data-atab="sala" hidden>
+      <div class="card" style="max-width:620px">
+        <h3>Publicar ID / Senha da sala</h3>
+        <p class="muted small-t mt">Preencha os dados da sala. Ao publicar, eles aparecem em destaque no centro da página inicial para todos os participantes.</p>
+        <form id="roomCredentialsForm" class="mt">
+          <label>ID da sala<input name="roomId" required maxlength="30" inputmode="numeric" placeholder="Digite o ID da sala"></label>
+          <label>Senha da sala<input name="roomPassword" required maxlength="30" placeholder="Digite a senha da sala"></label>
+          <button class="btn" type="submit">PUBLICAR ID / SENHA</button>
+        </form>
+        <div class="actions mt"><button class="btn danger small" type="button" data-act="clearRoomCredentials">Remover da página inicial</button></div>
+        <p class="muted small-t mt" id="roomCredentialsStatus"></p>
+      </div>
+    </div>
+
+    <div class="atab" data-atab="automaticKill" hidden>
+      <div class="card">
+        <h3 style="color:var(--cyan)">AUTOMATIC.KILL</h3>
+        <p class="muted small-t">Ferramenta exclusiva do organizador principal. Envie o print do placar, revise os nomes e kills reconhecidos e salve cada queda. A publicação só acontece quando você confirmar.</p>
+        <label class="mt">X-Treino<select id="autoKillScrim"></select></label>
+        <label>Queda<select id="autoKillRound"><option value="1">Queda 1 — Bermuda</option><option value="2">Queda 2 — Purgatório</option><option value="3">Queda 3 — Kalahari</option><option value="4">Queda 4 — Nova Terra</option><option value="5">Queda 5 — Solara</option></select></label>
+        <label class="mt">Foto do resultado<input id="autoKillImage" type="file" accept="image/*"></label>
+        <div id="autoKillImagePreview" class="mt"></div>
+        <div class="actions mt"><button class="btn" id="autoKillRead" type="button">LER FOTO AUTOMATICAMENTE</button></div>
+        <p id="autoKillStatus" class="muted small-t mt">Selecione uma imagem para começar. A leitura depende da nitidez do print.</p>
+        <label class="mt">Jogadores identificados (confira e corrija se necessário)<textarea id="autoKillText" rows="8" placeholder="Exemplo:
+NickPlayer - 8
+OutroNick - 5"></textarea></label>
+        <p class="muted small-t">O leitor separa cada espaço de jogador do placar. Confira os nicks e abates identificados; corrija qualquer erro antes de salvar.</p>
+        <div class="actions mt"><button class="btn ghost" id="autoKillPrepare" type="button">PREPARAR / ATUALIZAR LISTA</button><button class="btn" id="autoKillSaveRound" type="button">SALVAR ESTA QUEDA</button><button class="btn danger small" id="autoKillClearRound" type="button">APAGAR ESTA QUEDA</button><button class="btn danger small" id="autoKillResetAll" type="button">REINICIAR AS 5 QUEDAS</button></div>
+        <div id="autoKillReview" class="mt"></div>
+        <div class="divider mt"></div>
+        <h3 class="mt">Resumo das 5 quedas</h3>
+        <div id="autoKillRoundsSummary" class="mt"></div>
+        <div class="actions mt"><button class="btn" id="autoKillPublish" type="button">PUBLICAR ABATES NA PÁGINA INICIAL</button><button class="btn danger small" id="autoKillUnpublish" type="button">REMOVER PUBLICAÇÃO</button></div>
+        <p class="muted small-t mt" id="autoKillPublishStatus"></p>
+      </div>
+    </div>
+
+    <div class="atab" data-atab="pessoas" hidden>
+      <div class="card"><h3>Criar time</h3><form id="admTeamForm" class="mt"><div class="row"><label>Nome<input name="name" required maxlength="24"></label><label>Tag<input name="tag" required minlength="2" maxlength="4"></label></div><button class="btn" type="submit">Criar time</button></form></div>
+      <h3 class="sec">Times</h3><div id="adminTeams" class="grid g2"></div>
+      <h3 class="sec">Jogadores</h3><div id="adminUsers" class="grid g2"></div>
+    </div>
+
+    <div class="atab" data-atab="avisos" hidden>
+      <div class="card">
+        <form id="newsForm"><label>Novo aviso<input name="text" required maxlength="200"></label><button class="btn" type="submit">Publicar</button></form>
+      </div>
+      <div id="adminNews" class="mt"></div>
+    </div>
+
+    <div class="atab" data-atab="logs" hidden>
+      <div class="card"><h3>Criar log</h3><form id="logForm" class="mt"><label>Texto do log<input name="text" required maxlength="200"></label><button class="btn" type="submit">Criar log</button></form></div>
+      <div class="flex between wrap"><h3 class="sec">Registro de atividades</h3><button class="btn ghost small" data-act="logwipe">Limpar tudo</button></div>
+      <div id="adminLogs2" class="card"></div>
+    </div>
+
+    <div class="atab" data-atab="equipe" hidden>
+      <div class="card">
+        <h3>Novo organizador</h3>
+        <p class="muted small-t">Crie um acesso para quem vai ajudar. Você pode desativar, reativar ou excluir quando quiser.</p>
+        <form id="admForm" class="mt">
+          <div class="row">
+            <label>Usuário<input name="user" required minlength="3" maxlength="20" autocomplete="off"></label>
+            <label>Senha (mín. 6)<input name="pass" type="password" required minlength="6" autocomplete="new-password"></label>
+          </div>
+          <button class="btn" type="submit">Criar acesso</button>
+        </form>
+      </div>
+      <h3 class="sec">Organizadores</h3>
+      <div id="adminList" class="grid g2"></div>
+      <div class="flex between wrap"><h3 class="sec">Registro de atividades</h3><button class="btn ghost small" data-act="logclear">Limpar registro</button></div>
+      <div id="adminLogs" class="card"></div>
+    </div>
+
+    <div class="atab" data-atab="config" hidden>
+      <div class="card">
+        <h3>Identidade e redes</h3>
+        <form id="configForm" class="mt">
+          <label>Nome da comunidade<input name="brand" maxlength="24"></label>
+          <div class="row">
+            <label>WhatsApp (link)<input name="whatsapp"></label>
+            <label>Instagram (link)<input name="instagram"></label>
+          </div>
+          <div class="row">
+            <label>YouTube (link)<input name="youtube"></label>
+            <label>Discord (link)<input name="discord"></label>
+          </div>
+          <button class="btn" type="submit">Salvar</button>
+        </form>
+      </div>
+      <div class="card mt"><h3>Tabela de pontuação</h3><p class="muted small-t">Pontos por colocação e por abate. O ranking recalcula para todos.</p>
+        <form id="pointsForm" class="mt"><div class="row" id="ptsInputs"></div><label>Pontos por abate<input type="number" name="kill" min="0" step="0.5"></label><button class="btn" type="submit">Salvar pontuação</button></form></div>
+      <div class="card mt">
+        <h3>Backup e exportação</h3>
+        <div class="actions mt">
+          <button class="btn ghost small" id="expJson">Copiar backup</button>
+          <button class="btn ghost small" id="expCsv">Copiar ranking (.csv)</button>
+          <label class="btn ghost small" style="display:inline-block;cursor:pointer">Restaurar de arquivo<input type="file" id="impJson" accept=".json" hidden></label>
+          <button class="btn ghost small" id="impPaste">Restaurar colando</button>
+          <button class="btn danger small" id="resetAll">Apagar tudo</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
-</div></main></div>
-<div class="modal" id="eventModal"><div class="modalbox"><div class="modalhead"><h2>Novo X-Treino</h2><button class="close" onclick="closeModal()">×</button></div>
-<form id="eventForm"><div class="formgrid">
- <div class="field full"><label>NOME DO EVENTO</label><input id="evName" required placeholder="Ex.: ZEUX NIGHT CUP"></div>
- <div class="field"><label>FORMATO</label><select id="evMode"><option>Squad</option><option>Duo</option><option>Solo</option></select></div>
- <div class="field"><label>CAPACIDADE DE EQUIPES</label><input id="evSlots" type="number" min="2" max="48" value="12"></div>
- <div class="field"><label>DATA DO X-TREINO</label><input id="evDate" type="date" required></div>
- <div class="field"><label>HORÁRIO DO X-TREINO</label><input id="evTime" type="time" required></div>
- <div class="field"><label>ABRIR INSCRIÇÕES EM</label><input id="evOpen" type="datetime-local" required></div>
- <div class="field"><label>MAPAS</label><select id="evMaps"><option>5 quedas — todos os mapas</option><option>3 quedas — seleção do organizador</option><option>Personalizado</option></select></div>
- <div class="field full"><label>OBSERVAÇÕES</label><textarea id="evNotes" placeholder="Regras, requisitos e informações..."></textarea></div>
- <div class="field full"><button class="btn primary" type="submit">Criar X-Treino agendado</button></div>
- </div></form></div></div>
+
+</main>
+
+<footer>© <span id="year"></span> <span id="footBrand">ZEUX X-TREINOS FF</span> • Feito para a comunidade Free Fire</footer>
+<div class="modal" id="modal" hidden><div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <h3 id="mTitle"></h3><p class="muted small-t" id="mMsg"></p><textarea id="mText" rows="10" hidden></textarea>
+  <div class="actions"><button class="btn ghost small" id="mCancel" type="button">Cancelar</button><button class="btn small" id="mOk" type="button">OK</button></div>
+</div></div>
 <div class="toast" id="toast"></div>
+<noscript><p style="padding:20px;text-align:center">Ative o JavaScript para usar o site.</p></noscript>
+
 <script>
-const $=id=>document.getElementById(id), nowLocal=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
-const seed={events:[{id:1,name:"ZEUX SCRIM NIGHT",mode:"Squad",slots:12,date:"2026-12-02",time:"20:00",open:"2026-11-28T18:00",status:"Agendado",notes:"Cinco quedas."},{id:2,name:"NEXUS OPEN QUALIFIER",mode:"Squad",slots:12,date:"2026-12-05",time:"19:30",open:"2026-11-20T18:00",status:"Agendado",notes:"Inscrições por ordem de confirmação."}],teams:[["VORTEX","VTX",124],["NOVA E-SPORTS","NVA",108],["GHOST UNIT","GST",96],["ALPHA SIX","A6",88],["RAVEN CLUB","RVN",76]],players:[["Ghost","VORTEX"],["Kauan7","VORTEX"],["LipeX","NOVA E-SPORTS"],["JalyG0zei","GHOST UNIT"],["Cass","ALPHA SIX"]],results:[],news:["Bem-vindos ao ZEUX NEXUS! Fiquem atentos aos próximos eventos."],pools:{"Bermuda":["Peak","Clock Tower","Factory","Riverside"],"Purgatório":["Brasília","Central","Fields","Refinery"],"Kalahari":["Command Post","Bayfront","Stone Ridge"],"Nova Terra":["Deca Square","Mud Site","Grav Labs"],"Solara":["Stadium","Canyon","Shipyard"]},rooms:[],draw:[]};
-let data;try{data=JSON.parse(localStorage.getItem("zeux_nexus_v2"))||structuredClone(seed)}catch(e){data=structuredClone(seed)}
-function persist(){localStorage.setItem("zeux_nexus_v2",JSON.stringify(data));renderAll()}
-function toast(t){$("toast").textContent=t;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2600)}
-function go(page){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===page));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));$("crumb").textContent=document.querySelector(`[data-page="${page}"]`)?.textContent.trim()||page;renderAll()}
-$("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-page]");if(b)go(b.dataset.page)});
-function effectiveStatus(e){if(e.status==="Encerrado")return e.status;return new Date()>=new Date(e.open)?"Inscrições abertas":"Agendado"}
-function openModal(){$("eventModal").classList.add("open");$("evDate").value ||= new Date(Date.now()+86400000).toISOString().slice(0,10);$("evOpen").value ||= nowLocal()}
-function closeModal(){$("eventModal").classList.remove("open")}
-$("eventForm").addEventListener("submit",e=>{e.preventDefault();data.events.push({id:Date.now(),name:$("evName").value.trim(),mode:$("evMode").value,slots:+$("evSlots").value,date:$("evDate").value,time:$("evTime").value,open:$("evOpen").value,status:"Agendado",notes:$("evNotes").value});persist();closeModal();e.target.reset();toast("X-Treino criado no protótipo!")});
-function table(headers,rows){return `<div style="overflow:auto"><table><thead><tr>${headers.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${headers.length}" class="empty">Nenhum registro encontrado.</td></tr>`}</tbody></table></div>`}
-function renderEvents(){let q=($("eventSearch")?.value||"").toLowerCase(),f=$("eventFilter")?.value||"all";let a=data.events.filter(e=>e.name.toLowerCase().includes(q)&&(f==="all"||effectiveStatus(e)===f));$("eventTable").innerHTML=table(["EVENTO","FORMATO","DATA / HORA","INSCRIÇÕES","VAGAS","AÇÃO"],a.map(e=>[`<b>${e.name}</b>`,e.mode,`${e.date} • ${e.time}`,`<span class="tag ${effectiveStatus(e)==="Inscrições abertas"?"green":"gold"}">${effectiveStatus(e)}</span>`,e.slots,`<button class="btn ghost" onclick="finishEvent(${e.id})">Encerrar</button>`]))}
-function finishEvent(id){let e=data.events.find(x=>x.id===id);if(e)e.status="Encerrado";persist();toast("Evento encerrado.")}
-function renderTeams(){$("teamTable").innerHTML=table(["EQUIPE","TAG","PONTOS","STATUS"],data.teams.map(t=>[`<div class="team"><div class="crest">${t[1]}</div><b>${t[0]}</b></div>`,t[1],t[2],'<span class="tag green">Ativa</span>']))}
-function renderPlayers(){$("playerTable").innerHTML=table(["NICK","EQUIPE","SITUAÇÃO"],data.players.map(p=>[p[0],p[1],'<span class="tag green">Ativo</span>']))}
-function renderRanking(){$("rankingTable").innerHTML=table(["POS.","EQUIPE","PONTOS","TENDÊNCIA"],data.teams.slice().sort((a,b)=>b[2]-a[2]).map((t,i)=>[`<b class="rank">#${i+1}</b>`,`<div class="team"><div class="crest">${t[1]}</div><b>${t[0]}</b></div>`,`<b>${t[2]}</b>`,i===0?'<span class="tag green">Líder</span>':'<span class="muted">—</span>']))}
-function renderUpcoming(){$("upcoming").innerHTML=data.events.slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4).map(e=>`<div class="match"><div class="datebox"><b>${e.date.slice(8,10)}</b><small>${e.date.slice(5,7)}/${e.date.slice(0,4)}</small></div><div class="matchinfo"><b>${e.name}</b><small>${e.mode} • ${e.time} • ${e.slots} vagas</small></div><span class="tag ${effectiveStatus(e)==="Inscrições abertas"?"green":"gold"}">${effectiveStatus(e)}</span></div>`).join("")||'<div class="empty">Nenhum evento cadastrado.</div>'}
-function renderCalendar(){$("calendarList").innerHTML=data.events.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(e=>`<div class="match"><div class="datebox"><b>${e.date.slice(8,10)}</b><small>${e.date.slice(5,7)}</small></div><div class="matchinfo"><b>${e.name}</b><small>${e.date} às ${e.time} • abertura: ${e.open.replace("T"," ")}</small></div><span class="tag">${effectiveStatus(e)}</span></div>`).join("")||'<div class="empty">Agenda vazia.</div>'}
-function renderPools(){$("mapPools").innerHTML=Object.entries(data.pools).map(([m,arr])=>`<div class="maptile"><span class="tag">POOL DE CALLS</span><b>${m}</b><small>${arr.length} calls cadastradas</small><div style="margin-top:10px"><input style="width:100%;background:#09121c;border:1px solid #304157;padding:8px;color:white;border-radius:7px" id="pool_${m}" placeholder="Adicionar call"><button class="btn" style="width:100%;margin-top:7px" onclick="addCall('${m}')">Adicionar</button></div><small style="display:block;margin-top:9px">${arr.join(" • ")||"Sem calls"}</small></div>`).join("")}
-function addCall(m){let v=$("pool_"+m).value.trim();if(v){data.pools[m].push(v);persist();toast("Call adicionada.")}}
-function drawCalls(){let teams=data.teams.map(t=>t[0]);if(teams.length>12)teams=teams.slice(0,12);let maps=Object.keys(data.pools);data.draw=teams.map(t=>({team:t,calls:maps.map(m=>{let a=data.pools[m];return a.length?a[Math.floor(Math.random()*a.length)]:"Sem call"})}));$("drawOutput").innerHTML=table(["EQUIPE",...maps],data.draw.map(x=>[x.team,...x.calls]));}
-function saveRoom(){data.rooms.push({event:$("roomEvent").value,map:$("roomMap").value,id:$("roomId").value,pass:$("roomPass").value});persist();toast("Dados de sala salvos localmente.")}
-function renderRooms(){$("roomEvent").innerHTML=data.events.map(e=>`<option>${e.name}</option>`).join("");$("roomList").innerHTML=table(["EVENTO","MAPA","ID","SENHA"],data.rooms.map(r=>[r.event,r.map,r.id,r.pass]))}
-function addResult(){let team=prompt("Nome da equipe:");if(!team)return;let kills=Number(prompt("Abates:","0"));let points=Number(prompt("Pontos:","0"));data.results.push({team,kills,points});persist();toast("Resultado registrado localmente.")}
-function renderResults(){$("resultTable").innerHTML=table(["EQUIPE","ABATES","PONTOS"],data.results.map(r=>[r.team,r.kills,r.points]))}
-function addNews(){let n=prompt("Escreva o comunicado:");if(n){data.news.unshift(n);persist();toast("Comunicado publicado no protótipo.")}}
-function renderNews(){$("newsList").innerHTML=data.news.map(n=>`<div class="notice">${n}</div>`).join("")||'<div class="empty">Sem comunicados.</div>'}
-function addTeam(){let n=prompt("Nome da equipe:");if(!n)return;let tag=prompt("Tag da equipe (2–4 letras):")||"NEW";data.teams.push([n,tag.toUpperCase().slice(0,4),0]);persist();toast("Equipe adicionada.")}function addPlayer(){let n=prompt("Nick do jogador:");if(!n)return;let t=prompt("Equipe:")||"Sem equipe";data.players.push([n,t]);persist();toast("Jogador adicionado.")}
-function renderStats(){$("sEvents").textContent=String(data.events.length).padStart(2,"0");$("sTeams").textContent=String(data.teams.length).padStart(2,"0");$("sPlayers").textContent=String(data.players.length).padStart(2,"0");$("sMatches").textContent=String(data.results.length+18).padStart(2,"0")}
-function renderAll(){renderStats();renderUpcoming();$("topTeams").innerHTML=table(["POS.","EQUIPE","PONTOS"],data.teams.slice().sort((a,b)=>b[2]-a[2]).slice(0,3).map((t,i)=>[`#${i+1}`,t[0],t[2]]));renderEvents();renderTeams();renderPlayers();renderRanking();renderCalendar();renderPools();renderRooms();renderResults();renderNews()}
-function exportData(){let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="zeux-nexus-backup.json";a.click();URL.revokeObjectURL(a.href);toast("Backup exportado.")}
-function resetDemo(){if(confirm("Restaurar os dados de demonstração? Seus dados locais serão substituídos.")){data=structuredClone(seed);persist();toast("Dados restaurados.")}}
-renderAll();setInterval(()=>{renderUpcoming();renderEvents();renderCalendar()},30000);
+/* =====================================================
+   CONFIGURAÇÃO — edite aqui
+   ===================================================== */
+const CONFIG = {
+  firebaseApiKey: "AIzaSyCSajNuSmcpVlTaEs6CXheoOEz6PzIbLRA",
+  firebaseUrl: "https://silva-xtreinos-testes-default-rtdb.firebaseio.com",
+  masterUid: "V85KIVXHKkQmF2JciXGyXyf0M5t1",
+  pollMs: 4000,                // de quanto em quanto tempo atualizar (modo online)
+  enforceRoster: true,         // exigir jogadores mínimos para inscrever (Squad 4, Duo 2, Solo 1)
+  points: [12, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0]  // pontos por posição (1º ao 12º)
+};
+
+/* =====================================================
+   UTILITÁRIOS
+   ===================================================== */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const arr = o => Object.values(o || {});
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const genCode = () => Array.from({length: 6}, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("");
+function hashPass(s){ // hash simples (cyrb53) — ver observação de segurança no README do chat
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  s = "xt:" + s;
+  for (let i = 0; i < s.length; i++){ const c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+// E-mail interno usado apenas pelo Firebase Authentication; nunca é exibido ao organizador.
+function organizerEmail(user){ return "org-" + hashPass(String(user).trim().toLowerCase()) + "@silva-xtreinos-testes.firebaseapp.com"; }
+function makeStore(getter){
+  const mem = {};
+  return {
+    get(k){ try { const v = getter().getItem(k); return v === null ? (mem[k] ?? null) : v; } catch(e){ return mem[k] ?? null; } },
+    set(k, v){ mem[k] = v; try { getter().setItem(k, v); } catch(e){} },
+    del(k){ delete mem[k]; try { getter().removeItem(k); } catch(e){} }
+  };
+}
+const local = makeStore(() => localStorage);
+const session = makeStore(() => sessionStorage);
+
+let toastTimer;
+function toast(msg, type){
+  const t = $("#toast"); t.textContent = msg; t.className = "toast show" + (type === "err" ? " err" : "");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+/* =====================================================
+   AUTENTICAÇÃO FIREBASE + BANCO DE DADOS REST
+   ===================================================== */
+const AUTH = {
+  user: null, idToken: "", refreshToken: "", expiresAt: 0,
+  get api(){ return "https://identitytoolkit.googleapis.com/v1/"; },
+  load(){ try { const x = JSON.parse(local.get("xt_auth") || "null"); if (x) { this.user=x.user; this.refreshToken=x.refreshToken || ""; this.idToken=x.idToken || ""; this.expiresAt=x.expiresAt || 0; } } catch(e){} },
+  save(){ local.set("xt_auth", JSON.stringify({user:this.user, refreshToken:this.refreshToken, idToken:this.idToken, expiresAt:this.expiresAt})); },
+  async request(endpoint, body){
+    const r = await fetch(this.api + endpoint + "?key=" + encodeURIComponent(CONFIG.firebaseApiKey), {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+    const data = await r.json().catch(()=>({}));
+    if (!r.ok) { const code=data.error && data.error.message || "AUTH_ERROR"; const map={EMAIL_EXISTS:"Este e-mail já está cadastrado.",INVALID_EMAIL:"E-mail inválido.",WEAK_PASSWORD:"A senha precisa ter pelo menos 6 caracteres.",EMAIL_NOT_FOUND:"E-mail não cadastrado.",INVALID_PASSWORD:"Senha incorreta.",INVALID_LOGIN_CREDENTIALS:"E-mail ou senha incorretos.",USER_DISABLED:"Esta conta foi desativada.",TOO_MANY_ATTEMPTS_TRY_LATER:"Muitas tentativas. Tente novamente mais tarde."}; throw new Error(map[code] || code); }
+    return data;
+  },
+  async register(email, password){ const d=await this.request("accounts:signUp",{email,password,returnSecureToken:true}); this.accept(d); return d; },
+  async login(email,password){ const d=await this.request("accounts:signInWithPassword",{email,password,returnSecureToken:true}); this.accept(d); return d; },
+  accept(d){ this.user={uid:d.localId,email:d.email}; this.idToken=d.idToken; this.refreshToken=d.refreshToken; this.expiresAt=Date.now()+(Number(d.expiresIn)||3600)*1000; this.save(); },
+  async token(){
+    if (!this.refreshToken) return "";
+    if (!this.idToken || Date.now() > this.expiresAt - 60000) await this.refresh();
+    return this.idToken;
+  },
+  async refresh(){
+    if (!this.refreshToken) return "";
+    const r=await fetch("https://securetoken.googleapis.com/v1/token?key="+encodeURIComponent(CONFIG.firebaseApiKey),{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"grant_type=refresh_token&refresh_token="+encodeURIComponent(this.refreshToken)});
+    const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error("Sua sessão expirou. Entre novamente.");
+    this.idToken=d.id_token; this.refreshToken=d.refresh_token; this.expiresAt=Date.now()+(Number(d.expires_in)||3600)*1000; this.user={uid:d.user_id,email:this.user?.email||""}; this.save(); return this.idToken;
+  },
+  async reset(email){ return this.request("accounts:sendOobCode",{requestType:"PASSWORD_RESET",email}); },
+  signOut(){ this.user=null; this.idToken=""; this.refreshToken=""; this.expiresAt=0; local.del("xt_auth"); local.del("xt_uid"); }
+};
+const KEY = "xtreinos_pro_v1";
+const DB = {
+  data: {}, pending: 0,
+  cloud: !!(CONFIG.firebaseUrl || "").trim(),
+  status: "local",
+  async url(p){ const base=CONFIG.firebaseUrl.trim().replace(/\/+$/, "") + "/" + p + ".json"; const token=await AUTH.token(); return token ? base + "?auth=" + encodeURIComponent(token) : base; },
+  load(){ try { this.data = JSON.parse(local.get(KEY) || "{}") || {}; } catch(e){ this.data = {}; } },
+  persist(){ local.set(KEY, JSON.stringify(this.data)); },
+  get(p){ let o=this.data; if(!p) return o; for(const k of p.split("/")){ if(o===null||typeof o!=="object") return undefined; o=o[k]; } return o; },
+  _apply(p,v){ const ks=p.split("/"); let o=this.data; for(let i=0;i<ks.length-1;i++){if(o[ks[i]]===null||typeof o[ks[i]]!=="object")o[ks[i]]={};o=o[ks[i]];} const last=ks[ks.length-1]; if(v===undefined)delete o[last];else o[last]=v; },
+  async request(p,method,v){
+    let url=await this.url(p); let r=await fetch(url,{method,headers:{"Content-Type":"application/json"},body:v===undefined?undefined:JSON.stringify(v),cache:"no-store"});
+    if(r.status===401 && AUTH.refreshToken){ await AUTH.refresh(); url=await this.url(p); r=await fetch(url,{method,headers:{"Content-Type":"application/json"},body:v===undefined?undefined:JSON.stringify(v),cache:"no-store"}); }
+    if(!r.ok) throw new Error("Firebase HTTP "+r.status); return r;
+  },
+  async set(p,v){
+    if(!this.cloud){this._apply(p,v);this.persist();return true;}
+    this.pending++;
+    try{
+      await this.request(p,v===undefined?"DELETE":"PUT",v);
+      this._apply(p,v);this.persist();this.status="online";return true;
+    }catch(e){
+      this.status="error";
+      const msg=(e.message||"").includes("HTTP 401")||(e.message||"").includes("HTTP 403")
+        ? "Firebase recusou a gravação (permissão). Confira as regras do Realtime Database."
+        : "Não foi possível salvar: "+e.message;
+      toast(msg,"err");throw e;
+    }finally{this.pending--;updatePill();}
+  },
+  del(p){return this.set(p,undefined);},
+  async replaceAll(obj){
+    const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills"];
+    if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
+    this.data=obj||{};this.persist();if(!this.cloud)return;
+    try{for(const branch of branches){const value=this.data[branch];await this.request(branch,value===undefined?"DELETE":"PUT",value);}this.status="online";}
+    catch(e){this.status="error";toast("Falha ao restaurar: "+e.message,"err");}
+    updatePill();
+  },
+  async pull(){
+    if(!this.cloud||this.pending>0)return false;
+    try{
+      // Não lê a raiz inteira: cada coleção pública é consultada separadamente.
+      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills"];
+      if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
+      let changed=false;
+      for(const branch of branches){
+        const r=await this.request(branch,"GET");
+        const value=(await r.json())||{};
+        if(JSON.stringify(this.get(branch)||{})!==JSON.stringify(value))changed=true;
+        this._apply(branch,value);
+      }
+      this.status="online";this.persist();updatePill();return changed;
+    }catch(e){this.status="error";updatePill();return false;}
+  }
+};
+function updatePill(){
+  const p = $("#syncPill"); if (!p) return;
+  const map = { local: "Local", online: "Online", error: "Offline" };
+  p.className = "pill " + DB.status; p.lastElementChild.textContent = map[DB.status] || "Local";
+}
+
+/* =====================================================
+   REGRAS DE NEGÓCIO
+   ===================================================== */
+const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", autoKillScrim: "", autoKillRound: 1, autoKillRows: [] };
+const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","clearRoomCredentials"]);
+function adminSess(){
+  try {
+    const s = JSON.parse(session.get("xt_admin") || "null");
+    if (!s || typeof s !== "object") return null;
+    if (s.role === "master") return AUTH.user && AUTH.user.uid === CONFIG.masterUid ? s : null;
+    if (!AUTH.user || AUTH.user.uid !== s.id) return null;
+    const a = DB.get("admins/" + s.id);
+    return a && a.active ? s : null;
+  } catch(e){ return null; }
+}
+const isAdmin = () => !!adminSess();
+const isMaster = () => { const s = adminSess(); return !!s && s.role === "master"; };
+async function logAct(text){
+  const a = adminSess(), id = uid();
+  await DB.set("logs/" + id, { id, at: Date.now(), who: a ? a.user : "?", text });
+  const all = arr(DB.get("logs")).sort((x, y) => x.at - y.at);
+  for (const l of all.slice(0, Math.max(0, all.length - 300))) await DB.del("logs/" + l.id);
+}
+const me = () => { const id = AUTH.user?.uid; return id ? DB.get("users/" + id) || null : null; };
+const myTeam = () => { const u = me(); return u ? arr(DB.get("teams")).find(t => t.members && t.members[u.id]) || null : null; };
+const teamOf = uidx => arr(DB.get("teams")).find(t => t.members && t.members[uidx]) || null;
+const scrimsSorted = () => arr(DB.get("scrims")).sort((a, b) => new Date(a.date + "T" + a.time) - new Date(b.date + "T" + b.time));
+const scrimRegs = s => arr(s.regs).sort((a, b) => a.at - b.at);
+// Status calculado no horário local de cada visitante: agendado vira aberto no instante programado.
+const scrimStatus = s => s && s.status === "scheduled" && Number(s.registrationOpensAt) <= Date.now() ? "open" : (s?.status || "closed");
+const confirmedRegs = s => scrimRegs(s).slice(0, +s.slots);
+const needPlayers = mode => mode === "Squad" ? 4 : mode === "Duo" ? 2 : 1;
+const pointsTable = () => { const p = settings().points, a = p ? Object.values(p).map(Number) : []; return a.length ? a : CONFIG.points; };
+const killPts = () => { const k = settings().killPts; return k === undefined || k === null || k === "" ? 1 : Number(k) || 0; };
+const ptsOf = r => (pointsTable()[(+r.place) - 1] || 0) + (+r.kills || 0) * killPts();
+const pointsDesc = () => "Pontuação: " + pointsTable().map((p, i) => (i + 1) + "º=" + p).join(" · ") + " · cada abate = " + killPts();
+const startersCount = t => Object.keys(t.members || {}).filter(k => t.starters && t.starters[k]).length;
+function nextScrim(){
+  const up = scrimsSorted().filter(s => s.status !== "done");
+  return up.find(s => new Date(s.date + "T" + s.time) > new Date() - 6 * 3600e3) || up[0] || null;
+}
+function standings(filter){
+  const list = filter ? [DB.get("scrims/" + filter)].filter(Boolean) : arr(DB.get("scrims"));
+  const T = {};
+  list.forEach(s => {
+    Object.entries(DB.get("results/" + s.id) || {}).sort((a, b) => (+a[0].slice(1)) - (+b[0].slice(1))).forEach(([rk, round]) => {
+      Object.entries(round || {}).forEach(([tid, r]) => {
+        const team = DB.get("teams/" + tid);
+        if (!team || !(+r.place > 0)) return;
+        const o = T[tid] || (T[tid] = { tid, name: team.name, tag: team.tag, pts: 0, kills: 0, booyah: 0, games: 0, hist: [] });
+        const p = ptsOf(r); o.pts += p; o.kills += +r.kills || 0; o.booyah += +r.place === 1 ? 1 : 0; o.games++;
+        o.hist.push({ lab: (filter ? "" : s.title.slice(0, 12) + " ") + "Q" + rk.slice(1), place: +r.place, kills: +r.kills || 0, pts: p });
+      });
+    });
+  });
+  return Object.values(T).sort((a, b) => b.pts - a.pts || b.booyah - a.booyah || b.kills - a.kills);
+}
+const fmtDate = s => new Date(s.date + "T" + s.time).toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" }) + " às " + s.time;
+
+async function removeMember(team, userId){
+  await DB.del(`teams/${team.id}/members/${userId}`); await DB.del(`teams/${team.id}/starters/${userId}`);
+  const rest = Object.keys(team.members || {}).filter(k => k !== userId);
+  if (!rest.length) await removeTeam(team.id);
+  else if (team.captainId === userId) await DB.set(`teams/${team.id}/captainId`, rest[0]);
+}
+async function removeTeam(tid){
+  await DB.del("teams/" + tid);
+  for (const s of arr(DB.get("scrims"))) if (s.regs && s.regs[tid]) await DB.del(`scrims/${s.id}/regs/${tid}`);
+}
+
+/* =====================================================
+   NAVEGAÇÃO
+   ===================================================== */
+const PAGES = $$("section.page").map(p => p.id);
+function show(id){
+  if (!PAGES.includes(id)) id = "inicio";
+  $$("section.page").forEach(p => p.classList.toggle("active", p.id === id));
+  $$(".nav a").forEach(a => a.classList.toggle("active", a.dataset.go === id));
+  $("#nav").classList.remove("open");
+  window.scrollTo(0, 0);
+}
+function go(id){ show(id); try { history.replaceState(null, "", "#" + id); } catch(e){} }
+window.addEventListener("hashchange", () => show((location.hash || "#inicio").slice(1)));
+
+/* =====================================================
+   RENDER
+   ===================================================== */
+function settings(){ return DB.get("settings") || {}; }
+function render(){
+  const st = settings(), brand = st.brand || "ZEUX X-TREINOS FF";
+  $("#brandName").textContent = brand; $("#footBrand").textContent = brand; document.title = brand + " • Free Fire";
+  renderHome(); renderScrims(); renderTeams(); renderMyTeam(); renderProfile(); renderRanking(); renderSocial(); renderCallsPublic(); renderAdmin(); renderAdmin2(); renderCallAdmin();
+}
+
+function scrimCard(s){
+  const regs = scrimRegs(s), conf = regs.slice(0, +s.slots), t = myTeam(), u = me();
+  const mine = t && s.regs && s.regs[t.id];
+  const pos = mine ? regs.findIndex(r => r.tid === t.id) : -1;
+  const currentStatus = scrimStatus(s);
+  const badge = currentStatus === "open" ? '<span class="badge ok">Inscrições abertas</span>' : currentStatus === "scheduled" ? `<span class="badge wait">Abre em ${new Date(+s.registrationOpensAt).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})}</span>` : currentStatus === "closed" ? '<span class="badge wait">Inscrições fechadas</span>' : '<span class="badge off">Finalizado</span>';
+  let actions = "";
+  if (currentStatus === "open"){
+    if (!u) actions = '<button class="btn small" data-go="perfil">Entrar para participar</button>';
+    else if (!t) actions = '<button class="btn small" data-go="meutime">Criar / entrar em um time</button>';
+    else if (t.captainId !== u.id) actions = '<span class="muted small-t">Só o capitão inscreve o time.</span>';
+    else if (mine) actions = `<button class="btn small ${mine.checkin ? "ok" : ""}" data-act="checkin" data-id="${s.id}">${mine.checkin ? "✔ Check-in feito" : "Fazer check-in"}</button>
+      <button class="btn small danger" data-act="unreg" data-id="${s.id}">Cancelar</button>`;
+    else actions = `<button class="btn small" data-act="reg" data-id="${s.id}">${conf.length >= s.slots ? "Entrar na fila de espera" : "Inscrever meu time"}</button>`;
+  } else if (mine && currentStatus === "closed") actions = `<button class="btn small ${mine.checkin ? "ok" : ""}" data-act="checkin" data-id="${s.id}">${mine.checkin ? "✔ Check-in feito" : "Fazer check-in"}</button>`;
+  const teamsHtml = conf.map((r, i) => { const tm = DB.get("teams/" + r.tid); return tm ? `<span class="badge off" style="margin:2px">${i + 1}. [${esc(tm.tag)}] ${esc(tm.name)}${r.checkin ? " ✔" : ""}</span>` : ""; }).join("");
+  const waitHtml = regs.length > s.slots ? `<p class="muted small-t mt">Fila de espera: ${regs.length - s.slots} time(s)</p>` : "";
+  const myPos = mine ? `<p class="small-t mt" style="color:var(--cyan)">${pos < s.slots ? "Seu time está confirmado (vaga " + (pos + 1) + ")" : "Seu time está na fila de espera (posição " + (pos - s.slots + 1) + ")"}</p>` : "";
+  return `<div class="card">
+    <div class="flex between wrap"><h3>${esc(s.title)}</h3>${badge}</div>
+    <p class="muted small-t">${esc(fmtDate(s))} • ${esc(s.mode)}</p>
+    <div class="flex between small-t mt"><span>Vagas</span><b>${Math.min(conf.length, s.slots)}/${s.slots}</b></div>
+    <div class="bar"><i style="width:${Math.min(100, conf.length / s.slots * 100)}%"></i></div>
+    ${myPos}${waitHtml}
+    <div class="mt">${teamsHtml || '<span class="muted small-t">Nenhum time inscrito ainda.</span>'}</div>
+    ${actions ? `<div class="actions mt">${actions}</div>` : ""}
+  </div>`;
+}
+
+function renderHome(){
+  const s = nextScrim(), users = arr(DB.get("users")), teams = arr(DB.get("teams"));
+  $("#homeNext").innerHTML = s ? `<h3>${esc(s.title)}</h3><p class="muted">${esc(fmtDate(s))} • ${esc(s.mode)} • ${confirmedRegs(s).length}/${s.slots} vagas</p>
+      <div class="countdown" id="countdown" data-t="${esc(s.date)}T${esc(s.time)}"></div>
+      <div class="actions center mt"><a class="btn small" data-go="treinos">Ver / inscrever</a></div>`
+    : '<p class="empty">Nenhum treino marcado ainda. Fique de olho nos avisos!</p>';
+  const room = DB.get("roomCredentials") || {};
+  const roomBox = $("#homeRoomCredentials");
+  if (room.id && room.password){
+    roomBox.hidden = false;
+    roomBox.innerHTML = `<div class="room-publish"><span class="tag">ACESSO À SALA</span><h2>ID / SENHA DA SALA</h2><p class="muted small-t">Use os botões para copiar os dados da partida.</p><div class="room-value"><small>ID DA SALA</small><strong>${esc(room.id)}</strong><button class="btn room-copy" data-act="copyRoomId">COPIAR ID</button></div><div class="room-value"><small>SENHA DA SALA</small><strong>${esc(room.password)}</strong><button class="btn room-copy" data-act="copyRoomPassword">COPIAR SENHA</button></div></div>`;
+  } else { roomBox.hidden = true; roomBox.innerHTML = ""; }
+  $("#sTeams").textContent = teams.length; $("#sPlayers").textContent = users.length;
+  $("#sScrims").textContent = arr(DB.get("scrims")).filter(x => x.status === "done").length;
+  renderPublishedAutomaticKills();
+  const rk = standings(); $("#homeRank").innerHTML = rankRows(rk, true);
+  $("#homeRankInfo").textContent = rk.length ? rk.length + " time(s) • " + Math.max(...rk.map(r => r.games)) + " queda(s) disputada(s) • " + pointsDesc() : "";
+  const news = arr(DB.get("news")).sort((a, b) => b.at - a.at).slice(0, 4);
+  $("#homeNews").innerHTML = news.length ? news.map(n => `<div class="news">${esc(n.text)}<div class="muted small-t">${new Date(n.at).toLocaleDateString("pt-BR")}</div></div>`).join("") : '<div class="card empty">Sem avisos por enquanto.</div>';
+  tick();
+}
+
+function renderScrims(){
+  const list = scrimsSorted().reverse();
+  $("#scrimList").innerHTML = list.length ? list.map(scrimCard).join("") : '<div class="card empty" style="grid-column:1/-1">Nenhum treino criado ainda.</div>';
+}
+
+function rosterHtml(t){
+  return Object.entries(t.members || {}).map(([id, nick]) => `<div class="rrow"><span>${esc(nick)}</span><span>${id === t.captainId ? '<span class="badge wait">👑 Capitão</span> ' : ""}${t.starters && t.starters[id] ? '<span class="badge ok">Titular</span>' : '<span class="badge off">Reserva</span>'}</span></div>`).join("") || '<p class="muted small-t">Sem jogadores.</p>';
+}
+function renderTeams(){
+  const list = arr(DB.get("teams")).sort((a, b) => a.created - b.created), u = me(), v = DB.get("teams/" + state.viewTeam);
+  let det = "";
+  if (v){
+    const n = Object.keys(v.members || {}).length, myT = myTeam();
+    let btn;
+    if (!u) btn = '<button class="btn small" data-go="perfil">Entrar para pedir vaga</button>';
+    else if (v.members && v.members[u.id]) btn = '<span class="badge ok">Você está neste time</span>';
+    else if (myT) btn = '<span class="muted small-t">Você já está em outro time.</span>';
+    else if (v.requests && v.requests[u.id]) btn = '<span class="badge wait">Pedido enviado — aguarde o capitão</span>';
+    else if (n >= 5) btn = '<span class="badge err">Time cheio</span>';
+    else btn = `<button class="btn" data-act="reqjoin" data-id="${esc(v.id)}">PEDIR VAGA</button>`;
+    det = `<div class="card" style="border-color:var(--blue2);margin-bottom:14px"><div class="flex between wrap"><h3>[${esc(v.tag)}] ${esc(v.name)}</h3><button class="btn ghost small" data-act="teamclose">Fechar</button></div>
+      <p class="muted small-t">${n}/5 jogadores • ${startersCount(v)}/4 titulares</p><div class="mt">${rosterHtml(v)}</div><div class="actions mt">${btn}</div></div>`;
+  }
+  $("#teamList").innerHTML = det + (list.length ? list.map((t, i) => `<div class="card team" data-act="teamview" data-id="${esc(t.id)}"><div class="num">${i + 1}</div>
+    <div class="info"><b>[${esc(t.tag)}] ${esc(t.name)}</b><span class="muted small-t">${Object.keys(t.members || {}).length}/5 jogadores • toque para ver</span></div></div>`).join("")
+    : '<div class="card empty" style="grid-column:1/-1">Nenhum time cadastrado ainda.</div>');
+}
+
+function renderMyTeam(){
+  const u = me(), t = myTeam();
+  $("#teamNeedLogin").hidden = !!u; $("#teamNone").hidden = !u || !!t; $("#teamBox").hidden = !u || !t;
+  if (!u || !t) return;
+  const isCap = t.captainId === u.id, reqs = arr(t.requests).sort((a, b) => a.at - b.at), ids = Object.keys(t.members || {});
+  $("#teamBox").innerHTML = `<div class="card">
+    <div class="flex between wrap"><h3>[${esc(t.tag)}] ${esc(t.name)}</h3><span class="badge ok">${isCap ? "Você é o capitão" : t.starters && t.starters[u.id] ? "Você é titular" : "Você é reserva"}</span></div>
+    <p class="muted small-t mt">Código de convite</p><span class="code">${esc(t.code)}</span>
+    <h3 class="sec">Elenco (${ids.length}/5) • Titulares ${startersCount(t)}/4</h3>
+    ${ids.map(id => `<div class="rrow"><span>${esc(t.members[id])} ${id === t.captainId ? '<span class="badge wait">👑 Capitão</span>' : ""} ${t.starters && t.starters[id] ? '<span class="badge ok">Titular</span>' : '<span class="badge off">Reserva</span>'}</span>
+      ${isCap ? `<span class="flex"><button class="btn small ${t.starters && t.starters[id] ? "ghost" : ""}" data-act="tog" data-id="${esc(t.id)}" data-id2="${esc(id)}">${t.starters && t.starters[id] ? "Mandar p/ reserva" : "Tornar titular"}</button>${id !== u.id ? `<button class="btn small danger" data-act="kick" data-id="${esc(id)}">Expulsar</button>` : ""}</span>` : ""}</div>`).join("")}
+    <div class="actions mt"><button class="btn danger small" data-act="leave">Sair do time</button></div>
+  </div>
+  ${isCap ? `<div class="card mt"><h3>Pedidos de vaga (${reqs.length})</h3>${reqs.map(r => `<div class="rrow"><b>${esc(r.nick)}</b><span class="flex"><button class="btn small ok" data-act="accept" data-id="${esc(t.id)}" data-id2="${esc(r.uid)}">Aceitar</button><button class="btn small danger" data-act="reject" data-id="${esc(t.id)}" data-id2="${esc(r.uid)}">Rejeitar</button></span></div>`).join("") || '<p class="muted small-t mt">Nenhum pedido no momento.</p>'}</div>` : ""}`;
+}
+
+function renderProfile(){
+  const u = me();
+  $("#authBox").hidden = !!u; $("#profileBox").hidden = !u;
+  if (!u) return;
+  $("#profNick").textContent = u.nick;
+  const t = myTeam(); $("#profTeam").textContent = t ? `Time: [${t.tag}] ${t.name}` : "Você ainda não está em um time.";
+  const f = $("#profileForm");
+  if (!f.contains(document.activeElement)){ f.ffid.value = u.ffid || ""; f.role.value = u.role || "Rush"; f.server.value = u.server || "Brasil"; }
+}
+
+function renderRanking(){
+  const sel = $("#rankFilter"), cur = sel.value;
+  sel.innerHTML = '<option value="">Geral (todos os treinos)</option>' + scrimsSorted().reverse().map(s => `<option value="${s.id}">${esc(s.title)} — ${esc(s.date)}</option>`).join("");
+  sel.value = [...sel.options].some(o => o.value === cur) ? cur : "";
+  $("#rankBody").innerHTML = rankRows(standings(sel.value), true);
+  $("#rankSub").textContent = pointsDesc();
+}
+
+function renderSocial(){
+  const st = settings();
+  const items = [["💬", "WhatsApp", st.whatsapp, "Entre no grupo"], ["📸", "Instagram", st.instagram, "Siga a gente"], ["▶️", "YouTube", st.youtube, "Treinos ao vivo"], ["🎮", "Discord", st.discord, "Comunidade"]];
+  const ok = items.filter(i => i[2]);
+  $("#socialList").innerHTML = ok.length ? ok.map(i => `<a class="card social" href="${esc(i[2])}" target="_blank" rel="noopener"><span class="ic">${i[0]}</span><div><h3>${i[1]}</h3><span class="muted small-t">${i[3]}</span></div></a>`).join("")
+    : '<div class="card empty" style="grid-column:1/-1">Os links ainda não foram configurados pelo organizador.</div>';
+}
+
+function renderAdmin(){
+  const on = isAdmin();
+  $("#adminLock").hidden = on; $("#adminPanel").hidden = !on;
+  if (!on) return;
+  const master = isMaster(), sess = adminSess();
+  $("#tabEquipe").hidden = !master;
+  $("#tabAutomaticKill").hidden = !master;
+  if (!master && ["equipe", "automaticKill"].includes(state.adminTab)) state.adminTab = "treinos";
+  $("#adminWho").textContent = "Conectado como " + sess.user + (master ? " (organizador principal)" : " (organizador)");
+  if (master){
+    const adms = arr(DB.get("admins")).sort((a, b) => a.created - b.created);
+    $("#adminList").innerHTML = adms.length ? adms.map(a => `<div class="card"><div class="flex between wrap"><b>${esc(a.user)}</b><span class="badge ${a.active ? "ok" : "off"}">${a.active ? "Ativo" : "Desativado"}</span></div>
+      <p class="muted small-t">Criado em ${new Date(a.created).toLocaleDateString("pt-BR")}</p>
+      <div class="actions mt"><button class="btn small ${a.active ? "ghost" : "ok"}" data-act="admtoggle" data-id="${a.id}">${a.active ? "Desativar" : "Ativar"}</button><button class="btn small danger" data-act="admdel" data-id="${a.id}">Excluir</button></div></div>`).join("")
+      : '<div class="card empty" style="grid-column:1/-1">Nenhum organizador extra ainda.</div>';
+    const logs = arr(DB.get("logs")).sort((a, b) => b.at - a.at).slice(0, 60);
+    $("#adminLogs").innerHTML = logs.length ? logs.map(l => `<div style="padding:7px 0;border-bottom:1px solid var(--line)"><span class="muted small-t">${esc(new Date(l.at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }))}</span> • <b>${esc(l.who)}</b>: ${esc(l.text)}</div>`).join("") : '<p class="empty">Sem atividades registradas ainda.</p>';
+  }
+  $$("#adminTabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === state.adminTab));
+  $$(".atab").forEach(a => a.hidden = a.dataset.atab !== state.adminTab);
+  if (state.adminTab === "calls") renderCallAdmin();
+  if (state.adminTab === "automaticKill" && master) renderAutomaticKillAdmin();
+
+  const scrims = scrimsSorted().reverse();
+  $("#adminScrims").innerHTML = scrims.length ? scrims.map(s => {
+    const regs = scrimRegs(s);
+    return `<div class="card"><div class="flex between wrap"><h3>${esc(s.title)}</h3>
+      <div class="flex"><select data-status="${s.id}" style="width:auto"><option value="scheduled"${scrimStatus(s) === "scheduled" ? " selected" : ""}>Agendado</option><option value="open"${scrimStatus(s) === "open" ? " selected" : ""}>Aberto</option><option value="closed"${scrimStatus(s) === "closed" ? " selected" : ""}>Fechado</option><option value="done"${scrimStatus(s) === "done" ? " selected" : ""}>Finalizado</option></select>
+      <button class="btn small danger" data-act="delscrim" data-id="${s.id}">Excluir</button></div></div>
+      <p class="muted small-t">${esc(fmtDate(s))} • ${esc(s.mode)} • ${Math.min(regs.length, s.slots)}/${s.slots} vagas${regs.length > s.slots ? " (+" + (regs.length - s.slots) + " na fila)" : ""}</p>
+      <div class="mt">${regs.map((r, i) => { const tm = DB.get("teams/" + r.tid); return tm ? `<div class="flex between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>${i + 1}. [${esc(tm.tag)}] ${esc(tm.name)} ${i >= s.slots ? '<span class="badge wait">fila</span>' : ""} ${r.checkin ? '<span class="badge ok">check-in</span>' : ""}</span><button class="btn small danger" data-act="delreg" data-id="${s.id}" data-id2="${r.tid}">Remover</button></div>` : ""; }).join("") || '<span class="muted small-t">Sem inscritos.</span>'}</div></div>`;
+  }).join("") : '<div class="card empty">Nenhum treino criado.</div>';
+
+  renderResults();
+
+  const teams = arr(DB.get("teams"));
+  $("#adminTeams").innerHTML = teams.length ? teams.map(t => `<div class="card"><div class="flex between"><b>[${esc(t.tag)}] ${esc(t.name)}</b><button class="btn small danger" data-act="delteam" data-id="${t.id}">Excluir</button></div><p class="muted small-t">${arr(t.members).map(esc).join(" • ")}</p></div>`).join("") : '<div class="card empty">Nenhum time.</div>';
+  const users = arr(DB.get("users"));
+  $("#adminUsers").innerHTML = users.length ? users.map(x => `<div class="card"><div class="flex between"><b>${esc(x.nick)}</b><button class="btn small danger" data-act="deluser" data-id="${x.id}">Excluir</button></div><p class="muted small-t">ID: ${esc(x.ffid || "—")} • ${esc(x.role || "")}</p></div>`).join("") : '<div class="card empty">Nenhum jogador.</div>';
+  const news = arr(DB.get("news")).sort((a, b) => b.at - a.at);
+  $("#adminNews").innerHTML = news.map(n => `<div class="card flex between" style="margin-bottom:10px"><span>${esc(n.text)}</span><button class="btn small danger" data-act="delnews" data-id="${n.id}">Excluir</button></div>`).join("");
+}
+
+function renderResults(){
+  const scrims = scrimsSorted().reverse(), sel = $("#resScrim");
+  if (sel.contains(document.activeElement) === false) sel.innerHTML = scrims.length ? scrims.map(s => `<option value="${s.id}">${esc(s.title)} — ${esc(s.date)}</option>`).join("") : '<option value="">Nenhum treino</option>';
+  if (!scrims.some(s => s.id === state.resScrim)) state.resScrim = scrims[0] ? scrims[0].id : "";
+  sel.value = state.resScrim;
+  const s = DB.get("scrims/" + state.resScrim);
+  if (!s){ $("#resRounds").innerHTML = ""; $("#resTableWrap").innerHTML = '<p class="empty">Crie um treino primeiro.</p>'; return; }
+  const rounds = Math.max(1, +s.rounds || 1);
+  if (state.resRound > rounds) state.resRound = 1;
+  $("#resRounds").innerHTML = Array.from({ length: rounds }, (_, i) => `<button data-round="${i + 1}" class="${state.resRound === i + 1 ? "active" : ""}">Queda ${i + 1}</button>`).join("") + '<button data-act="addround">+ Nova queda</button>';
+  const conf = confirmedRegs(s).filter(r => DB.get("teams/" + r.tid));
+  if (!conf.length){ $("#resTableWrap").innerHTML = '<p class="empty">Nenhum time confirmado neste treino.</p>'; return; }
+  if ($("#resTableWrap").contains(document.activeElement)) return;
+  const res = DB.get(`results/${s.id}/r${state.resRound}`) || {};
+  $("#resTableWrap").innerHTML = `<p class="muted small-t" style="padding:10px 13px">${esc(s.title)} • Queda ${state.resRound} • ${Object.keys(res).length ? "resultado salvo" : "ainda não salva"} • deixe a colocação vazia para time que não jogou</p><table><thead><tr><th>Time</th><th>Colocação (1–12)</th><th>Abates</th><th>Pontos</th></tr></thead><tbody>` + conf.map(r => {
+    const tm = DB.get("teams/" + r.tid), v = res[r.tid] || {};
+    return `<tr data-tid="${r.tid}"><td>[${esc(tm.tag)}] ${esc(tm.name)}</td>
+      <td><input type="number" min="1" max="12" class="res-in" data-f="place" value="${+v.place || ""}"></td>
+      <td><input type="number" min="0" class="res-in" data-f="kills" value="${v.kills ?? ""}"></td>
+      <td><b data-pts>${+v.place > 0 ? ptsOf(v) : "—"}</b></td></tr>`;
+  }).join("") + `</tbody></table><div class="actions" style="padding:13px"><button class="btn" data-act="saveround">Salvar queda ${state.resRound}</button><button class="btn danger small" data-act="clearround">Limpar queda</button></div>`;
+}
+
+/* =====================================================
+   AUTOMATIC.KILL — OCR + conferência + publicação
+   ===================================================== */
+function autoKillRoundData(){ return DB.get("automaticKillDrafts/"+(state.autoKillScrim||"")) || {}; }
+function renderAutomaticKillAdmin(){
+  if(!isMaster()) return;
+  const scrims=scrimsSorted().slice().reverse(), sel=$("#autoKillScrim");
+  const active=sel.value || state.autoKillScrim;
+  sel.innerHTML=scrims.length?scrims.map(sc=>`<option value="${esc(sc.id)}">${esc(sc.title)} — ${esc(sc.date)}</option>`).join(""):'<option value="">Nenhum treino cadastrado</option>';
+  state.autoKillScrim=scrims.some(sc=>sc.id===active)?active:(scrims[0]?.id||""); sel.value=state.autoKillScrim;
+  $("#autoKillRound").value=String(state.autoKillRound);
+  const rounds=autoKillRoundData();
+  $("#autoKillRoundsSummary").innerHTML=[1,2,3,4,5].map(n=>{const rows=rounds["r"+n]||[];return `<div class="rrow"><span>Queda ${n}: <b>${rows.length} jogador(es)</b> • ${rows.reduce((a,x)=>a+(+x.kills||0),0)} kills</span><span class="badge ${rows.length?"ok":"wait"}">${rows.length?"Salva":"Pendente"}</span></div>`;}).join("");
+  const pub=DB.get("automaticKills/"+state.autoKillScrim);
+  $("#autoKillPublishStatus").textContent=pub?.publishedAt?"Publicado em "+new Date(pub.publishedAt).toLocaleString("pt-BR")+" • "+(pub.players||[]).length+" jogador(es).":"Ainda não publicado para este treino.";
+  if(!state.autoKillRows.length) $("#autoKillReview").innerHTML='<p class="muted small-t">A lista de conferência aparecerá aqui depois de preparar o texto.</p>';
+}
+function parseAutoKillText(raw){
+  const out=[];
+  raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{
+    const m=line.match(/^(.+?)\s*(?:[-–—,:;|]|\t)\s*(\d{1,2})\s*$/) || line.match(/^(.+?)\s{2,}(\d{1,2})\s*$/);
+    if(m){const nick=m[1].trim().replace(/^\d+[.)\s]+/,"");const kills=Number(m[2]);if(nick&&Number.isInteger(kills)&&kills>=0&&kills<=99)out.push({nick,kills});}
+  });
+  return out;
+}
+function autoKillPlayerRects(w,h){
+  // Posições conferidas no print de referência 1600x720.
+  // O lado esquerdo tem 20 jogadores; o direito tem 17 (uma vaga vazia no rank 8).
+  const leftRows=[185,222,280,319,376,414,470,509,565,603];
+  const rightRows=[
+    [185,[2,3]],[220,[2,3]],
+    [285,[2,3]],[320,[2,3]],
+    [375,[2,3]],[410,[2]],
+    [470,[2,3]],
+    [510,[2,3]],[545,[2,3]]
+  ];
+  const columns=[
+    {nick:[.205,.278],kills:[.278,.326]},
+    {nick:[.375,.440],kills:[.440,.505]},
+    {nick:[.598,.675],kills:[.675,.725]},
+    {nick:[.720,.810],kills:[.810,.865]}
+  ];
+  const players=[];
+  const makeRect=([x0,x1],y)=>{
+    const cy=y/720, half=.024;
+    return {
+      left:Math.max(0,Math.round(x0*w)),
+      top:Math.max(0,Math.round((cy-half)*h)),
+      right:Math.min(w,Math.round(x1*w)),
+      bottom:Math.min(h,Math.round((cy+half)*h))
+    };
+  };
+  const add=(y,col)=>{
+    const c=columns[col];
+    players.push({nick:makeRect(c.nick,y),kills:makeRect(c.kills,y)});
+  };
+  for(const y of leftRows){add(y,0);add(y,1);}
+  for(const [y,cols] of rightRows){for(const col of cols)add(y,col);}
+  return players;
+}
+function cleanAutoKillNick(text,index){
+  let s=String(text||"").replace(/[\r\n\t]+/g," ").replace(/\s+/g," ").trim();
+  s=s.replace(/\b(?:abates?|abat[eé]s?)\b/ig,"").replace(/^[\s|:;.,\-–—]+|[\s|:;.,\-–—]+$/g,"").trim();
+  s=s.replace(/^[^A-Za-zÀ-ÿ0-9@<({\[]+/,"").trim();
+  return s || `REVISAR NICK #${index+1}`;
+}
+function parseAutoKillNumber(text){
+  const m=String(text||"").match(/\d{1,2}/);
+  return m ? Math.min(99,Number(m[0])) : null;
+}
+
+function parseAutoKillCell(text){
+  const s=String(text||"").replace(/[|]/g," ").replace(/\s+/g," ").trim();
+  const m=s.match(/^(.*?)\s*([0-9])\s*(?:A?bates?|Abat[eé]s?)\b/i);
+  if(!m)return null;
+  let nick=m[1].replace(/[•·.,:;]+$/g,"").trim();
+  nick=nick.replace(/^[^A-Za-zÀ-ÿ0-9@<]+/,"").trim();
+  const kills=Number(m[2]);
+  if(!nick||nick.length<2||kills<0||kills>99)return null;
+  return {nick,kills};
+}
+
+function renderAutoKillReview(){
+  const box=$("#autoKillReview");
+  if(!state.autoKillRows.length){box.innerHTML='<p class="empty">Nenhum jogador identificado. Ajuste o texto no formato Nick - kills.</p>';return;}
+  box.innerHTML='<h3>Conferir jogadores e kills</h3><div class="table-wrap"><table><thead><tr><th>Jogador</th><th>Kills</th></tr></thead><tbody>'+state.autoKillRows.map((r,i)=>`<tr><td><input data-ak-nick="${i}" value="${esc(r.nick)}" maxlength="32"></td><td><input data-ak-kills="${i}" type="number" min="0" max="99" value="${r.kills ?? ""}"></td></tr>`).join("")+'</tbody></table></div><p class="muted small-t mt">Confira com atenção antes de salvar. O sistema não publica sem sua confirmação.</p>';
+}
+$("#autoKillScrim").addEventListener("change",e=>{state.autoKillScrim=e.target.value;state.autoKillRows=[];renderAutomaticKillAdmin();});
+$("#autoKillRound").addEventListener("change",e=>{state.autoKillRound=Math.max(1,Math.min(5,+e.target.value||1));state.autoKillRows=[];renderAutomaticKillAdmin();});
+$("#autoKillImage").addEventListener("change",e=>{const file=e.target.files?.[0],box=$("#autoKillImagePreview");if(!file){box.innerHTML="";return;}if(!file.type.startsWith("image/")){e.target.value="";return toast("Selecione uma imagem válida","err");}const url=URL.createObjectURL(file);box.innerHTML=`<img src="${url}" alt="Prévia do resultado" style="max-width:100%;max-height:260px;border-radius:12px;display:block">`;$("#autoKillStatus").textContent="Imagem carregada. Clique em LER FOTO AUTOMATICAMENTE.";});
+$("#autoKillRead").addEventListener("click",async()=>{
+  if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  const file=$("#autoKillImage").files?.[0];if(!file)return toast("Escolha a foto do resultado primeiro","err");
+  const status=$("#autoKillStatus"),btn=$("#autoKillRead");btn.disabled=true;status.textContent="Lendo a imagem... isso pode levar alguns segundos.";
+  try{
+    if(!window.Tesseract) await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Não foi possível carregar o leitor de imagem. Verifique a internet."));document.head.appendChild(sc);});
+    const bitmap=await createImageBitmap(file);
+    const players=autoKillPlayerRects(bitmap.width,bitmap.height);
+    const worker=await Tesseract.createWorker("eng",1,{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo placar: "+Math.min(38,Math.max(1,Math.round((m.progress||0)*38)))+" de 38 jogadores...";}});
+    const parsed=[],rawLines=[];
+    const readCrop=async(r,whitelist)=>{
+      const cw=r.right-r.left,ch=r.bottom-r.top;
+      if(cw<5||ch<5)return "";
+      const crop=document.createElement("canvas");crop.width=cw*4;crop.height=ch*4;
+      const cctx=crop.getContext("2d",{willReadFrequently:true});
+      cctx.imageSmoothingEnabled=true;cctx.imageSmoothingQuality="high";
+      cctx.drawImage(bitmap,r.left,r.top,cw,ch,0,0,crop.width,crop.height);
+      await worker.setParameters({tessedit_pageseg_mode:"7",preserve_interword_spaces:"1",tessedit_char_whitelist:whitelist||""});
+      let result=await worker.recognize(crop);
+      let recognized=String(result.data.text||"").trim();
+      if(!recognized && !whitelist){
+        await worker.setParameters({tessedit_pageseg_mode:"6",preserve_interword_spaces:"1",tessedit_char_whitelist:""});
+        result=await worker.recognize(crop);
+        recognized=String(result.data.text||"").trim();
+      }
+      return recognized;
+    };
+    try{
+      for(let i=0;i<players.length;i++){
+        const nickText=await readCrop(players[i].nick,"");
+        const killsText=await readCrop(players[i].kills,"0123456789");
+        const nick=cleanAutoKillNick(nickText,i);
+        const kills=parseAutoKillNumber(killsText);
+        rawLines.push(`${nickText} | ${killsText}`);
+        // Mantém a posição do jogador mesmo se o OCR não reconhecer um dos campos.
+        parsed.push({nick,kills:kills===null?"":kills});
+      }
+    }finally{await worker.terminate();bitmap.close?.();}
+    state.autoKillRows=parsed;
+    $("#autoKillText").value=parsed.map(r=>r.nick+" - "+r.kills).join("\n");
+    renderAutoKillReview();
+    const missing=parsed.filter(r=>!r.kills.toString().match(/^\\d+$/)||r.nick.startsWith("REVISAR NICK")).length;
+    status.textContent=`Analisei ${parsed.length} posições do placar. ${missing} precisam de conferência manual; revise os campos destacados antes de salvar.`;
+  }catch(err){status.textContent=err.message||"Falha ao ler a imagem.";toast(status.textContent,"err");}finally{btn.disabled=false;}
+});
+$("#autoKillPrepare").addEventListener("click",()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");state.autoKillRows=parseAutoKillText($("#autoKillText").value);renderAutoKillReview();if(!state.autoKillRows.length)toast("Não encontrei linhas no formato Nick - kills","err");});
+$("#autoKillReview").addEventListener("input",e=>{const n=e.target.dataset.akNick,k=e.target.dataset.akKills;if(n!==undefined)state.autoKillRows[+n].nick=e.target.value;if(k!==undefined)state.autoKillRows[+k].kills=Math.max(0,Math.min(99,+e.target.value||0));});
+$("#autoKillClearRound").addEventListener("click",async()=>{
+  if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  if(!state.autoKillScrim)return toast("Selecione um X-Treino","err");
+  const round=Number(state.autoKillRound)||1;
+  if(!await ask(`Apagar somente os dados salvos da Queda ${round} deste X-Treino?`))return;
+  try{
+    await DB.del(`automaticKillDrafts/${state.autoKillScrim}/r${round}`);
+    state.autoKillRows=[];
+    $("#autoKillText").value="";
+    renderAutomaticKillAdmin();
+    $("#autoKillReview").innerHTML='<p class="muted small-t">Queda apagada. Você pode enviar um novo print.</p>';
+    toast(`Queda ${round} apagada. ✅`);
+  }catch(err){toast("Não foi possível apagar a queda: "+err.message,"err");}
+});
+$("#autoKillResetAll").addEventListener("click",async()=>{
+  if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  if(!state.autoKillScrim)return toast("Selecione um X-Treino","err");
+  if(!await ask("REINICIAR este X-Treino? Isso apagará as 5 quedas salvas e também removerá a publicação dos abates da página inicial. Essa ação não pode ser desfeita."))return;
+  try{
+    await DB.del(`automaticKillDrafts/${state.autoKillScrim}`);
+    await DB.del(`automaticKills/${state.autoKillScrim}`);
+    state.autoKillRows=[];
+    $("#autoKillText").value="";
+    renderAutomaticKillAdmin();
+    $("#autoKillReview").innerHTML='<p class="muted small-t">As cinco quedas foram reiniciadas. Envie o print da Queda 1 para começar novamente.</p>';
+    renderHome();
+    toast("As 5 quedas foram reiniciadas. ✅");
+  }catch(err){toast("Não foi possível reiniciar: "+err.message,"err");}
+});
+$("#autoKillSaveRound").addEventListener("click",async()=>{
+  if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  if(!state.autoKillScrim)return toast("Selecione um X-Treino","err");
+  const rows=state.autoKillRows.map(r=>({nick:String(r.nick||"").trim(),kills:+r.kills||0})).filter(r=>r.nick);
+  if(!rows.length)return toast("Prepare e confira a lista antes de salvar","err");
+  const seen=new Set();for(const r of rows){const k=r.nick.toLocaleLowerCase("pt-BR");if(seen.has(k))return toast("Há jogador repetido na lista: "+r.nick,"err");seen.add(k);}
+  try{await DB.set("automaticKillDrafts/"+state.autoKillScrim+"/r"+state.autoKillRound,rows);toast("Queda "+state.autoKillRound+" salva no Firebase! ✅");renderAutomaticKillAdmin();}
+  catch(err){toast("Não foi possível salvar a queda: "+err.message,"err");}
+});
+$("#autoKillPublish").addEventListener("click",async()=>{
+  if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  const sc=DB.get("scrims/"+state.autoKillScrim);if(!sc)return toast("Selecione um X-Treino","err");
+  const rounds=autoKillRoundData();const totals={};
+  for(let n=1;n<=5;n++)for(const r of (rounds["r"+n]||[])){const key=r.nick.toLocaleLowerCase("pt-BR");if(!totals[key])totals[key]={nick:r.nick,kills:0,rounds:0,history:{}};totals[key].kills+=+r.kills||0;totals[key].rounds++;totals[key].history["r"+n]=+r.kills||0;}
+  const players=Object.values(totals).sort((a,b)=>b.kills-a.kills||a.nick.localeCompare(b.nick));if(!players.length)return toast("Salve pelo menos uma queda antes de publicar","err");
+  if(!await ask("Publicar "+players.length+" jogador(es) e seus abates na página inicial de "+sc.title+"?"))return;
+  try{await DB.set("automaticKills/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,publishedAt:Date.now(),rounds:[1,2,3,4,5].filter(n=>(rounds["r"+n]||[]).length)});await logAct("Publicou abates automáticos de "+sc.title);toast("Abates publicados na página inicial! 🏆");render();}catch(err){toast("Não foi possível publicar: "+err.message,"err");}
+});
+$("#autoKillUnpublish").addEventListener("click",async()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");if(!state.autoKillScrim)return; if(!await ask("Remover os abates publicados deste X-Treino da página inicial?"))return;await DB.del("automaticKills/"+state.autoKillScrim);await logAct("Removeu publicação de abates");toast("Publicação removida");renderAutomaticKillAdmin();renderHome();});
+function renderPublishedAutomaticKills(){
+  const box=$("#homeAutomaticKills");if(!box)return;
+  const all=arr(DB.get("automaticKills")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
+  if(!all.length){box.innerHTML="";return;}
+  box.innerHTML=all.map(pub=>`<div class="card mt"><div class="flex between wrap"><div><h2 class="title">ABATES DOS JOGADORES</h2><p class="muted small-t">${esc(pub.scrimTitle||"X-Treino")} • Publicado em ${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):"—"}</p></div><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Abates totais</th><th>Quedas registradas</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td><b>${+p.kills||0}</b></td><td>${+p.rounds||0}/5</td></tr>`).join("")}</tbody></table></div></div>`).join("");
+}
+
+/* contagem regressiva */
+function tick(){
+  const el = $("#countdown"); if (!el) return;
+  const diff = new Date(el.dataset.t) - new Date();
+  if (isNaN(diff) || diff <= 0){ el.innerHTML = '<b style="font-family:Rajdhani;font-size:1.4rem;color:var(--cyan)">EM ANDAMENTO / ENCERRADO</b>'; return; }
+  const d = Math.floor(diff / 864e5), h = Math.floor(diff / 36e5) % 24, m = Math.floor(diff / 6e4) % 60, s = Math.floor(diff / 1e3) % 60;
+  el.innerHTML = [[d, "dias"], [h, "horas"], [m, "min"], [s, "seg"]].map(([v, l]) => `<div><b>${String(v).padStart(2, "0")}</b><small>${l}</small></div>`).join("");
+}
+setInterval(tick, 1000);
+let lastScheduleState = "";
+setInterval(() => {
+  const scheduleState = arr(DB.get("scrims")).map(sc => sc.id + ":" + scrimStatus(sc)).join("|");
+  if (scheduleState !== lastScheduleState) { lastScheduleState = scheduleState; renderScrims(); if (isAdmin()) renderAdmin2(); }
+}, 1000);
+
+/* =====================================================
+   AÇÕES (cliques)
+   ===================================================== */
+$("#menuBtn").addEventListener("click", () => $("#nav").classList.toggle("open"));
+
+document.addEventListener("click", async e => {
+  const g = e.target.closest("[data-go]");
+  if (g){ e.preventDefault(); go(g.dataset.go); return; }
+
+  const tabBtn = e.target.closest("#adminTabs button");
+  if (tabBtn){ if (tabBtn.dataset.tab === "automaticKill" && !isMaster()) return toast("AUTOMATIC.KILL é exclusivo do organizador principal", "err"); state.adminTab = tabBtn.dataset.tab; renderAdmin(); return; }
+  const roundBtn = e.target.closest("#resRounds [data-round]");
+  if (roundBtn){ state.resRound = +roundBtn.dataset.round; renderResults(); return; }
+
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act, id = b.dataset.id || b.dataset.round, id2 = b.dataset.id2, u = me(), t = myTeam();
+  if (ADMIN_ACTS.has(act) && !isAdmin()){ render(); return toast("Sessão do organizador encerrada", "err"); }
+  if (["admtoggle", "admdel", "logclear"].includes(act) && !isMaster()) return toast("Só o organizador principal pode fazer isso", "err");
+  try {
+    if (await extraActs(act, id, id2, u, t)){ render(); return; }
+    if (act === "reg"){
+      const s = DB.get("scrims/" + id);
+      if (!s || scrimStatus(s) !== "open") return toast(scrimStatus(s) === "scheduled" ? "As inscrições ainda não abriram. Aguarde o horário agendado." : "Inscrições encerradas", "err");
+      if (!t || t.captainId !== u.id) return toast("Só o capitão pode inscrever", "err");
+      const n = Object.keys(t.members).length, need = needPlayers(s.mode);
+      if (CONFIG.enforceRoster && n < need) return toast(`Seu time precisa de pelo menos ${need} jogadores para o modo ${s.mode}`, "err");
+      if (s.regs && s.regs[t.id]) return;
+      await DB.set(`scrims/${id}/regs/${t.id}`, { tid: t.id, at: Date.now(), checkin: false });
+      toast("Time inscrito! ✅");
+    }
+    else if (act === "unreg"){ if (await ask("Cancelar a inscrição do seu time?")){ await DB.del(`scrims/${id}/regs/${t.id}`); toast("Inscrição cancelada"); } }
+    else if (act === "checkin"){
+      const cur = DB.get(`scrims/${id}/regs/${t.id}/checkin`);
+      await DB.set(`scrims/${id}/regs/${t.id}/checkin`, !cur); toast(!cur ? "Check-in confirmado ✔" : "Check-in desfeito");
+    }
+    else if (act === "leave"){ if (await ask("Sair do time?")){ await removeMember(t, u.id); toast("Você saiu do time"); } }
+    else if (act === "kick"){ if (await ask("Expulsar este jogador?")){ await removeMember(t, id); toast("Jogador removido"); } }
+    else if (act === "addround"){ const s = DB.get("scrims/" + state.resScrim); await DB.set(`scrims/${s.id}/rounds`, (+s.rounds || 1) + 1); state.resRound = (+s.rounds || 1) + 1; }
+    else if (act === "delscrim"){ if (await ask("Excluir este treino e seus resultados?")){ const sc = DB.get("scrims/" + id); await DB.del("scrims/" + id); await DB.del("results/" + id); await logAct("Excluiu o treino " + (sc ? sc.title : id)); } }
+    else if (act === "delreg"){ const tm = DB.get("teams/" + id2), sc = DB.get("scrims/" + id); await DB.del(`scrims/${id}/regs/${id2}`); await logAct(`Removeu o time ${tm ? tm.name : id2} do treino ${sc ? sc.title : id}`); }
+    else if (act === "delteam"){ if (await ask("Excluir este time?")){ const tm = DB.get("teams/" + id); await removeTeam(id); await logAct("Excluiu o time " + (tm ? tm.name : id)); } }
+    else if (act === "deluser"){
+      if (!await ask("Excluir este jogador?")) return;
+      const tm = teamOf(id), usr = DB.get("users/" + id); if (tm) await removeMember(tm, id);
+      await DB.del("users/" + id); await logAct("Excluiu o jogador " + (usr ? usr.nick : id));
+      if (local.get("xt_uid") === id) local.del("xt_uid");
+    }
+    else if (act === "delnews"){ await DB.del("news/" + id); await logAct("Excluiu um aviso"); }
+    else if (act === "admtoggle"){
+      const a = DB.get("admins/" + id); if (!a) return;
+      await DB.set(`admins/${id}/active`, !a.active);
+      await logAct((a.active ? "Desativou" : "Reativou") + " o organizador " + a.user);
+      toast(a.active ? "Acesso desativado" : "Acesso reativado ✅");
+    }
+    else if (act === "admdel"){
+      const a = DB.get("admins/" + id); if (!a) return;
+      if (await ask("Excluir o acesso de " + a.user + "?")){ await DB.del("admins/" + id); await logAct("Excluiu o organizador " + a.user); toast("Acesso excluído"); }
+    }
+    else if (act === "logclear"){ if (await ask("Limpar todo o registro de atividades?")){ await DB.del("logs"); toast("Registro limpo"); } }
+  } catch(err){ console.error(err); toast("Algo deu errado. Tente de novo.", "err"); }
+  render();
+});
+
+document.addEventListener("change", async e => {
+  const st = e.target.closest("[data-status]");
+  if (st){ if (!isAdmin()) return render(); const sc = DB.get("scrims/" + st.dataset.status); if (st.value === "scheduled" && !(Number(sc?.registrationOpensAt) > 0)) { toast("Para agendar, crie o treino preenchendo a data e hora de abertura.", "err"); render(); return; } await DB.set(`scrims/${st.dataset.status}/status`, st.value); await logAct(`Mudou o treino ${sc ? sc.title : ""} para ${({ scheduled: "agendado", open: "aberto", closed: "fechado", done: "finalizado" })[st.value]}`); render(); return; }
+  if (e.target.id === "resScrim"){ state.resScrim = e.target.value; state.resRound = 1; renderResults(); return; }
+  if (e.target.id === "callAdminScrim"){ state.callScrim = e.target.value; renderCallAdmin(); return; }
+  if (e.target.id === "publicCallScrim"){ state.publicCallScrim = e.target.value; renderCallsPublic(); return; }
+  if (e.target.id === "rankFilter"){ renderRanking(); return; }
+
+});
+
+/* ---------- formulários ---------- */
+$("#registerForm").addEventListener("submit", async e => {
+  e.preventDefault(); const f=new FormData(e.target), nick=String(f.get("nick")||"").trim(), email=String(f.get("email")||"").trim().toLowerCase(), pass=String(f.get("pass")||"");
+  if(nick.length<3)return toast("Nick muito curto","err");
+  if(arr(DB.get("users")).some(x=>(x.nick||"").toLowerCase()===nick.toLowerCase()))return toast("Esse nick já está em uso","err");
+  try{const a=await AUTH.register(email,pass);const id=a.localId;await DB.set("users/"+id,{id,uid:id,nick,ffid:String(f.get("ffid")||"").trim(),role:"Rush",server:"Brasil",created:Date.now()});if(DB.status==="error")throw new Error("Conta criada, mas o perfil não foi salvo. Verifique as regras do Realtime Database.");e.target.reset();toast("Conta criada! Bem-vindo, "+nick);render();}
+  catch(err){toast(err.message||"Não foi possível criar a conta.","err");}
+});
+$("#loginForm").addEventListener("submit", async e => {
+  e.preventDefault();const f=new FormData(e.target),email=String(f.get("email")||"").trim().toLowerCase(),pass=String(f.get("pass")||"");
+  try{
+    const a=await AUTH.login(email,pass);await DB.pull();let u=DB.get("users/"+a.localId);
+    // Recupera contas cuja autenticação foi criada, mas cujo perfil não chegou a ser salvo.
+    if(!u){
+      const nick=await promptText("Sua conta existe. Escolha seu nick para concluir o cadastro","");
+      if(!nick||nick.trim().length<3){AUTH.signOut();return toast("Informe um nick com pelo menos 3 caracteres para concluir o cadastro.","err");}
+      if(arr(DB.get("users")).some(x=>(x.nick||"").toLowerCase()===nick.toLowerCase())){AUTH.signOut();return toast("Esse nick já está em uso. Entre novamente e escolha outro.","err");}
+      const ffid=await promptText("Informe seu ID do Free Fire","");
+      u={id:a.localId,uid:a.localId,nick:nick.trim(),ffid:String(ffid||"").trim(),role:"Rush",server:"Brasil",created:Date.now()};
+      await DB.set("users/"+a.localId,u);
+    }
+    e.target.reset();toast("Bem-vindo de volta, "+u.nick);render();
+  }
+  catch(err){toast(err.message||"Não foi possível entrar.","err");}
+});
+$("#forgotPass").addEventListener("click",async()=>{const email=$("#loginForm [name=email]").value.trim().toLowerCase();if(!email)return toast("Digite seu e-mail no campo acima.","err");try{await AUTH.reset(email);toast("Enviamos um link de redefinição para seu e-mail.");}catch(e){toast(e.message,"err");}});
+$("#logoutUser").addEventListener("click",()=>{AUTH.signOut();toast("Você saiu da conta");render();});
+$("#profileForm").addEventListener("submit", async e => {
+  e.preventDefault(); const u = me(); if (!u) return;
+  const f = new FormData(e.target);
+  await DB.set("users/" + u.id, Object.assign({}, u, { ffid: (f.get("ffid") || "").trim(), role: f.get("role"), server: f.get("server") }));
+  toast("Perfil salvo ✅"); render();
+});
+
+$("#teamForm").addEventListener("submit", async e => {
+  e.preventDefault(); const u = me(); if (!u) return;
+  const f = new FormData(e.target), name = f.get("name").trim(), tag = f.get("tag").trim().toUpperCase();
+  if (arr(DB.get("teams")).some(x => x.name.toLowerCase() === name.toLowerCase())) return toast("Já existe um time com esse nome", "err");
+  const id = uid();
+  await DB.set("teams/" + id, { id, name, tag, captainId: u.id, code: genCode(), members: { [u.id]: u.nick }, created: Date.now() });
+  e.target.reset(); toast("Time criado! 🎉"); render();
+});
+$("#joinForm").addEventListener("submit", async e => {
+  e.preventDefault(); const u = me(); if (!u) return;
+  const code = new FormData(e.target).get("code").trim().toUpperCase();
+  const t = arr(DB.get("teams")).find(x => x.code === code);
+  if (!t) return toast("Código inválido", "err");
+  if (Object.keys(t.members || {}).length >= 5) return toast("Esse time já está cheio", "err");
+  await DB.set(`teams/${t.id}/members/${u.id}`, u.nick);
+  e.target.reset(); toast("Você entrou em [" + t.tag + "] " + t.name); render();
+});
+
+/* ---------- organizador ---------- */
+$("#adminForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const user = $("#adminUser").value.trim();
+  const pass = $("#adminPass").value;
+  let s = null;
+  if (user.includes("@")) {
+    try {
+      const account = await AUTH.login(user.toLowerCase(), pass);
+      if (account.localId !== CONFIG.masterUid) {
+        AUTH.signOut();
+        return toast("Esta conta não é a do organizador principal.", "err");
+      }
+      await DB.pull();
+      s = { id: "master", user: "master", role: "master" };
+    } catch(err) {
+      return toast(err.message || "E-mail ou senha incorretos.", "err");
+    }
+  } else {
+    try {
+      const account = await AUTH.login(organizerEmail(user), pass);
+      await DB.pull();
+      const a = DB.get("admins/" + account.localId);
+      if (!a || (a.user || "").toLowerCase() !== user.toLowerCase()) {
+        AUTH.signOut();
+        return toast("Usuário ou senha incorretos.", "err");
+      }
+      if (!a.active) {
+        AUTH.signOut();
+        return toast("Esse acesso está desativado. Fale com o organizador principal.", "err");
+      }
+      s = { id: account.localId, user: a.user, role: "org" };
+    } catch(err) {
+      AUTH.signOut();
+      return toast("Usuário ou senha incorretos.", "err");
+    }
+  }
+  if (!s) return toast("Usuário ou senha incorretos", "err");
+  session.set("xt_admin", JSON.stringify(s));
+  $("#adminPass").value = "";
+  await logAct(s.role === "master" ? "Entrou no painel principal" : "Entrou no painel");
+  toast("Acesso liberado ✅");
+  render();
+});
+$("#admForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!isMaster()) return toast("Só o organizador principal pode criar acessos", "err");
+  const f = new FormData(e.target), user = f.get("user").trim(), pass = f.get("pass");
+  if (user.length < 3) return toast("Usuário muito curto", "err");
+  if (String(pass).length < 6) return toast("A senha precisa ter pelo menos 6 caracteres", "err");
+  if (user.toLowerCase() === "master" || arr(DB.get("admins")).some(x => (x.user || "").toLowerCase() === user.toLowerCase())) return toast("Esse usuário já existe", "err");
+  try {
+    // Cria a conta no Firebase sem trocar a sessão atual do organizador principal.
+    const account = await AUTH.request("accounts:signUp", { email: organizerEmail(user), password: pass, returnSecureToken: true });
+    const id = account.localId;
+    await DB.set("admins/" + id, { id, user, active: true, created: Date.now() });
+    await logAct("Criou o organizador " + user);
+    e.target.reset(); toast("Acesso criado ✅"); render();
+  } catch(err) {
+    const msg = (err.message || "").includes("EMAIL_EXISTS") ? "Não foi possível criar: tente outro usuário." : (err.message || "Falha ao criar o acesso.");
+    toast(msg, "err");
+  }
+});
+$("#adminOut").addEventListener("click", () => {
+  session.del("xt_admin");
+  AUTH.signOut();
+  render();
+});
+$("#roomCredentialsForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!isAdmin()) return toast("Acesso restrito ao organizador", "err");
+  const f = new FormData(e.target);
+  const id = String(f.get("roomId") || "").trim();
+  const password = String(f.get("roomPassword") || "").trim();
+  if (!id || !password) return toast("Preencha o ID e a senha", "err");
+  try {
+    await DB.set("roomCredentials", { id, password, updatedAt: Date.now() });
+    if (DB.status === "error") throw new Error("Não foi possível salvar no banco online.");
+    await logAct("Publicou o ID / senha da sala");
+    e.target.reset();
+    toast("ID / senha publicados na página inicial! ✅");
+    render();
+  } catch(err) { toast(err.message || "Não foi possível publicar", "err"); }
+});
+
+$("#scrimForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = Object.fromEntries(new FormData(e.target)), id = uid();
+  const opensAt = f.registrationOpensAt ? new Date(f.registrationOpensAt).getTime() : 0;
+  if (f.registrationOpensAt && (!Number.isFinite(opensAt) || opensAt <= Date.now())) return toast("Escolha uma data e hora futuras para o agendamento, ou deixe vazio para abrir agora.", "err");
+  const status = opensAt > Date.now() ? "scheduled" : "open";
+  await DB.set("scrims/" + id, { id, title: f.title.trim(), date: f.date, time: f.time, mode: f.mode, slots: Math.max(2, +f.slots || 12), status, registrationOpensAt: opensAt || null, rounds: 1, created: Date.now() });
+  e.target.reset(); e.target.time.value = "20:00"; e.target.slots.value = 12; await logAct((status === "scheduled" ? "Agendou abertura das inscrições de " : "Criou o treino ") + f.title.trim()); toast(status === "scheduled" ? "Treino criado! As inscrições abrirão automaticamente no horário agendado. ⏰" : "Treino criado com inscrições abertas! ✅"); render();
+});
+$("#newsForm").addEventListener("submit", async e => {
+  e.preventDefault(); const id = uid();
+  await DB.set("news/" + id, { id, text: new FormData(e.target).get("text").trim(), at: Date.now() });
+  await logAct("Publicou um aviso"); e.target.reset(); toast("Aviso publicado"); render();
+});
+function fillConfig(){
+  const st = settings(), f = $("#configForm");
+  ["brand", "whatsapp", "instagram", "youtube", "discord"].forEach(k => f[k].value = st[k] || "");
+}
+$("#configForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = Object.fromEntries(new FormData(e.target));
+  await DB.set("settings", { ...settings(), brand: f.brand.trim() || "ZEUX X-TREINOS FF", whatsapp: f.whatsapp.trim(), instagram: f.instagram.trim(), youtube: f.youtube.trim(), discord: f.discord.trim() });
+  await logAct("Alterou as configurações"); toast("Configurações salvas ✅"); render();
+});
+/* janelas dentro da página (o viewer bloqueia confirm() e downloads) */
+function openModal({ title, msg = "", text = null, readonly = false, ok = "OK", cancel = "Cancelar", danger = false, onOk = null }){
+  return new Promise(res => {
+    const m = $("#modal"), ta = $("#mText"), okb = $("#mOk"), cb = $("#mCancel");
+    $("#mTitle").textContent = title; $("#mMsg").textContent = msg;
+    ta.hidden = text === null; ta.value = text || ""; ta.readOnly = readonly;
+    okb.textContent = ok; okb.className = "btn small" + (danger ? " danger" : "");
+    cb.textContent = cancel; cb.hidden = !cancel; m.hidden = false;
+    const done = v => { m.hidden = true; okb.onclick = cb.onclick = m.onclick = null; res(v); };
+    okb.onclick = () => onOk ? onOk() : done(true);
+    cb.onclick = () => done(false);
+    m.onclick = e => { if (e.target === m) done(false); };
+    (text !== null && !readonly ? ta : okb).focus();
+  });
+}
+const ask = msg => openModal({ title: "Confirmar", msg, ok: "Confirmar", danger: true });
+function showText(title, text){
+  const ta = $("#mText");
+  return openModal({ title, msg: "Toque em Copiar e cole onde quiser guardar (bloco de notas, WhatsApp...).", text, readonly: true, ok: "Copiar", cancel: "Fechar",
+    onOk: () => {
+      ta.focus(); ta.select();
+      try { navigator.clipboard.writeText(text).then(() => toast("Copiado ✅"), () => toast("Selecione o texto e copie", "err")); }
+      catch(e){ toast("Selecione o texto e copie", "err"); }
+    } });
+}
+async function restoreFrom(raw){
+  try { const obj = JSON.parse(raw); if (typeof obj !== "object" || !obj) throw 0; await DB.replaceAll(obj); fillConfig(); render(); toast("Backup restaurado ✅"); await logAct("Restaurou um backup"); }
+  catch(err){ toast("Backup inválido", "err"); }
+}
+$("#expJson").addEventListener("click", () => showText("Backup dos dados", JSON.stringify(DB.data, null, 2)));
+$("#impPaste").addEventListener("click", async () => { if (!isMaster()) return toast("Só o organizador principal pode restaurar", "err"); if (await openModal({ title: "Restaurar backup", msg: "Cole aqui o texto do backup.", text: "", ok: "Restaurar" })) restoreFrom($("#mText").value); });
+$("#expCsv").addEventListener("click", () => {
+  const rows = standings(""), csv = ["posicao,time,tag,quedas,booyah,abates,pontos"].concat(rows.map((r, i) => [i + 1, `"${r.name.replace(/"/g, '""')}"`, r.tag, r.games, r.booyah, r.kills, r.pts].join(","))).join("\n");
+  showText("Ranking (CSV)", csv);
+});
+$("#impJson").addEventListener("change", e => {
+  const file = e.target.files[0]; if (!file) return;
+  if (!isMaster()){ e.target.value = ""; return toast("Só o organizador principal pode restaurar", "err"); }
+  const rd = new FileReader();
+  rd.onload = async () => {
+    await restoreFrom(rd.result);
+  };
+  rd.readAsText(file); e.target.value = "";
+});
+$("#resetAll").addEventListener("click", async () => {
+  if (!isMaster()) return toast("Só o organizador principal pode apagar tudo", "err");
+  if (!await ask("Apagar TODOS os dados (jogadores, times, treinos e resultados)?")) return;
+  await DB.replaceAll({}); local.del("xt_uid"); fillConfig(); render(); toast("Tudo apagado");
+});
+
+/* =====================================================
+   NOVOS RECURSOS: pedidos de vaga, escalação, queda, logs
+   ===================================================== */
+function rankRows(rows, detail){
+  return rows.length ? rows.map((r, i) => `<tr><td class="${i < 3 ? "p" + (i + 1) : ""}">${i + 1}</td><td>[${esc(r.tag)}] ${esc(r.name)}</td><td>${r.games}</td><td>${r.booyah}</td><td>${r.kills}</td><td><b>${r.pts}</b></td>${detail ? `<td class="muted small-t">${r.hist.map(h => esc(h.lab) + ": " + h.place + "º/" + h.kills + " ab = " + h.pts).join(" • ")}</td>` : ""}</tr>`).join("")
+    : `<tr><td colspan="${detail ? 7 : 6}" class="empty">Sem resultados ainda.</td></tr>`;
+}
+async function promptText(title, val){ const ok = await openModal({ title, text: val || "", ok: "Salvar" }); return ok ? $("#mText").value.trim() : null; }
+async function extraActs(act, id, id2, u, t){
+  const no = m => { toast(m, "err"); return true; };
+  const canTeam = tid => { const tm = DB.get("teams/" + tid); return !!tm && (isAdmin() || (u && tm.captainId === u.id)); };
+  const lg = txt => isAdmin() ? logAct(txt) : null;
+  switch (act){
+    case "copyRoomId":
+    case "copyRoomPassword": {
+      const room = DB.get("roomCredentials") || {};
+      const value = act === "copyRoomId" ? room.id : room.password;
+      if (!value) return no("Ainda não há dado publicado");
+      try { await navigator.clipboard.writeText(String(value)); toast(act === "copyRoomId" ? "ID copiado!" : "Senha copiada!"); }
+      catch(e){ return no("Não foi possível copiar automaticamente neste navegador"); }
+      return true;
+    }
+    case "clearRoomCredentials": {
+      if (!isAdmin()) return no("Acesso restrito ao organizador");
+      if (!await ask("Remover o ID e a senha da página inicial?")) return true;
+      await DB.del("roomCredentials");
+      await logAct("Removeu o ID / senha da sala da página inicial");
+      toast("ID / senha removidos");
+      return true;
+    }
+    case "savecallpool": {
+      if (!isAdmin()) return no("Acesso restrito ao organizador");
+      const sc = selectedCallScrim(), round = Math.max(1, Math.min(5, +id || 1));
+      if (!sc) return no("Selecione um treino");
+      const raw = $("#callPool-r" + round)?.value || "";
+      const names = raw.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+      const unique = [...new Set(names.map(x => x.toLocaleLowerCase("pt-BR")))];
+      if (unique.length !== names.length) return no("Há nomes repetidos nessa lista");
+      await DB.set(`callPools/${sc.id}/r${round}`, names);
+      await logAct(`Salvou ${names.length} calls — Queda ${round} (${sc.title})`);
+      toast("Nomes salvos ✅"); return true;
+    }
+    case "drawcalls": {
+      if (!isAdmin()) return no("Acesso restrito ao organizador");
+      const sc = selectedCallScrim(), round = Math.max(1, Math.min(5, +id || 1));
+      if (!sc) return no("Selecione um treino");
+      const teams = confirmedRegs(sc).slice(0,12).filter(r => DB.get("teams/" + r.tid));
+      if (!teams.length) return no("Não há equipes confirmadas para sortear");
+      const pool = arr(DB.get(`callPools/${sc.id}/r${round}`)).map(x => String(x).trim()).filter(Boolean);
+      if (pool.length < teams.length) return no(`Cadastre pelo menos ${teams.length} calls diferentes para esta queda`);
+      const shuffled = [...pool];
+      for (let i = shuffled.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
+      const out = {}; teams.forEach((r, i) => { out[r.tid] = shuffled[i]; });
+      await DB.set(`callResults/${sc.id}/r${round}`, out);
+      await logAct(`Sorteou as calls da Queda ${round} — ${sc.title} (${teams.length} equipes)`);
+      toast(`Queda ${round} sorteada! ✅`); return true;
+    }
+    case "clearcalls": {
+      if (!isAdmin()) return no("Acesso restrito ao organizador");
+      const sc = selectedCallScrim(), round = Math.max(1, Math.min(5, +id || 1));
+      if (!sc || !await ask(`Apagar o resultado da Queda ${round}?`)) return true;
+      await DB.del(`callResults/${sc.id}/r${round}`); await logAct(`Apagou o sorteio da Queda ${round} — ${sc.title}`); toast("Resultado apagado"); return true;
+    }
+    case "teamview": state.viewTeam = id; window.scrollTo(0, 0); return true;
+    case "teamclose": state.viewTeam = ""; return true;
+    case "reqjoin": {
+      const tm = DB.get("teams/" + id);
+      if (!u) return no("Entre na sua conta primeiro");
+      if (!tm) return no("Time não existe mais");
+      if (teamOf(u.id)) return no("Você já está em um time");
+      if (Object.keys(tm.members || {}).length >= 5) return no("Esse time está cheio");
+      await DB.set(`teams/${id}/requests/${u.id}`, { uid: u.id, nick: u.nick, at: Date.now() }); toast("Pedido enviado ao capitão ✅"); return true;
+    }
+    case "accept": {
+      if (!canTeam(id)) return no("Só o capitão pode aceitar");
+      const tm = DB.get("teams/" + id), rq = tm.requests && tm.requests[id2]; if (!rq) return true;
+      if (teamOf(id2)){ await DB.del(`teams/${id}/requests/${id2}`); return no("Esse jogador já entrou em outro time"); }
+      if (Object.keys(tm.members || {}).length >= 5) return no("Time cheio (máx. 5)");
+      const usr = DB.get("users/" + id2);
+      await DB.set(`teams/${id}/members/${id2}`, usr ? usr.nick : rq.nick); await DB.del(`teams/${id}/requests/${id2}`);
+      await lg(`Aceitou ${rq.nick} no time ${tm.name}`); toast(rq.nick + " entrou no elenco ✅"); return true;
+    }
+    case "reject": {
+      if (!canTeam(id)) return no("Só o capitão pode rejeitar");
+      await DB.del(`teams/${id}/requests/${id2}`); toast("Pedido rejeitado"); return true;
+    }
+    case "tog": {
+      if (!canTeam(id)) return no("Só o capitão altera a escalação");
+      const tm = DB.get("teams/" + id); if (!tm || !(tm.members && tm.members[id2])) return true;
+      if (tm.starters && tm.starters[id2]) await DB.del(`teams/${id}/starters/${id2}`);
+      else { if (startersCount(tm) >= 4) return no("Máximo de 4 titulares. Mande alguém para reserva antes."); await DB.set(`teams/${id}/starters/${id2}`, true); }
+      return true;
+    }
+    case "admkick": {
+      const tm = DB.get("teams/" + id); if (!tm || !await ask("Remover este jogador do time?")) return true;
+      await DB.del(`teams/${id}/members/${id2}`); await DB.del(`teams/${id}/starters/${id2}`);
+      if (tm.captainId === id2){ const rest = Object.keys(tm.members || {}).filter(k => k !== id2); await DB.set(`teams/${id}/captainId`, rest[0] || ""); }
+      await logAct(`Removeu ${tm.members[id2]} do time ${tm.name}`); return true;
+    }
+    case "admcap": { const tm = DB.get("teams/" + id); await DB.set(`teams/${id}/captainId`, id2); await logAct(`Novo capitão do time ${tm.name}: ${tm.members[id2]}`); return true; }
+    case "admteamedit": {
+      const tm = DB.get("teams/" + id); if (!tm) return true;
+      const name = await promptText("Nome do time", tm.name); if (name === null) return true;
+      const tag = (await promptText("Tag (2 a 4 letras)", tm.tag) || "").toUpperCase(); if (name.length < 2 || tag.length < 2 || tag.length > 4) return no("Nome ou tag inválidos");
+      await DB.set(`teams/${id}/name`, name); await DB.set(`teams/${id}/tag`, tag); await logAct(`Editou o time ${tm.name} → ${name}`); toast("Time atualizado ✅"); return true;
+    }
+    case "admuseredit": {
+      const x = DB.get("users/" + id); if (!x) return true;
+      const nick = await promptText("Nick do jogador", x.nick); if (!nick || nick.length < 3) return true;
+      if (arr(DB.get("users")).some(o => o.id !== id && o.nick.toLowerCase() === nick.toLowerCase())) return no("Nick já em uso");
+      const ffid = await promptText("ID do Free Fire", x.ffid); if (ffid === null) return true;
+      await DB.set(`users/${id}/nick`, nick); await DB.set(`users/${id}/ffid`, ffid);
+      const tm = teamOf(id); if (tm) await DB.set(`teams/${tm.id}/members/${id}`, nick);
+      await logAct("Editou o jogador " + nick); toast("Jogador atualizado ✅"); return true;
+    }
+    case "scrimedit": {
+      const s = DB.get("scrims/" + id); if (!s) return true;
+      const title = await promptText("Título do treino", s.title); if (!title) return true;
+      const date = await promptText("Data (AAAA-MM-DD)", s.date); if (!/^\d{4}-\d{2}-\d{2}$/.test(date || "")) return no("Data inválida");
+      const time = await promptText("Hora (HH:MM)", s.time); if (!/^\d{2}:\d{2}$/.test(time || "")) return no("Hora inválida");
+      const slots = parseInt(await promptText("Total de vagas", String(s.slots)), 10); if (!(slots >= 2)) return no("Vagas inválidas");
+      await DB.set("scrims/" + id, { ...s, title, date, time, slots }); await logAct("Editou o treino " + title); toast("Treino atualizado ✅"); return true;
+    }
+    case "admreg": {
+      const sel = $(`[data-regsel="${id}"]`); if (!sel || !sel.value) return no("Escolha um time");
+      await DB.set(`scrims/${id}/regs/${sel.value}`, { tid: sel.value, at: Date.now(), checkin: false });
+      const tm = DB.get("teams/" + sel.value); await logAct("Inscreveu o time " + (tm ? tm.name : "") + " no treino"); return true;
+    }
+    case "saveround": {
+      const sid = state.resScrim, rn = state.resRound, o = {}, used = {};
+      for (const tr of $$("#resTableWrap tr[data-tid]")){
+        const p = parseInt($("[data-f=place]", tr).value, 10) || 0, k = Math.max(0, parseInt($("[data-f=kills]", tr).value, 10) || 0);
+        if (p < 0 || p > 12) return no("A colocação deve ser de 1 a 12");
+        if (!p){ if (k) return no("Informe a colocação do time que tem abates"); continue; }
+        if (used[p]) return no(`Colocação ${p}º repetida`); used[p] = 1; o[tr.dataset.tid] = { place: p, kills: k };
+      }
+      if (Object.keys(o).length) await DB.set(`results/${sid}/r${rn}`, o); else await DB.del(`results/${sid}/r${rn}`);
+      const sc = DB.get("scrims/" + sid); await logAct(`Salvou a queda ${rn} do treino ${sc ? sc.title : ""} (${Object.keys(o).length} times)`);
+      state.resFresh = true; toast("Queda salva — ranking atualizado ✅"); $("#resTableWrap").innerHTML = ""; return true;
+    }
+    case "clearround": {
+      if (!await ask("Apagar os resultados desta queda?")) return true;
+      await DB.del(`results/${state.resScrim}/r${state.resRound}`); await logAct(`Limpou a queda ${state.resRound}`); $("#resTableWrap").innerHTML = ""; return true;
+    }
+    case "logdel": await DB.del("logs/" + id); return true;
+    case "logwipe": if (await ask("Apagar todos os logs?")){ await DB.del("logs"); toast("Logs apagados"); } return true;
+  }
+  return false;
+}
+document.addEventListener("input", e => {
+  const i = e.target.closest(".res-in"); if (!i) return;
+  const tr = i.closest("tr"), p = +$("[data-f=place]", tr).value, k = +$("[data-f=kills]", tr).value || 0;
+  $("[data-pts]", tr).textContent = p > 0 ? ptsOf({ place: p, kills: k }) : "—";
+});
+$("#logForm").addEventListener("submit", async e => {
+  e.preventDefault(); if (!isAdmin()) return toast("Sessão encerrada", "err");
+  const text = new FormData(e.target).get("text").trim(); if (!text) return;
+  const id = uid(), a = adminSess(); await DB.set("logs/" + id, { id, at: Date.now(), who: a.user, text }); e.target.reset(); toast("Log criado ✅"); render();
+});
+$("#admTeamForm").addEventListener("submit", async e => {
+  e.preventDefault(); if (!isAdmin()) return toast("Sessão encerrada", "err");
+  const f = new FormData(e.target), name = f.get("name").trim(), tag = f.get("tag").trim().toUpperCase();
+  if (arr(DB.get("teams")).some(x => x.name.toLowerCase() === name.toLowerCase())) return toast("Já existe um time com esse nome", "err");
+  const id = uid(); await DB.set("teams/" + id, { id, name, tag, captainId: "", code: genCode(), members: {}, created: Date.now() });
+  await logAct("Criou o time " + name); e.target.reset(); toast("Time criado ✅"); render();
+});
+$("#pointsForm").addEventListener("submit", async e => {
+  e.preventDefault(); if (!isAdmin()) return toast("Sessão encerrada", "err");
+  const f = new FormData(e.target), pts = Array.from({ length: 12 }, (_, i) => Math.max(0, Number(f.get("p" + (i + 1))) || 0));
+  await DB.set("settings/points", pts); await DB.set("settings/killPts", Math.max(0, Number(f.get("kill")) || 0));
+  await logAct("Alterou a tabela de pontuação"); toast("Pontuação salva — ranking recalculado ✅"); render();
+});
+const CALL_MAPS = [
+  { name: "Bermuda", round: 1 },
+  { name: "Purgatório", round: 2 },
+  { name: "Kalahari", round: 3 },
+  { name: "Nova Terra", round: 4 },
+  { name: "Solara", round: 5 }
+];
+function selectedCallScrim(){
+  const all = scrimsSorted().slice().reverse();
+  if (!all.some(x => x.id === state.callScrim)) state.callScrim = (nextScrim() || all[0] || {}).id || "";
+  return DB.get("scrims/" + state.callScrim) || null;
+}
+function renderCallAdmin(){
+  if (!isAdmin()) return;
+  const sel = $("#callAdminScrim");
+  if (!sel) return;
+  const all = scrimsSorted().slice().reverse();
+  const current = state.callScrim;
+  sel.innerHTML = all.length ? all.map(x => `<option value="${esc(x.id)}">${esc(x.title)} — ${esc(x.date)}</option>`).join("") : '<option value="">Nenhum treino criado</option>';
+  if (!all.some(x => x.id === current)) state.callScrim = (nextScrim() || all[0] || {}).id || "";
+  sel.value = state.callScrim;
+  const wrap = $("#callAdminMaps");
+  const sc = selectedCallScrim();
+  if (!sc){ wrap.innerHTML = '<div class="empty">Crie um treino primeiro para configurar as calls.</div>'; return; }
+  const regs = confirmedRegs(sc).slice(0, 12).filter(r => DB.get("teams/" + r.tid));
+  wrap.innerHTML = CALL_MAPS.map(m => {
+    const pool = arr(DB.get(`callPools/${sc.id}/r${m.round}`));
+    const result = DB.get(`callResults/${sc.id}/r${m.round}`) || {};
+    const done = Object.keys(result).length;
+    return `<div class="call-map">
+      <div class="flex between wrap"><h3>Queda ${m.round} — ${m.name}</h3><span class="badge ${done ? "ok" : "off"}">${done ? done + " call(s) sorteada(s)" : "Aguardando sorteio"}</span></div>
+      <p class="muted small-t mt">Cadastre um nome por linha. Para ${regs.length} equipe(s) confirmada(s), é necessário ter pelo menos ${regs.length} nomes diferentes.</p>
+      <label class="mt">Nomes das calls<textarea id="callPool-r${m.round}" placeholder="Exemplo:\nRED ZONE\nHANGAR\nSENTOSA">${esc(pool.join("\n"))}</textarea></label>
+      <div class="actions mt"><button class="btn ghost small" data-act="savecallpool" data-round="${m.round}">Salvar nomes</button><button class="btn small" data-act="drawcalls" data-round="${m.round}" ${regs.length ? "" : "disabled"}>Sortear Queda ${m.round}</button><button class="btn danger small" data-act="clearcalls" data-round="${m.round}" ${done ? "" : "disabled"}>Apagar resultado</button></div>
+      ${done ? `<p class="muted small-t mt">Resultado salvo para ${done} equipe(s). Um novo sorteio substituirá apenas esta queda.</p>` : ""}
+    </div>`;
+  }).join("");
+}
+function renderCallsPublic(){
+  const sel = $("#publicCallScrim"); if (!sel) return;
+  const all = scrimsSorted().slice().reverse();
+  sel.innerHTML = all.length ? all.map(x => `<option value="${esc(x.id)}">${esc(x.title)} — ${esc(x.date)}</option>`).join("") : '<option value="">Nenhum treino disponível</option>';
+  if (!all.some(x => x.id === state.publicCallScrim)) state.publicCallScrim = (nextScrim() || all[0] || {}).id || "";
+  sel.value = state.publicCallScrim;
+  const sc = DB.get("scrims/" + state.publicCallScrim), info = $("#publicCallInfo"), wrap = $("#publicCallsList");
+  if (!sc){ info.textContent = "Ainda não há treino cadastrado."; wrap.innerHTML = ""; return; }
+  const teams = confirmedRegs(sc).slice(0,12).filter(r => DB.get("teams/" + r.tid));
+  info.textContent = `${sc.title} • ${sc.date} • ${teams.length} equipe(s) confirmada(s)`;
+  wrap.innerHTML = CALL_MAPS.map(m => {
+    const result = DB.get(`callResults/${sc.id}/r${m.round}`) || {};
+    const rows = teams.map((r,i) => { const tm=DB.get("teams/"+r.tid), call=result[r.tid]; return `<div class="call-slot"><span class="num">${i+1}</span><span class="teamname">[${esc(tm.tag)}] ${esc(tm.name)}</span><span class="callname">${call ? esc(call) : "Aguardando"}</span></div>`; }).join("");
+    return `<div class="card"><div class="flex between wrap"><h3>Queda ${m.round} — ${m.name}</h3><span class="badge ${Object.keys(result).length ? "ok" : "wait"}">${Object.keys(result).length ? "Sorteado" : "Pendente"}</span></div><div class="grid mt">${rows || '<p class="empty">Nenhuma equipe confirmada neste treino.</p>'}</div></div>`;
+  }).join("");
+}
+
+function renderAdmin2(){
+  if (!isAdmin()) return;
+  const ln = id => esc(DB.get("teams/" + id) ? DB.get("teams/" + id).name : "?");
+  const scrims = scrimsSorted().reverse(), allTeams = arr(DB.get("teams"));
+  $("#adminScrims").innerHTML = scrims.length ? scrims.map(s => {
+    const regs = scrimRegs(s), free = allTeams.filter(tm => !(s.regs && s.regs[tm.id]));
+    return `<div class="card"><div class="flex between wrap"><h3>${esc(s.title)}</h3><div class="flex"><select data-status="${s.id}" style="width:auto"><option value="scheduled"${scrimStatus(s) === "scheduled" ? " selected" : ""}>Agendado</option><option value="open"${scrimStatus(s) === "open" ? " selected" : ""}>Aberto</option><option value="closed"${scrimStatus(s) === "closed" ? " selected" : ""}>Fechado</option><option value="done"${scrimStatus(s) === "done" ? " selected" : ""}>Finalizado</option></select>
+      <button class="btn small ghost" data-act="scrimedit" data-id="${s.id}">Editar</button><button class="btn small danger" data-act="delscrim" data-id="${s.id}">Excluir</button></div></div>
+      <p class="muted small-t">${esc(fmtDate(s))} • ${esc(s.mode)} • ${Math.min(regs.length, s.slots)}/${s.slots} vagas${regs.length > s.slots ? " (+" + (regs.length - s.slots) + " na fila)" : ""}</p>
+      <div class="mt">${regs.map((r, i) => { const tm = DB.get("teams/" + r.tid); return tm ? `<div class="rrow"><span>${i + 1}. [${esc(tm.tag)}] ${esc(tm.name)} ${i >= s.slots ? '<span class="badge wait">fila</span>' : ""} ${r.checkin ? '<span class="badge ok">check-in</span>' : ""}</span><button class="btn small danger" data-act="delreg" data-id="${s.id}" data-id2="${r.tid}">Remover</button></div>` : ""; }).join("") || '<span class="muted small-t">Sem inscritos.</span>'}</div>
+      ${free.length ? `<div class="flex mt"><select data-regsel="${s.id}">${free.map(tm => `<option value="${tm.id}">[${esc(tm.tag)}] ${esc(tm.name)}</option>`).join("")}</select><button class="btn small" data-act="admreg" data-id="${s.id}">Inscrever</button></div>` : ""}</div>`;
+  }).join("") : '<div class="card empty">Nenhum treino criado.</div>';
+  $("#adminTeams").innerHTML = allTeams.length ? allTeams.map(t => {
+    const reqs = arr(t.requests);
+    return `<div class="card"><div class="flex between wrap"><b>[${esc(t.tag)}] ${esc(t.name)}</b><span class="flex"><button class="btn small ghost" data-act="admteamedit" data-id="${t.id}">Editar</button><button class="btn small danger" data-act="delteam" data-id="${t.id}">Excluir</button></span></div>
+      <p class="muted small-t">Código ${esc(t.code)} • titulares ${startersCount(t)}/4</p>
+      ${Object.entries(t.members || {}).map(([id, nick]) => `<div class="rrow"><span>${esc(nick)} ${id === t.captainId ? "👑" : ""} ${t.starters && t.starters[id] ? '<span class="badge ok">T</span>' : '<span class="badge off">R</span>'}</span><span class="flex"><button class="btn small ghost" data-act="tog" data-id="${t.id}" data-id2="${esc(id)}">T/R</button>${id !== t.captainId ? `<button class="btn small ghost" data-act="admcap" data-id="${t.id}" data-id2="${esc(id)}">Capitão</button>` : ""}<button class="btn small danger" data-act="admkick" data-id="${t.id}" data-id2="${esc(id)}">Remover</button></span></div>`).join("") || '<p class="muted small-t">Sem jogadores.</p>'}
+      ${reqs.map(r => `<div class="rrow"><span>Pedido: <b>${esc(r.nick)}</b></span><span class="flex"><button class="btn small ok" data-act="accept" data-id="${t.id}" data-id2="${esc(r.uid)}">Aceitar</button><button class="btn small danger" data-act="reject" data-id="${t.id}" data-id2="${esc(r.uid)}">Rejeitar</button></span></div>`).join("")}</div>`;
+  }).join("") : '<div class="card empty">Nenhum time.</div>';
+  $("#adminUsers").innerHTML = arr(DB.get("users")).map(x => `<div class="card"><div class="flex between"><b>${esc(x.nick)}</b><span class="flex"><button class="btn small ghost" data-act="admuseredit" data-id="${x.id}">Editar</button><button class="btn small danger" data-act="deluser" data-id="${x.id}">Excluir</button></span></div><p class="muted small-t">ID: ${esc(x.ffid || "—")} • ${esc(x.role || "")}</p></div>`).join("") || '<div class="card empty">Nenhum jogador.</div>';
+  const logs = arr(DB.get("logs")).sort((a, b) => b.at - a.at).slice(0, 100);
+  $("#adminLogs2").innerHTML = logs.length ? logs.map(l => `<div class="rrow"><span><span class="muted small-t">${esc(new Date(l.at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }))}</span> • <b>${esc(l.who)}</b>: ${esc(l.text)}</span><button class="btn small danger" data-act="logdel" data-id="${l.id}">Excluir</button></div>`).join("") : '<p class="empty">Sem logs ainda.</p>';
+  const pf = $("#pointsForm"), box = $("#ptsInputs");
+  if (!box.children.length) box.innerHTML = Array.from({ length: 12 }, (_, i) => `<label>${i + 1}º lugar<input type="number" name="p${i + 1}" min="0" step="0.5"></label>`).join("");
+  if (!pf.contains(document.activeElement)){ pointsTable().forEach((p, i) => { if (pf["p" + (i + 1)]) pf["p" + (i + 1)].value = p; }); pf.kill.value = killPts(); }
+}
+
+/* =====================================================
+   INICIALIZAÇÃO
+   ===================================================== */
+let pendingRender = false;
+function safeRender(){
+  const a = document.activeElement;
+  if (a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)){ pendingRender = true; return; }
+  render();
+}
+document.addEventListener("focusout", () => { if (pendingRender) setTimeout(() => { const a = document.activeElement; if (!(a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))){ pendingRender = false; render(); } }, 80); });
+
+(async function init(){
+  $("#year").textContent=new Date().getFullYear();DB.load();AUTH.load();DB.status=DB.cloud?"error":"local";updatePill();
+  if(AUTH.refreshToken){try{await AUTH.refresh();}catch(e){AUTH.signOut();}}
+  fillConfig();render();show((location.hash||"#inicio").slice(1));
+  if(DB.cloud){if(await DB.pull()){fillConfig();render();}setInterval(async()=>{if(await DB.pull())safeRender();},CONFIG.pollMs);}
+})();
 </script>
-</body></html>
+
+</body>
+</html>
