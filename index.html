@@ -362,6 +362,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <button data-tab="resultados">Queda</button>
         <button data-tab="calls">Sorteio de call</button>
         <button data-tab="sala">ID / Senha</button>
+        <button data-tab="manualKill">Kill.manual</button>
         <button data-tab="automaticKill" id="tabAutomaticKill" hidden>AUTOMATIC.KILL</button>
         <button data-tab="pessoas">Times e jogadores</button>
         <button data-tab="avisos">Avisos</button>
@@ -438,6 +439,18 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         </form>
         <div class="actions mt"><button class="btn danger small" type="button" data-act="clearRoomCredentials">Remover da página inicial</button></div>
         <p class="muted small-t mt" id="roomCredentialsStatus"></p>
+      </div>
+    </div>
+
+    <div class="atab" data-atab="manualKill" hidden>
+      <div class="card">
+        <h3 style="color:var(--red,#e11d2e)">Kill.manual</h3>
+        <p class="muted small-t">Escolha o X-Treino. A lista mostra somente jogadores dos times inscritos e dentro das vagas confirmadas. Marque apenas quem realmente jogou e informe os abates. A lista não inclui jogadores de outros times ou reservas de cadastro que não participaram.</p>
+        <label class="mt">X-Treino<select id="manualKillScrim"></select></label>
+        <div class="flex between wrap mt"><p id="manualKillInfo" class="muted small-t"></p><button class="btn ghost small" type="button" id="manualKillRefresh">ATUALIZAR LISTA</button></div>
+        <div id="manualKillTeams" class="mt"></div>
+        <div class="actions mt"><button class="btn" type="button" id="manualKillSave">SALVAR PARTICIPAÇÃO E ABATES</button></div>
+        <p id="manualKillStatus" class="muted small-t mt"></p>
       </div>
     </div>
 
@@ -673,7 +686,7 @@ const DB = {
   },
   del(p){return this.set(p,undefined);},
   async replaceAll(obj){
-    const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills"];
+    const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills","manualKills"];
     if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
     this.data=obj||{};this.persist();if(!this.cloud)return;
     try{for(const branch of branches){const value=this.data[branch];await this.request(branch,value===undefined?"DELETE":"PUT",value);}this.status="online";}
@@ -684,7 +697,7 @@ const DB = {
     if(!this.cloud||this.pending>0)return false;
     try{
       // Não lê a raiz inteira: cada coleção pública é consultada separadamente.
-      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills"];
+      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills","manualKills"];
       if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
       let changed=false;
       for(const branch of branches){
@@ -706,7 +719,7 @@ function updatePill(){
 /* =====================================================
    REGRAS DE NEGÓCIO
    ===================================================== */
-const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", autoKillScrim: "", autoKillRound: 1, autoKillRows: [] };
+const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", autoKillScrim: "", autoKillRound: 1, autoKillRows: [], manualKillScrim: "" };
 const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","clearRoomCredentials"]);
 function adminSess(){
   try {
@@ -952,6 +965,7 @@ function renderAdmin(){
   $$("#adminTabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === state.adminTab));
   $$(".atab").forEach(a => a.hidden = a.dataset.atab !== state.adminTab);
   if (state.adminTab === "calls") renderCallAdmin();
+  if (state.adminTab === "manualKill") renderManualKill();
   if (state.adminTab === "automaticKill" && master) renderAutomaticKillAdmin();
   if (state.adminTab === "interface" && master) renderInterfacePanel();
 
@@ -1002,6 +1016,27 @@ function renderResults(){
    AUTOMATIC.KILL — OCR + conferência + publicação
    ===================================================== */
 function autoKillRoundData(){ return DB.get("automaticKillDrafts/"+(state.autoKillScrim||"")) || {}; }
+function renderManualKill(){
+  const sel=$("#manualKillScrim"); if(!sel)return;
+  const scrims=scrimsSorted().slice().reverse();
+  const active=state.manualKillScrim;
+  sel.innerHTML=scrims.length?scrims.map(sc=>`<option value="${esc(sc.id)}">${esc(sc.title)} — ${esc(sc.date||"")}</option>`).join(""):'<option value="">Nenhum treino cadastrado</option>';
+  state.manualKillScrim=scrims.some(sc=>sc.id===active)?active:(scrims[0]?.id||""); sel.value=state.manualKillScrim;
+  const sc=DB.get("scrims/"+state.manualKillScrim), box=$("#manualKillTeams");
+  if(!sc){$("#manualKillInfo").textContent="Crie ou selecione um X-Treino.";box.innerHTML="";return;}
+  const regs=confirmedRegs(sc).filter(r=>DB.get("teams/"+r.tid));
+  const saved=DB.get("manualKills/"+sc.id)||{}; const picked=new Map((saved.players||[]).map(p=>[p.uid,p]));
+  let count=0;
+  box.innerHTML=regs.map((r,i)=>{
+    const tm=DB.get("teams/"+r.tid); if(!tm)return "";
+    const members=Object.entries(tm.members||{});
+    if(!members.length)return `<div class="card"><b>${i+1}. [${esc(tm.tag)}] ${esc(tm.name)}</b><p class="muted small-t">Time sem jogadores cadastrados.</p></div>`;
+    return `<div class="card"><div class="flex between wrap"><b>${i+1}. [${esc(tm.tag)}] ${esc(tm.name)}</b><span class="badge ${r.checkin?"ok":"wait"}">${r.checkin?"Check-in feito":"Sem check-in"}</span></div>${members.map(([uid,nick])=>{count++;const old=picked.get(uid);return `<div class="rrow"><label style="display:flex;align-items:center;gap:9px;flex:1"><input type="checkbox" class="manual-kill-player" data-uid="${esc(uid)}" data-team="${esc(tm.id)}" data-nick="${esc(nick)}" ${old?"checked":""} style="width:auto"> <span>${esc(nick)}${uid===tm.captainId?" 👑":""}</span></label><label style="max-width:110px">Abates<input type="number" class="manual-kill-count" data-uid="${esc(uid)}" min="0" max="99" value="${old?Number(old.kills)||0:0}" inputmode="numeric"></label></div>`;}).join("")}</div>`;
+  }).join("")||'<div class="card empty">Nenhum time confirmado neste X-Treino.</div>';
+  $("#manualKillInfo").textContent=`${regs.length} time(s) confirmado(s) • ${count} jogador(es) disponíveis • ${picked.size} participação(ões) já salva(s)`;
+  $("#manualKillStatus").textContent=saved.updatedAt?`Última atualização: ${new Date(saved.updatedAt).toLocaleString("pt-BR")}`:"Marque quem realmente jogou e salve. Jogadores desmarcados não entram no registro.";
+}
+
 function renderAutomaticKillAdmin(){
   if(!isMaster()) return;
   const scrims=scrimsSorted().slice().reverse(), sel=$("#autoKillScrim");
@@ -1022,38 +1057,6 @@ function parseAutoKillText(raw){
     if(m){const nick=m[1].trim().replace(/^\d+[.)\s]+/,"");const kills=Number(m[2]);if(nick&&Number.isInteger(kills)&&kills>=0&&kills<=99)out.push({nick,kills});}
   });
   return out;
-}
-// Localiza cada jogador pelo rótulo "Abates" no próprio placar.
-// Assim, salas incompletas geram somente jogadores visíveis, sem preencher vagas vazias.
-function parseAutoKillWords(words, imageWidth, imageHeight){
-  const clean=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z]/g,"");
-  const valid=(words||[]).filter(w=>w&&w.text&&w.bbox&&(+w.confidence||0)>=12);
-  const anchors=valid.filter(w=>clean(w.text).includes("abates"));
-  const columns=[{min:.17,max:.285},{min:.355,max:.465},{min:.575,max:.69},{min:.715,max:.825}];
-  const found=[];
-  for(const a of anchors){
-    const ax=(a.bbox.x0+a.bbox.x1)/2/imageWidth;
-    const ci=ax<.35?0:ax<.55?1:ax<.735?2:3;
-    const col=columns[ci], ay=(a.bbox.y0+a.bbox.y1)/2;
-    const embedded=String(a.text||"").match(/^(\d{1,2})\s*abates?$/i);
-    const nums=valid.filter(w=>/^\d{1,2}$/.test(String(w.text).trim()) &&
-      Math.abs((w.bbox.y0+w.bbox.y1)/2-ay)<=Math.max(22,imageHeight*.03) &&
-      w.bbox.x1<=a.bbox.x0+10 && a.bbox.x0-w.bbox.x1<imageWidth*.055)
-      .sort((x,y)=>y.bbox.x1-x.bbox.x1);
-    if(!embedded&&!nums.length)continue;
-    const kills=embedded?Number(embedded[1]):Number(String(nums[0].text).trim());
-    const numLeft=embedded?a.bbox.x0:nums[0].bbox.x0,ny=ay;
-    const nickWords=valid.filter(w=>{
-      const t=String(w.text).trim(),cy=(w.bbox.y0+w.bbox.y1)/2,cx=(w.bbox.x0+w.bbox.x1)/2/imageWidth;
-      return Math.abs(cy-ny)<=Math.max(24,imageHeight*.032) && cx>=col.min && cx<=col.max &&
-        w.bbox.x1<=numLeft+4 && !/^\d{1,2}$/.test(t) && !clean(t).includes("abates");
-    }).sort((x,y)=>x.bbox.x0-y.bbox.x0);
-    const nick=nickWords.map(w=>String(w.text).trim()).join(" ")
-      .replace(/^[^A-Za-zÀ-ÿ0-9@<]+|[^A-Za-zÀ-ÿ0-9>]+$/g,"").trim();
-    const key=ci+":"+Math.round(ny/Math.max(8,imageHeight*.012));
-    if(nick.length>=2 && kills>=0 && kills<=99 && !found.some(r=>r._key===key))found.push({nick,kills,_key:key,_y:ny,_x:ax});
-  }
-  return found.sort((a,b)=>a._y-b._y || a._x-b._x).map(({nick,kills})=>({nick,kills}));
 }
 function autoKillPlayerRects(w,h){
   // Posições conferidas no print de referência 1600x720.
@@ -1117,29 +1120,64 @@ function renderAutoKillReview(){
   if(!state.autoKillRows.length){box.innerHTML='<p class="empty">Nenhum jogador identificado. Ajuste o texto no formato Nick - kills.</p>';return;}
   box.innerHTML='<h3>Conferir jogadores e kills</h3><div class="table-wrap"><table><thead><tr><th>Jogador</th><th>Kills</th></tr></thead><tbody>'+state.autoKillRows.map((r,i)=>`<tr><td><input data-ak-nick="${i}" value="${esc(r.nick)}" maxlength="32"></td><td><input data-ak-kills="${i}" type="number" min="0" max="99" value="${r.kills ?? ""}"></td></tr>`).join("")+'</tbody></table></div><p class="muted small-t mt">Confira com atenção antes de salvar. O sistema não publica sem sua confirmação.</p>';
 }
+$("#manualKillScrim").addEventListener("change",e=>{state.manualKillScrim=e.target.value;renderManualKill();});
+$("#manualKillRefresh").addEventListener("click",()=>renderManualKill());
+$("#manualKillSave").addEventListener("click",async()=>{
+  if(!isAdmin())return toast("Entre como organizador para continuar","err");
+  const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return toast("Selecione um X-Treino","err");
+  const selected=$$("#manualKillTeams .manual-kill-player:checked");
+  const players=selected.map(ch=>{const input=$(`#manualKillTeams .manual-kill-count[data-uid="${CSS.escape(ch.dataset.uid)}"]`);return {uid:ch.dataset.uid,teamId:ch.dataset.team,nick:ch.dataset.nick,kills:Math.max(0,Math.min(99,Number(input?.value)||0))};});
+  const seen=new Set();for(const pl of players){if(seen.has(pl.uid))return toast("Jogador duplicado na lista","err");seen.add(pl.uid);}
+  try{await DB.set("manualKills/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,updatedAt:Date.now(),updatedBy:adminSess()?.user||"organizador"});await logAct(`Salvou Kill.manual de ${sc.title}: ${players.length} jogador(es)`);toast("Kill.manual salvo com sucesso!");renderManualKill();}
+  catch(err){toast("Não foi possível salvar: "+err.message,"err");}
+});
+
 $("#autoKillScrim").addEventListener("change",e=>{state.autoKillScrim=e.target.value;state.autoKillRows=[];renderAutomaticKillAdmin();});
 $("#autoKillRound").addEventListener("change",e=>{state.autoKillRound=Math.max(1,Math.min(5,+e.target.value||1));state.autoKillRows=[];renderAutomaticKillAdmin();});
 $("#autoKillImage").addEventListener("change",e=>{const file=e.target.files?.[0],box=$("#autoKillImagePreview");if(!file){box.innerHTML="";return;}if(!file.type.startsWith("image/")){e.target.value="";return toast("Selecione uma imagem válida","err");}const url=URL.createObjectURL(file);box.innerHTML=`<img src="${url}" alt="Prévia do resultado" style="max-width:100%;max-height:260px;border-radius:12px;display:block">`;$("#autoKillStatus").textContent="Imagem carregada. Clique em LER FOTO AUTOMATICAMENTE.";});
 $("#autoKillRead").addEventListener("click",async()=>{
   if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
   const file=$("#autoKillImage").files?.[0];if(!file)return toast("Escolha a foto do resultado primeiro","err");
-  const status=$("#autoKillStatus"),btn=$("#autoKillRead");btn.disabled=true;status.textContent="Lendo o placar completo...";
+  const status=$("#autoKillStatus"),btn=$("#autoKillRead");btn.disabled=true;status.textContent="Lendo a imagem... isso pode levar alguns segundos.";
   try{
-    if(!window.Tesseract)await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Não foi possível carregar o leitor de imagem. Verifique a internet."));document.head.appendChild(sc);});
-    const bitmap=await createImageBitmap(file),canvas=document.createElement("canvas");
-    const scale=Math.min(2.5,2400/Math.max(bitmap.width,bitmap.height));canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);
-    const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
-    const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
-    for(let i=0;i<pixels.data.length;i+=4){const gray=pixels.data[i]*.299+pixels.data[i+1]*.587+pixels.data[i+2]*.114;const contrast=Math.max(0,Math.min(255,(gray-100)*1.65+128));pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=contrast;}
-    ctx.putImageData(pixels,0,0);
-    const result=await Tesseract.recognize(canvas,"eng",{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo o placar: "+Math.round((m.progress||0)*100)+"%";}});
-    const parsed=parseAutoKillWords(result.data.words,canvas.width,canvas.height);bitmap.close?.();
-    if(parsed.length>48){status.textContent="Encontrei mais de 48 registros. Confira o print e corrija a lista manualmente.";state.autoKillRows=parsed.slice(0,48);}else state.autoKillRows=parsed;
-    $("#autoKillText").value=state.autoKillRows.map(r=>r.nick+" - "+r.kills).join("\n");
+    if(!window.Tesseract) await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Não foi possível carregar o leitor de imagem. Verifique a internet."));document.head.appendChild(sc);});
+    const bitmap=await createImageBitmap(file);
+    const players=autoKillPlayerRects(bitmap.width,bitmap.height);
+    const worker=await Tesseract.createWorker("eng",1,{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo placar: "+Math.min(38,Math.max(1,Math.round((m.progress||0)*38)))+" de 38 jogadores...";}});
+    const parsed=[],rawLines=[];
+    const readCrop=async(r,whitelist)=>{
+      const cw=r.right-r.left,ch=r.bottom-r.top;
+      if(cw<5||ch<5)return "";
+      const crop=document.createElement("canvas");crop.width=cw*4;crop.height=ch*4;
+      const cctx=crop.getContext("2d",{willReadFrequently:true});
+      cctx.imageSmoothingEnabled=true;cctx.imageSmoothingQuality="high";
+      cctx.drawImage(bitmap,r.left,r.top,cw,ch,0,0,crop.width,crop.height);
+      await worker.setParameters({tessedit_pageseg_mode:"7",preserve_interword_spaces:"1",tessedit_char_whitelist:whitelist||""});
+      let result=await worker.recognize(crop);
+      let recognized=String(result.data.text||"").trim();
+      if(!recognized && !whitelist){
+        await worker.setParameters({tessedit_pageseg_mode:"6",preserve_interword_spaces:"1",tessedit_char_whitelist:""});
+        result=await worker.recognize(crop);
+        recognized=String(result.data.text||"").trim();
+      }
+      return recognized;
+    };
+    try{
+      for(let i=0;i<players.length;i++){
+        const nickText=await readCrop(players[i].nick,"");
+        const killsText=await readCrop(players[i].kills,"0123456789");
+        const nick=cleanAutoKillNick(nickText,i);
+        const kills=parseAutoKillNumber(killsText);
+        rawLines.push(`${nickText} | ${killsText}`);
+        // Mantém a posição do jogador mesmo se o OCR não reconhecer um dos campos.
+        parsed.push({nick,kills:kills===null?"":kills});
+      }
+    }finally{await worker.terminate();bitmap.close?.();}
+    state.autoKillRows=parsed;
+    $("#autoKillText").value=parsed.map(r=>r.nick+" - "+r.kills).join("\n");
     renderAutoKillReview();
-    status.textContent=state.autoKillRows.length
-      ?`Identifiquei ${state.autoKillRows.length} jogador(es) visíveis. O limite é 48, mas a sala pode ter menos; vagas vazias não serão criadas. Confira todos os nicks e abates antes de salvar.`
-      :"Não consegui localizar os campos de nick e Abates. Envie o print completo, sem cortes, e com boa nitidez.";
+    const missing=parsed.filter(r=>!r.kills.toString().match(/^\\d+$/)||r.nick.startsWith("REVISAR NICK")).length;
+    status.textContent=`Analisei ${parsed.length} posições do placar. ${missing} precisam de conferência manual; revise os campos destacados antes de salvar.`;
   }catch(err){status.textContent=err.message||"Falha ao ler a imagem.";toast(status.textContent,"err");}finally{btn.disabled=false;}
 });
 $("#autoKillPrepare").addEventListener("click",()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");state.autoKillRows=parseAutoKillText($("#autoKillText").value);renderAutoKillReview();if(!state.autoKillRows.length)toast("Não encontrei linhas no formato Nick - kills","err");});
@@ -1178,7 +1216,6 @@ $("#autoKillSaveRound").addEventListener("click",async()=>{
   if(!state.autoKillScrim)return toast("Selecione um X-Treino","err");
   const rows=state.autoKillRows.map(r=>({nick:String(r.nick||"").trim(),kills:+r.kills||0})).filter(r=>r.nick);
   if(!rows.length)return toast("Prepare e confira a lista antes de salvar","err");
-  if(rows.length>48)return toast("O limite é de 48 jogadores (12 times). Remova os registros extras antes de salvar.","err");
   const seen=new Set();for(const r of rows){const k=r.nick.toLocaleLowerCase("pt-BR");if(seen.has(k))return toast("Há jogador repetido na lista: "+r.nick,"err");seen.add(k);}
   try{await DB.set("automaticKillDrafts/"+state.autoKillScrim+"/r"+state.autoKillRound,rows);toast("Queda "+state.autoKillRound+" salva no Firebase! ✅");renderAutomaticKillAdmin();}
   catch(err){toast("Não foi possível salvar a queda: "+err.message,"err");}
