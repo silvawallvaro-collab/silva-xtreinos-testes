@@ -1,10 +1,15 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important} .interface-preview{max-width:180px;max-height:110px;object-fit:contain;border-radius:10px;border:1px solid var(--line)}
-</style></head><body>
+</style>
 <title>SPIDER XTREINOS</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#090a10">
+<meta name="description" content="SPIDER XTREINOS — plataforma de X-Treinos, equipes, ranking e CALL.">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/spider-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icons/spider-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head><body>
 <style>
 :root{
   --bg:#060a16; --bg2:#0c1326; --card:#101933; --line:#1f2c52;
@@ -96,6 +101,8 @@ h3.sec{font-size:1.35rem;margin:22px 0 10px}
 .home-next .countdown div{background:#1a1b26;border-color:rgba(239,68,68,.20);min-width:68px}
 .home-next .actions.center{justify-content:flex-start}
 .home-next .btn{margin-top:2px}
+#installAppBtn{border:1px solid rgba(239,68,68,.65);cursor:pointer;font:700 1.02rem Rajdhani;letter-spacing:.04em}
+#installAppBtn[hidden]{display:none!important}
 @media(max-width:600px){.hero{padding:30px 14px 24px}.hero h1{font-size:clamp(2.35rem,12vw,3.6rem)}.hero p{font-size:.96rem;margin:13px auto 20px}.home-next{padding:17px 16px}.home-next .countdown{gap:7px}.home-next .countdown div{min-width:58px;padding:8px}}
 
 
@@ -177,6 +184,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <a data-go="times">Times</a>
     <a data-go="meutime">Meu time</a>
     <a data-go="ranking">Ranking</a>
+    <a data-go="abates">ABATES</a>
     <a data-go="calls">CALL</a>
     <a data-go="redes">Redes</a>
     <a data-go="perfil">Perfil</a>
@@ -201,7 +209,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <a class="btn ghost" data-go="treinos">Ver treinos</a>
       <a class="btn ghost" data-go="calls">Ver CALLS</a>
       <a class="btn" data-go="calls" id="homeChooseCall">ESCOLHER CALL</a>
+      <button class="btn ghost" type="button" id="installAppBtn">⬇ INSTALAR APLICATIVO</button>
     </div>
+    <p id="installAppHint" class="muted small-t" style="margin:12px auto 0">Instale o SPIDER XTREINOS no seu celular ou computador.</p>
   </div>
 
   <div id="homeRoomCredentials" hidden></div>
@@ -216,6 +226,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   </div>
 
   <div id="homeAutomaticKills" class="mt"></div>
+  <div id="homeManualKills" class="mt"></div>
 
   <h2 class="title">Ranking geral</h2>
   <div class="table-wrap"><table><thead><tr><th>#</th><th>Time</th><th>Quedas</th><th>Booyah</th><th>Abates</th><th>Pontos</th><th>Resultados das quedas</th></tr></thead><tbody id="homeRank"></tbody></table></div>
@@ -327,6 +338,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   </div>
 </section>
 
+<!-- ABATES -->
+<section class="page" id="abates">
+  <h2 class="title">ABATES</h2>
+  <p class="sub">Rankings individuais publicados dos X-Treinos.</p>
+  <div id="publicAbatesList" class="grid"></div>
+</section>
+
 <!-- CALLS PÚBLICAS -->
 <section class="page" id="calls">
   <h2 class="title">CALL — X-TREINO</h2>
@@ -365,6 +383,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <button data-tab="admCall" id="tabAdmCall" hidden>ADM.CALL</button>
         <button data-tab="sala">ID / Senha</button>
         <button data-tab="automaticKill" id="tabAutomaticKill" hidden>AUTOMATIC.KILL</button>
+        <button data-tab="manualKill">KILL.MANUAL</button>
         <button data-tab="pessoas">Times e jogadores</button>
         <button data-tab="avisos">Avisos</button>
         <button data-tab="logs">Logs</button>
@@ -464,6 +483,21 @@ OutroNick - 5"></textarea></label>
         <div id="autoKillRoundsSummary" class="mt"></div>
         <div class="actions mt"><button class="btn" id="autoKillPublish" type="button">PUBLICAR ABATES NA PÁGINA INICIAL</button><button class="btn danger small" id="autoKillUnpublish" type="button">REMOVER PUBLICAÇÃO</button></div>
         <p class="muted small-t mt" id="autoKillPublishStatus"></p>
+      </div>
+    </div>
+
+    <div class="atab" data-atab="manualKill" hidden>
+      <div class="card">
+        <h3 style="color:var(--primary)">KILL.MANUAL</h3>
+        <p class="muted small-t">Registre manualmente os abates individuais dos jogadores com conta que pertencem aos times confirmados no X-Treino. Limite: 12 times e 48 jogadores por treino. Salve de 1 a 5 quedas e publique o ranking quando terminar.</p>
+        <label class="mt">X-Treino<select id="manualKillScrim"></select></label>
+        <label>Queda<select id="manualKillRound"><option value="1">Queda 1</option><option value="2">Queda 2</option><option value="3">Queda 3</option><option value="4">Queda 4</option><option value="5">Queda 5</option></select></label>
+        <div id="manualKillRoster" class="mt"></div>
+        <div class="actions mt"><button class="btn" id="manualKillSaveRound" type="button">SALVAR ESTA QUEDA</button><button class="btn danger small" id="manualKillClearRound" type="button">APAGAR ESTA QUEDA</button></div>
+        <div class="divider mt"></div>
+        <h3>Resumo das 5 quedas</h3><div id="manualKillRoundsSummary" class="mt"></div>
+        <div class="actions mt"><button class="btn" id="manualKillPublish" type="button">PUBLICAR RANKING DE ABATES</button><button class="btn danger small" id="manualKillUnpublish" type="button">APAGAR PUBLICAÇÃO</button></div>
+        <p class="muted small-t mt" id="manualKillPublishStatus"></p>
       </div>
     </div>
 
@@ -708,7 +742,7 @@ function updatePill(){
 /* =====================================================
    REGRAS DE NEGÓCIO
    ===================================================== */
-const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", callRound: 1, callPending: null, autoKillScrim: "", autoKillRound: 1, autoKillRows: [] };
+const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", callRound: 1, callPending: null, autoKillScrim: "", autoKillRound: 1, autoKillRows: [], manualKillScrim: "", manualKillRound: 1 };
 
 // Posicionamento por arrastar das etiquetas no painel ADM.CALL.
 let callPinDrag = null;
@@ -858,7 +892,7 @@ function render(){
   const st = settings(), brand = st.brand || "SPIDER XTREINOS";
   applyInterface();
   $("#brandName").textContent = brand; $("#footBrand").textContent = brand; document.title = brand + " • Free Fire";
-  renderHome(); renderScrims(); renderTeams(); renderMyTeam(); renderProfile(); renderRanking(); renderSocial(); renderCallsPublic(); renderAdmin(); renderAdmin2(); renderCallAdmin();
+  renderHome(); renderScrims(); renderTeams(); renderMyTeam(); renderProfile(); renderRanking(); renderSocial(); renderCallsPublic(); renderAbatesPublic(); renderAdmin(); renderAdmin2(); renderCallAdmin();
 }
 
 function scrimCard(s){
@@ -905,6 +939,7 @@ function renderHome(){
   $("#sTeams").textContent = teams.length; $("#sPlayers").textContent = users.length;
   $("#sScrims").textContent = arr(DB.get("scrims")).filter(x => x.status === "done").length;
   renderPublishedAutomaticKills();
+  renderPublishedManualKills();
   const rk = standings(); $("#homeRank").innerHTML = rankRows(rk, true);
   $("#homeRankInfo").textContent = rk.length ? rk.length + " time(s) • " + Math.max(...rk.map(r => r.games)) + " queda(s) disputada(s) • " + pointsDesc() : "";
   const news = arr(DB.get("news")).sort((a, b) => b.at - a.at).slice(0, 4);
@@ -1006,6 +1041,7 @@ function renderAdmin(){
   $$(".atab").forEach(a => a.hidden = a.dataset.atab !== state.adminTab);
   if (state.adminTab === "admCall" && master) renderCallAdmin();
   if (state.adminTab === "automaticKill" && master) renderAutomaticKillAdmin();
+  if (state.adminTab === "manualKill") renderManualKillAdmin();
   if (state.adminTab === "interface" && master) renderInterfacePanel();
 
   const scrims = scrimsSorted().reverse();
@@ -1253,6 +1289,104 @@ function renderPublishedAutomaticKills(){
   box.innerHTML=all.map(pub=>`<div class="card mt"><div class="flex between wrap"><div><h2 class="title">ABATES DOS JOGADORES</h2><p class="muted small-t">${esc(pub.scrimTitle||"X-Treino")} • Publicado em ${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):"—"}</p></div><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Abates totais</th><th>Quedas registradas</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td><b>${+p.kills||0}</b></td><td>${+p.rounds||0}/5</td></tr>`).join("")}</tbody></table></div></div>`).join("");
 }
 
+/* =====================================================
+   KILL.MANUAL — registro individual, ranking e publicação
+   ===================================================== */
+function manualKillRounds(){ return DB.get("manualKills/"+(state.manualKillScrim||"")) || {}; }
+function manualKillRoster(scrim){
+  if(!scrim) return [];
+  const teams=confirmedRegs(scrim).slice(0,12).map(r=>DB.get("teams/"+r.tid)).filter(Boolean);
+  const players=[];
+  for(const team of teams){
+    for(const [uid,nick] of Object.entries(team.members||{})){
+      const user=DB.get("users/"+uid);
+      if(!user) continue;
+      players.push({uid,nick:user.nick||nick||"Jogador",teamId:team.id,teamName:team.name,teamTag:team.tag});
+    }
+  }
+  return players;
+}
+function manualKillTotals(scrimId){
+  const rounds=DB.get("manualKills/"+scrimId)||{}, totals={};
+  for(let n=1;n<=5;n++) for(const p of (rounds["r"+n]||[])){
+    const key=p.uid||String(p.nick||"").toLocaleLowerCase("pt-BR");
+    if(!totals[key]) totals[key]={uid:p.uid||"",nick:p.nick||"Jogador",teamId:p.teamId||"",teamName:p.teamName||"",teamTag:p.teamTag||"",kills:0,rounds:0,history:{}};
+    totals[key].kills+=Math.max(0,+p.kills||0); totals[key].rounds++; totals[key].history["r"+n]=Math.max(0,+p.kills||0);
+  }
+  return Object.values(totals).sort((a,b)=>b.kills-a.kills||a.nick.localeCompare(b.nick,"pt-BR"));
+}
+function renderManualKillAdmin(){
+  if(!isAdmin()) return;
+  const scrims=scrimsSorted().slice().reverse(),sel=$("#manualKillScrim");
+  const active=sel.value||state.manualKillScrim;
+  sel.innerHTML=scrims.length?scrims.map(sc=>`<option value="${esc(sc.id)}">${esc(sc.title)} — ${esc(sc.date)}</option>`).join(""):'<option value="">Nenhum treino cadastrado</option>';
+  state.manualKillScrim=scrims.some(sc=>sc.id===active)?active:(scrims[0]?.id||""); sel.value=state.manualKillScrim;
+  $("#manualKillRound").value=String(state.manualKillRound);
+  const sc=DB.get("scrims/"+state.manualKillScrim), box=$("#manualKillRoster");
+  if(!sc){box.innerHTML='<p class="empty">Crie um X-Treino primeiro.</p>';$("#manualKillRoundsSummary").innerHTML="";return;}
+  const players=manualKillRoster(sc), saved=manualKillRounds()["r"+state.manualKillRound]||[], byUid={};
+  saved.forEach(p=>{byUid[p.uid]=p;});
+  if(confirmedRegs(sc).length>12||players.length>48){box.innerHTML=`<div class="card"><p class="badge err">LIMITE EXCEDIDO</p><p>Este X-Treino tem ${confirmedRegs(sc).length} times confirmados e ${players.length} jogadores com conta. O KILL.MANUAL aceita no máximo 12 times e 48 jogadores.</p></div>`;}
+  else if(!players.length){box.innerHTML='<div class="card empty">Não há jogadores com conta nos times confirmados deste X-Treino.</div>';}
+  else{
+    const grouped={}; players.forEach(p=>(grouped[p.teamId]||(grouped[p.teamId]=[])).push(p));
+    box.innerHTML=`<p class="muted small-t">${players.length}/48 jogadores • ${Object.keys(grouped).length}/12 times confirmados • Queda ${state.manualKillRound}</p>`+
+      Object.entries(grouped).map(([tid,list])=>`<div class="card mt"><h3>[${esc(list[0].teamTag)}] ${esc(list[0].teamName)}</h3><div class="table-wrap"><table><thead><tr><th>Jogador</th><th>Abates</th></tr></thead><tbody>${list.map(p=>`<tr><td>${esc(p.nick)}</td><td><input type="number" min="0" max="99" step="1" value="${byUid[p.uid]?Math.max(0,+byUid[p.uid].kills||0):0}" data-manual-uid="${esc(p.uid)}" data-manual-nick="${esc(p.nick)}" data-team-id="${esc(p.teamId)}" data-team-name="${esc(p.teamName)}" data-team-tag="${esc(p.teamTag)}" aria-label="Abates de ${esc(p.nick)}" style="max-width:100px"></td></tr>`).join("")}</tbody></table></div></div>`).join("");
+  }
+  const rounds=manualKillRounds();
+  $("#manualKillRoundsSummary").innerHTML=[1,2,3,4,5].map(n=>{const rows=rounds["r"+n]||[];return `<div class="rrow"><span>Queda ${n}: <b>${rows.length} jogador(es)</b> • ${rows.reduce((a,x)=>a+(+x.kills||0),0)} abates</span><span class="badge ${rows.length?"ok":"wait"}">${rows.length?"Salva":"Pendente"}</span></div>`;}).join("");
+  const pub=DB.get("manualKillRankings/"+state.manualKillScrim);
+  $("#manualKillPublishStatus").textContent=pub?.publishedAt?"Publicado em "+new Date(pub.publishedAt).toLocaleString("pt-BR")+" • "+(pub.players||[]).length+" jogador(es).":"Ainda não publicado para este X-Treino.";
+}
+function renderPublishedManualKills(){
+  const box=$("#homeManualKills"); if(!box)return;
+  const all=arr(DB.get("manualKillRankings")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
+  if(!all.length){box.innerHTML="";return;}
+  box.innerHTML=all.map(pub=>`<div class="card mt"><div class="flex between wrap"><div><h2 class="title">KILL.MANUAL — ${esc(pub.scrimTitle||"X-Treino")}</h2><p class="muted small-t">Ranking individual publicado • ${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):"—"}</p></div><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Time</th><th>Abates</th></tr></thead><tbody>${(pub.players||[]).slice(0,5).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td>[${esc(p.teamTag||"")}] ${esc(p.teamName||"")}</td><td><b>${+p.kills||0}</b></td></tr>`).join("")}</tbody></table></div><p class="muted small-t mt">Veja o ranking completo na aba ABATES.</p></div>`).join("");
+}
+function renderAbatesPublic(){
+  const box=$("#publicAbatesList"); if(!box)return;
+  const manual=arr(DB.get("manualKillRankings")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
+  const automatic=arr(DB.get("automaticKills")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
+  const html=[...manual.map(pub=>`<div class="card"><div class="flex between wrap"><h3>KILL.MANUAL — ${esc(pub.scrimTitle||"X-Treino")}</h3><span class="badge ok">PUBLICADO</span></div><p class="muted small-t">${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):""}</p><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Time</th><th>Abates</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Q5</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td>[${esc(p.teamTag||"")}] ${esc(p.teamName||"")}</td><td><b>${+p.kills||0}</b></td>${[1,2,3,4,5].map(n=>`<td>${p.history&&p.history["r"+n]!==undefined?p.history["r"+n]:"—"}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`),...automatic.map(pub=>`<div class="card"><div class="flex between wrap"><h3>AUTOMATIC.KILL — ${esc(pub.scrimTitle||"X-Treino")}</h3><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Abates</th><th>Quedas</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td><b>${+p.kills||0}</b></td><td>${+p.rounds||0}/5</td></tr>`).join("")}</tbody></table></div></div>`)].join("");
+  box.innerHTML=html||'<div class="card empty">Ainda não há rankings de abates publicados.</div>';
+}
+
+/* Ações do KILL.MANUAL */
+$("#manualKillSaveRound").addEventListener("click",async()=>{
+  if(!isAdmin())return toast("Entre como organizador para registrar abates.","err");
+  const sc=DB.get("scrims/"+state.manualKillScrim); if(!sc)return toast("Selecione um X-Treino.","err");
+  const players=manualKillRoster(sc); if(confirmedRegs(sc).length>12||players.length>48)return toast("O limite do KILL.MANUAL é 12 times e 48 jogadores.","err");
+  const rows=$$("#manualKillRoster [data-manual-uid]").map(input=>({uid:input.dataset.manualUid,nick:input.dataset.manualNick,teamId:input.dataset.teamId,teamName:input.dataset.teamName,teamTag:input.dataset.teamTag,kills:Number(input.value)}));
+  if(rows.length!==players.length)return toast("A lista de jogadores mudou. Atualize e tente novamente.","err");
+  if(rows.some(r=>!Number.isInteger(r.kills)||r.kills<0||r.kills>99))return toast("Use abates inteiros entre 0 e 99.","err");
+  try{await DB.set(`manualKills/${sc.id}/r${state.manualKillRound}`,rows);await logAct(`Salvou KILL.MANUAL da Queda ${state.manualKillRound} — ${sc.title}`);toast(`KILL.MANUAL — Queda ${state.manualKillRound} salva!`);renderManualKillAdmin();}
+  catch(err){toast("Não foi possível salvar a queda: "+err.message,"err");}
+});
+$("#manualKillClearRound").addEventListener("click",async()=>{
+  if(!isAdmin())return toast("Acesso de organizador necessário.","err");
+  const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return;
+  if(!await ask(`Apagar os abates manuais da Queda ${state.manualKillRound} de ${sc.title}?`))return;
+  try{await DB.del(`manualKills/${sc.id}/r${state.manualKillRound}`);await logAct(`Apagou KILL.MANUAL da Queda ${state.manualKillRound} — ${sc.title}`);toast("Queda apagada.");renderManualKillAdmin();}
+  catch(err){toast("Não foi possível apagar a queda: "+err.message,"err");}
+});
+$("#manualKillPublish").addEventListener("click",async()=>{
+  if(!isAdmin())return toast("Acesso de organizador necessário.","err");
+  const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return toast("Selecione um X-Treino.","err");
+  const players=manualKillTotals(sc.id);if(!players.length)return toast("Salve pelo menos uma queda antes de publicar.","err");
+  if(!await ask(`Publicar o ranking KILL.MANUAL de ${sc.title} com ${players.length} jogador(es)?`))return;
+  try{await DB.set("manualKillRankings/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,publishedAt:Date.now(),rounds:[1,2,3,4,5].filter(n=>(manualKillRounds()["r"+n]||[]).length)});await logAct("Publicou KILL.MANUAL de "+sc.title);toast("Ranking KILL.MANUAL publicado! 🏆");render();}
+  catch(err){toast("Não foi possível publicar: "+err.message,"err");}
+});
+$("#manualKillUnpublish").addEventListener("click",async()=>{
+  if(!isAdmin())return toast("Acesso de organizador necessário.","err");
+  const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return;
+  if(!DB.get("manualKillRankings/"+sc.id))return toast("Este X-Treino não tem publicação.","err");
+  if(!await ask(`Apagar somente a publicação do KILL.MANUAL de ${sc.title}? Os registros salvos das quedas serão mantidos.`))return;
+  try{await DB.del("manualKillRankings/"+sc.id);await logAct("Removeu publicação KILL.MANUAL de "+sc.title);toast("Publicação removida. Os registros das quedas foram mantidos.");render();}
+  catch(err){toast("Não foi possível remover a publicação: "+err.message,"err");}
+});
+
 /* contagem regressiva */
 function tick(){
   const el = $("#countdown"); if (!el) return;
@@ -1335,6 +1469,8 @@ document.addEventListener("change", async e => {
   const st = e.target.closest("[data-status]");
   if (st){ if (!isAdmin()) return render(); const sc = DB.get("scrims/" + st.dataset.status); if (st.value === "scheduled" && !(Number(sc?.registrationOpensAt) > 0)) { toast("Para agendar, crie o treino preenchendo a data e hora de abertura.", "err"); render(); return; } await DB.set(`scrims/${st.dataset.status}/status`, st.value); await logAct(`Mudou o treino ${sc ? sc.title : ""} para ${({ scheduled: "agendado", open: "aberto", closed: "fechado", done: "finalizado" })[st.value]}`); render(); return; }
   if (e.target.id === "resScrim"){ state.resScrim = e.target.value; state.resRound = 1; renderResults(); return; }
+  if (e.target.id === "manualKillScrim"){ state.manualKillScrim=e.target.value; state.manualKillRound=1; renderManualKillAdmin(); return; }
+  if (e.target.id === "manualKillRound"){ state.manualKillRound=Math.min(5,Math.max(1,+e.target.value||1)); renderManualKillAdmin(); return; }
   if (e.target.matches("[data-call-image]")) {
     if(!isMaster()){e.target.value="";return toast("Somente o organizador principal pode enviar mapas","err");}
     const round=+e.target.dataset.callImage,file=e.target.files?.[0],sc=selectedCallScrim();if(!file||!sc)return;
