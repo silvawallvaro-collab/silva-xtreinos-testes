@@ -155,7 +155,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 [data-act=teamview]{cursor:pointer}[data-act=teamview]:hover{border-color:var(--blue2)}
 .rrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}
 .call-map{border:1px solid var(--line);border-radius:14px;padding:15px;background:var(--bg2)}
-.call-visual{position:relative;overflow:hidden;border-radius:14px;border:1px solid var(--line);background:#080d18;min-height:220px}.call-visual img{display:block;width:100%;max-height:520px;object-fit:contain}.call-pin{position:absolute;transform:translate(-50%,-50%);border:1px solid #ff6572;background:#a90f20;color:#fff;border-radius:999px;padding:7px 10px;font-weight:800;font-size:.78rem;box-shadow:0 3px 12px #0009;cursor:pointer}.call-pin:disabled{opacity:.38;filter:grayscale(1);cursor:not-allowed}.call-choice-preview{border:1px solid var(--blue2);background:var(--card);padding:14px;border-radius:12px}
+.call-visual{position:relative;overflow:hidden;border-radius:14px;border:1px solid var(--line);background:#080d18;min-height:220px}.call-visual img{display:block;width:100%;max-height:520px;object-fit:contain}.call-pin{position:absolute;transform:translate(-50%,-50%);border:1px solid #ff6572;background:#050505;color:#fff;border-radius:999px;padding:7px 10px;font-weight:800;font-size:.78rem;box-shadow:0 3px 12px #0009;cursor:pointer}.call-pin[data-call-drag]{cursor:grab;touch-action:none;user-select:none}.call-pin[data-call-drag]:active{cursor:grabbing;border-color:#fff}.call-pin:disabled{opacity:.38;filter:grayscale(1);cursor:not-allowed}.call-choice-preview{border:1px solid var(--blue2);background:var(--card);padding:14px;border-radius:12px}
 .call-map textarea{min-height:130px;resize:vertical;font-family:Inter,system-ui,sans-serif}
 .call-slot{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .call-slot .num{font:700 1.2rem Rajdhani;color:var(--blue2);min-width:28px}
@@ -423,7 +423,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <div class="atab" data-atab="admCall" hidden>
       <div class="card">
         <h3>ADM.CALL — Configuração dos mapas</h3>
-        <p class="muted small-t">Painel exclusivo do organizador principal. Configure a imagem e os locais clicáveis de cada queda. Use uma linha por local no formato: Nome do local | posição horizontal (0–100) | posição vertical (0–100).</p>
+        <p class="muted small-t">Painel exclusivo do organizador principal. Envie a imagem e arraste cada etiqueta preta até o local correto no mapa. Depois clique em SALVAR QUEDA. Se preferir, também pode ajustar as posições pelos números (0–100).</p>
         <label class="mt">X-Treino<select id="callAdminScrim"></select></label>
         <div id="callAdminMaps" class="grid mt"></div>
       </div>
@@ -709,6 +709,56 @@ function updatePill(){
    REGRAS DE NEGÓCIO
    ===================================================== */
 const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", callRound: 1, callPending: null, autoKillScrim: "", autoKillRound: 1, autoKillRows: [] };
+
+// Posicionamento por arrastar das etiquetas no painel ADM.CALL.
+let callPinDrag = null;
+document.addEventListener("pointerdown", e => {
+  const pin = e.target.closest("[data-call-drag]");
+  if (!pin || !isMaster()) return;
+  const map = pin.closest(".call-visual");
+  if (!map) return;
+  e.preventDefault();
+  callPinDrag = { pin, map, round: Number(pin.dataset.callDrag), index: Number(pin.dataset.locIndex), moved: false };
+  try { pin.setPointerCapture(e.pointerId); } catch (_) {}
+});
+document.addEventListener("pointermove", e => {
+  if (!callPinDrag) return;
+  const rect = callPinDrag.map.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+  const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+  callPinDrag.pin.style.left = x + "%";
+  callPinDrag.pin.style.top = y + "%";
+  callPinDrag.moved = true;
+});
+document.addEventListener("pointerup", async e => {
+  if (!callPinDrag) return;
+  const drag = callPinDrag;
+  callPinDrag = null;
+  if (!drag.moved) return;
+  const rect = drag.map.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const x = Math.round(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)));
+  const y = Math.round(Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100)));
+  const sc = selectedCallScrim();
+  if (!sc || !isMaster()) return;
+  const path = `callConfigs/${sc.id}/r${drag.round}`;
+  const cfg = DB.get(path) || {};
+  const locations = arr(cfg.locations).map((loc, i) => i === drag.index ? { ...loc, x, y } : loc);
+  if (!locations[drag.index]) return;
+  try {
+    await DB.set(path, { ...cfg, locations, updatedAt: Date.now() });
+    const textarea = document.getElementById(`callLocs-r${drag.round}`);
+    if (textarea) textarea.value = locations.map(loc => `${loc.name} | ${loc.x} | ${loc.y}`).join("\n");
+    toast(`Local reposicionado: ${locations[drag.index].name}`);
+    renderCallAdmin();
+  } catch (err) {
+    toast("Não consegui salvar a posição do local.", "err");
+    renderCallAdmin();
+  }
+});
+document.addEventListener("pointercancel", () => { callPinDrag = null; });
+
 const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","clearRoomCredentials"]);
 function adminSess(){
   try {
@@ -1735,7 +1785,7 @@ function renderCallAdmin(){
     const cfg=DB.get(`callConfigs/${sc.id}/r${m.round}`)||{};
     const locs=arr(cfg.locations);
     return `<div class="call-map"><h3>Queda ${m.round} — ${m.name}</h3>
-      ${cfg.image?`<div class="call-visual mt"><img src="${cfg.image}" alt="Mapa ${m.name}">${locs.map(l=>`<span class="call-pin" style="left:${+l.x||50}%;top:${+l.y||50}%">${esc(l.name)}</span>`).join("")}</div>`:'<p class="empty mt">Nenhuma imagem enviada ainda.</p>'}
+      ${cfg.image?`<div class="call-visual mt"><img src="${cfg.image}" alt="Mapa ${m.name}">${locs.map((l,i)=>`<button type="button" class="call-pin" data-call-drag="${m.round}" data-loc-index="${i}" style="left:${Number(l.x??50)}%;top:${Number(l.y??50)}%" title="Arraste para posicionar">${esc(l.name)}</button>`).join("")}</div>`:'<p class="empty mt">Nenhuma imagem enviada ainda.</p>'}
       <label class="mt">Foto do mapa<input type="file" accept="image/*" data-call-image="${m.round}"></label>
       <label class="mt">Locais no mapa<textarea rows="5" id="callLocs-r${m.round}" placeholder="Peak | 50 | 25\nClock Tower | 25 | 55\nFactory | 75 | 70">${esc(locs.map(l=>`${l.name} | ${l.x} | ${l.y}`).join("\n"))}</textarea></label>
       <div class="flex between wrap mt"><label class="small-t"><input type="checkbox" id="callOpen-r${m.round}" ${cfg.open===false?"":"checked"}> Escolhas abertas</label><button class="btn small" data-act="savecallconfig" data-round="${m.round}">SALVAR QUEDA ${m.round}</button></div>
