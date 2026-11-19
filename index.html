@@ -1023,6 +1023,38 @@ function parseAutoKillText(raw){
   });
   return out;
 }
+// Localiza cada jogador pelo rótulo "Abates" no próprio placar.
+// Assim, salas incompletas geram somente jogadores visíveis, sem preencher vagas vazias.
+function parseAutoKillWords(words, imageWidth, imageHeight){
+  const clean=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z]/g,"");
+  const valid=(words||[]).filter(w=>w&&w.text&&w.bbox&&(+w.confidence||0)>=12);
+  const anchors=valid.filter(w=>clean(w.text).includes("abates"));
+  const columns=[{min:.17,max:.285},{min:.355,max:.465},{min:.575,max:.69},{min:.715,max:.825}];
+  const found=[];
+  for(const a of anchors){
+    const ax=(a.bbox.x0+a.bbox.x1)/2/imageWidth;
+    const ci=ax<.35?0:ax<.55?1:ax<.735?2:3;
+    const col=columns[ci], ay=(a.bbox.y0+a.bbox.y1)/2;
+    const embedded=String(a.text||"").match(/^(\d{1,2})\s*abates?$/i);
+    const nums=valid.filter(w=>/^\d{1,2}$/.test(String(w.text).trim()) &&
+      Math.abs((w.bbox.y0+w.bbox.y1)/2-ay)<=Math.max(22,imageHeight*.03) &&
+      w.bbox.x1<=a.bbox.x0+10 && a.bbox.x0-w.bbox.x1<imageWidth*.055)
+      .sort((x,y)=>y.bbox.x1-x.bbox.x1);
+    if(!embedded&&!nums.length)continue;
+    const kills=embedded?Number(embedded[1]):Number(String(nums[0].text).trim());
+    const numLeft=embedded?a.bbox.x0:nums[0].bbox.x0,ny=ay;
+    const nickWords=valid.filter(w=>{
+      const t=String(w.text).trim(),cy=(w.bbox.y0+w.bbox.y1)/2,cx=(w.bbox.x0+w.bbox.x1)/2/imageWidth;
+      return Math.abs(cy-ny)<=Math.max(24,imageHeight*.032) && cx>=col.min && cx<=col.max &&
+        w.bbox.x1<=numLeft+4 && !/^\d{1,2}$/.test(t) && !clean(t).includes("abates");
+    }).sort((x,y)=>x.bbox.x0-y.bbox.x0);
+    const nick=nickWords.map(w=>String(w.text).trim()).join(" ")
+      .replace(/^[^A-Za-zÀ-ÿ0-9@<]+|[^A-Za-zÀ-ÿ0-9>]+$/g,"").trim();
+    const key=ci+":"+Math.round(ny/Math.max(8,imageHeight*.012));
+    if(nick.length>=2 && kills>=0 && kills<=99 && !found.some(r=>r._key===key))found.push({nick,kills,_key:key,_y:ny,_x:ax});
+  }
+  return found.sort((a,b)=>a._y-b._y || a._x-b._x).map(({nick,kills})=>({nick,kills}));
+}
 function autoKillPlayerRects(w,h){
   // Posições conferidas no print de referência 1600x720.
   // O lado esquerdo tem 20 jogadores; o direito tem 17 (uma vaga vazia no rank 8).
@@ -1091,46 +1123,23 @@ $("#autoKillImage").addEventListener("change",e=>{const file=e.target.files?.[0]
 $("#autoKillRead").addEventListener("click",async()=>{
   if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
   const file=$("#autoKillImage").files?.[0];if(!file)return toast("Escolha a foto do resultado primeiro","err");
-  const status=$("#autoKillStatus"),btn=$("#autoKillRead");btn.disabled=true;status.textContent="Lendo a imagem... isso pode levar alguns segundos.";
+  const status=$("#autoKillStatus"),btn=$("#autoKillRead");btn.disabled=true;status.textContent="Lendo o placar completo...";
   try{
-    if(!window.Tesseract) await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Não foi possível carregar o leitor de imagem. Verifique a internet."));document.head.appendChild(sc);});
-    const bitmap=await createImageBitmap(file);
-    const players=autoKillPlayerRects(bitmap.width,bitmap.height);
-    const worker=await Tesseract.createWorker("eng",1,{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo placar: "+Math.min(38,Math.max(1,Math.round((m.progress||0)*38)))+" de 38 jogadores...";}});
-    const parsed=[],rawLines=[];
-    const readCrop=async(r,whitelist)=>{
-      const cw=r.right-r.left,ch=r.bottom-r.top;
-      if(cw<5||ch<5)return "";
-      const crop=document.createElement("canvas");crop.width=cw*4;crop.height=ch*4;
-      const cctx=crop.getContext("2d",{willReadFrequently:true});
-      cctx.imageSmoothingEnabled=true;cctx.imageSmoothingQuality="high";
-      cctx.drawImage(bitmap,r.left,r.top,cw,ch,0,0,crop.width,crop.height);
-      await worker.setParameters({tessedit_pageseg_mode:"7",preserve_interword_spaces:"1",tessedit_char_whitelist:whitelist||""});
-      let result=await worker.recognize(crop);
-      let recognized=String(result.data.text||"").trim();
-      if(!recognized && !whitelist){
-        await worker.setParameters({tessedit_pageseg_mode:"6",preserve_interword_spaces:"1",tessedit_char_whitelist:""});
-        result=await worker.recognize(crop);
-        recognized=String(result.data.text||"").trim();
-      }
-      return recognized;
-    };
-    try{
-      for(let i=0;i<players.length;i++){
-        const nickText=await readCrop(players[i].nick,"");
-        const killsText=await readCrop(players[i].kills,"0123456789");
-        const nick=cleanAutoKillNick(nickText,i);
-        const kills=parseAutoKillNumber(killsText);
-        rawLines.push(`${nickText} | ${killsText}`);
-        // Mantém a posição do jogador mesmo se o OCR não reconhecer um dos campos.
-        parsed.push({nick,kills:kills===null?"":kills});
-      }
-    }finally{await worker.terminate();bitmap.close?.();}
-    state.autoKillRows=parsed;
-    $("#autoKillText").value=parsed.map(r=>r.nick+" - "+r.kills).join("\n");
+    if(!window.Tesseract)await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("Não foi possível carregar o leitor de imagem. Verifique a internet."));document.head.appendChild(sc);});
+    const bitmap=await createImageBitmap(file),canvas=document.createElement("canvas");
+    const scale=Math.min(2.5,2400/Math.max(bitmap.width,bitmap.height));canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);
+    const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+    const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
+    for(let i=0;i<pixels.data.length;i+=4){const gray=pixels.data[i]*.299+pixels.data[i+1]*.587+pixels.data[i+2]*.114;const contrast=Math.max(0,Math.min(255,(gray-100)*1.65+128));pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=contrast;}
+    ctx.putImageData(pixels,0,0);
+    const result=await Tesseract.recognize(canvas,"eng",{logger:m=>{if(m.status==="recognizing text")status.textContent="Lendo o placar: "+Math.round((m.progress||0)*100)+"%";}});
+    const parsed=parseAutoKillWords(result.data.words,canvas.width,canvas.height);bitmap.close?.();
+    if(parsed.length>48){status.textContent="Encontrei mais de 48 registros. Confira o print e corrija a lista manualmente.";state.autoKillRows=parsed.slice(0,48);}else state.autoKillRows=parsed;
+    $("#autoKillText").value=state.autoKillRows.map(r=>r.nick+" - "+r.kills).join("\n");
     renderAutoKillReview();
-    const missing=parsed.filter(r=>!r.kills.toString().match(/^\\d+$/)||r.nick.startsWith("REVISAR NICK")).length;
-    status.textContent=`Analisei ${parsed.length} posições do placar. ${missing} precisam de conferência manual; revise os campos destacados antes de salvar.`;
+    status.textContent=state.autoKillRows.length
+      ?`Identifiquei ${state.autoKillRows.length} jogador(es) visíveis. O limite é 48, mas a sala pode ter menos; vagas vazias não serão criadas. Confira todos os nicks e abates antes de salvar.`
+      :"Não consegui localizar os campos de nick e Abates. Envie o print completo, sem cortes, e com boa nitidez.";
   }catch(err){status.textContent=err.message||"Falha ao ler a imagem.";toast(status.textContent,"err");}finally{btn.disabled=false;}
 });
 $("#autoKillPrepare").addEventListener("click",()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");state.autoKillRows=parseAutoKillText($("#autoKillText").value);renderAutoKillReview();if(!state.autoKillRows.length)toast("Não encontrei linhas no formato Nick - kills","err");});
@@ -1169,6 +1178,7 @@ $("#autoKillSaveRound").addEventListener("click",async()=>{
   if(!state.autoKillScrim)return toast("Selecione um X-Treino","err");
   const rows=state.autoKillRows.map(r=>({nick:String(r.nick||"").trim(),kills:+r.kills||0})).filter(r=>r.nick);
   if(!rows.length)return toast("Prepare e confira a lista antes de salvar","err");
+  if(rows.length>48)return toast("O limite é de 48 jogadores (12 times). Remova os registros extras antes de salvar.","err");
   const seen=new Set();for(const r of rows){const k=r.nick.toLocaleLowerCase("pt-BR");if(seen.has(k))return toast("Há jogador repetido na lista: "+r.nick,"err");seen.add(k);}
   try{await DB.set("automaticKillDrafts/"+state.autoKillScrim+"/r"+state.autoKillRound,rows);toast("Queda "+state.autoKillRound+" salva no Firebase! ✅");renderAutomaticKillAdmin();}
   catch(err){toast("Não foi possível salvar a queda: "+err.message,"err");}
