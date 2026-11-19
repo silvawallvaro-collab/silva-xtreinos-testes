@@ -457,8 +457,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <label class="mt">Queda<select id="manualKillRound"><option value="1">Queda 1</option><option value="2">Queda 2</option><option value="3">Queda 3</option><option value="4">Queda 4</option><option value="5">Queda 5</option></select></label>
         <div class="flex between wrap mt"><p id="manualKillInfo" class="muted small-t"></p><button class="btn ghost small" type="button" id="manualKillRefresh">ATUALIZAR LISTA</button></div>
         <div id="manualKillTeams" class="mt"></div>
-        <div class="actions mt"><button class="btn ghost" type="button" id="manualKillSave">SALVAR QUEDA</button><button class="btn" type="button" id="manualKillPublish">PUBLICAR RANK</button></div>
+        <div class="actions mt"><button class="btn ghost" type="button" id="manualKillSave">SALVAR QUEDA</button></div>
         <p id="manualKillStatus" class="muted small-t mt"></p>
+        <div id="manualKillSavedRounds" class="mt"></div>
+        <div id="manualKillRankPreview" class="mt"></div>
+        <div class="actions mt"><button class="btn" type="button" id="manualKillPublish">PUBLICAR RANK</button></div>
         <div id="manualKillPublishedActions" class="mt"></div>
       </div>
     </div>
@@ -1045,6 +1048,10 @@ function renderManualKill(){
   const done=[1,2,3,4,5].filter(n=>!!saved.rounds?.["r"+n]?.updatedAt).length;
   $("#manualKillInfo").textContent=`${regs.length} time(s) confirmado(s) • ${count} jogador(es) disponíveis • ${done}/5 quedas salvas`;
   $("#manualKillStatus").textContent=round.updatedAt?`Queda ${state.manualKillRound} salva em ${new Date(round.updatedAt).toLocaleString("pt-BR")}`:"Marque quem realmente jogou nesta queda e salve. Cada queda fica guardada separadamente.";
+  const roundsBox=$("#manualKillSavedRounds");
+  roundsBox.innerHTML='<h3>Quedas já salvas</h3>'+[1,2,3,4,5].map(n=>{const rd=saved.rounds?.["r"+n];const list=rd?.players||[];return `<div class="card mt"><div class="flex between wrap"><b>Queda ${n}</b><span class="badge ${rd?.updatedAt?"ok":"wait"}">${rd?.updatedAt?"SALVA":"PENDENTE"}</span></div>${rd?.updatedAt?(list.length?`<p class="muted small-t">${list.length} jogador(es) salvo(s)</p><div class="table-wrap"><table><thead><tr><th>Jogador</th><th>Abates</th></tr></thead><tbody>${list.map(p=>`<tr><td>${esc(p.nick)}</td><td><b>${Number(p.kills)||0}</b></td></tr>`).join("")}</tbody></table></div>`:'<p class="muted small-t">Queda salva sem jogadores marcados.</p>'):'<p class="muted small-t">Ainda não foi salva.</p>'}</div>`;}).join("");
+  const rank=manualKillBuildRank(sc.id);
+  $("#manualKillRankPreview").innerHTML='<h3>Prévia do ranking acumulado</h3>'+(rank.length?`<div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Abates</th><th>Quedas</th></tr></thead><tbody>${rank.map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td><b>${p.kills}</b></td><td>${p.rounds}/5</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted small-t">Salve uma queda com pelo menos um jogador para montar o ranking.</p>');
   const pub=DB.get("manualKillRankings/"+sc.id);
   $("#manualKillPublishedActions").innerHTML=pub?'<button class="btn danger small" type="button" id="manualKillDelete">APAGAR PUBLICAÇÃO</button> <span class="muted small-t">Este ranking está visível em Início e ABATES.</span>':'';
   const del=$("#manualKillDelete");if(del)del.addEventListener("click",deleteManualKillPublication);
@@ -1156,14 +1163,15 @@ $("#manualKillSave").addEventListener("click",async()=>{
   if(!isAdmin())return toast("Entre como organizador para continuar","err");
   const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return toast("Selecione um X-Treino","err");
   const selected=$$("#manualKillTeams .manual-kill-player:checked"), players=selected.map(ch=>{const input=$(`#manualKillTeams .manual-kill-count[data-uid="${CSS.escape(ch.dataset.uid)}"]`);return {uid:ch.dataset.uid,teamId:ch.dataset.team,nick:ch.dataset.nick,kills:Math.max(0,Math.min(99,Number(input?.value)||0))};});
+  if(!players.length)return toast("Marque pelo menos um jogador que participou desta queda antes de salvar.","err");
   const seen=new Set();for(const pl of players){if(seen.has(pl.uid))return toast("Jogador duplicado na lista","err");seen.add(pl.uid);}
   try{const path="manualKills/"+sc.id, old=DB.get(path)||{}, rounds={...(old.rounds||{})};rounds["r"+state.manualKillRound]={players,updatedAt:Date.now(),updatedBy:adminSess()?.user||"organizador"};await DB.set(path,{scrimId:sc.id,scrimTitle:sc.title,rounds,updatedAt:Date.now(),updatedBy:adminSess()?.user||"organizador"});await logAct(`Salvou Kill.manual ${sc.title} — Queda ${state.manualKillRound}: ${players.length} jogador(es)`);toast(`Queda ${state.manualKillRound} salva!`);renderManualKill();}
   catch(err){toast("Não foi possível salvar: "+err.message,"err");}
 });
 $("#manualKillPublish").addEventListener("click",async()=>{
   if(!isAdmin())return toast("Entre como organizador para continuar","err");const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return toast("Selecione um X-Treino","err");
-  const data=DB.get("manualKills/"+sc.id)||{}, saved=[1,2,3,4,5].filter(n=>!!data.rounds?.["r"+n]?.updatedAt);if(!saved.length)return toast("Salve pelo menos uma queda antes de publicar.","err");
-  const players=manualKillBuildRank(sc.id);if(!players.length)return toast("Nenhum jogador foi registrado nas quedas salvas.","err");
+  const data=DB.get("manualKills/"+sc.id)||{}, saved=[1,2,3,4,5].filter(n=>!!data.rounds?.["r"+n]?.updatedAt && (data.rounds["r"+n].players||[]).length);if(!saved.length)return toast("Nenhuma queda com jogadores foi salva. Confira a lista de Quedas já salvas abaixo.","err");
+  const players=manualKillBuildRank(sc.id);if(!players.length)return toast("O ranking está vazio. Marque os jogadores e salve a queda novamente.","err");
   if(!await ask(`Publicar o ranking parcial de ${sc.title} com ${players.length} jogador(es) e ${saved.length}/5 quedas salvas? Você poderá salvar outras quedas e publicar novamente depois.`))return;
   try{await DB.set("manualKillRankings/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,publishedAt:Date.now(),publishedBy:adminSess()?.user||"organizador",rounds:saved});await logAct("Publicou ranking Kill.manual de "+sc.title);toast("Ranking publicado em Início e ABATES!");render();renderManualKill();}
   catch(err){toast("Não foi possível publicar: "+err.message,"err");}
