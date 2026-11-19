@@ -371,12 +371,29 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
             <label>Data do X-Treino<input type="date" name="date" required></label>
             <label>Hora do X-Treino<input type="time" name="time" required value="20:00"></label>
           </div>
-          <label class="mt">Abrir inscrições automaticamente em (data e hora)<input type="datetime-local" name="registrationOpensAt"><small class="muted">Deixe vazio para abrir as inscrições imediatamente. Se escolher uma data futura, o site libera as inscrições nesse horário.</small></label>
           <div class="row">
             <label>Modo<select name="mode"><option>Squad</option><option>Duo</option><option>Solo</option></select></label>
             <label>Total de vagas<input type="number" name="slots" min="2" max="48" value="12" required></label>
           </div>
           <button class="btn" type="submit">Criar treino</button>
+        </form>
+      </div>
+      <div class="card mt">
+        <h3>X-Treino agendado</h3>
+        <p class="muted small-t">Use este botão para criar um treino separado, com abertura automática das inscrições na data e hora escolhidas.</p>
+        <button class="btn ghost" type="button" id="toggleScheduledScrim">＋ Criar X-Treino agendado</button>
+        <form id="scheduledScrimForm" class="mt" hidden>
+          <label>Título<input name="title" required maxlength="40" placeholder="X-Treino agendado"></label>
+          <div class="row">
+            <label>Data do X-Treino<input type="date" name="date" required></label>
+            <label>Hora do X-Treino<input type="time" name="time" required value="20:00"></label>
+          </div>
+          <label class="mt">Data e hora para abrir as inscrições<input type="datetime-local" name="registrationOpensAt" required><small class="muted">As inscrições serão liberadas automaticamente quando chegar esse horário.</small></label>
+          <div class="row">
+            <label>Modo<select name="mode"><option>Squad</option><option>Duo</option><option>Solo</option></select></label>
+            <label>Total de vagas<input type="number" name="slots" min="2" max="48" value="12" required></label>
+          </div>
+          <div class="actions mt"><button class="btn" type="submit">Salvar X-Treino agendado</button><button class="btn ghost" type="button" id="cancelScheduledScrim">Cancelar</button></div>
         </form>
       </div>
       <div id="adminScrims" class="grid mt"></div>
@@ -1357,12 +1374,27 @@ $("#roomCredentialsForm").addEventListener("submit", async e => {
 
 $("#scrimForm").addEventListener("submit", async e => {
   e.preventDefault();
+  if (!isAdmin()) return toast("Acesso restrito ao organizador", "err");
   const f = Object.fromEntries(new FormData(e.target)), id = uid();
-  const opensAt = f.registrationOpensAt ? new Date(f.registrationOpensAt).getTime() : 0;
-  if (f.registrationOpensAt && (!Number.isFinite(opensAt) || opensAt <= Date.now())) return toast("Escolha uma data e hora futuras para o agendamento, ou deixe vazio para abrir agora.", "err");
-  const status = opensAt > Date.now() ? "scheduled" : "open";
-  await DB.set("scrims/" + id, { id, title: f.title.trim(), date: f.date, time: f.time, mode: f.mode, slots: Math.max(2, +f.slots || 12), status, registrationOpensAt: opensAt || null, rounds: 1, created: Date.now() });
-  e.target.reset(); e.target.time.value = "20:00"; e.target.slots.value = 12; await logAct((status === "scheduled" ? "Agendou abertura das inscrições de " : "Criou o treino ") + f.title.trim()); toast(status === "scheduled" ? "Treino criado! As inscrições abrirão automaticamente no horário agendado. ⏰" : "Treino criado com inscrições abertas! ✅"); render();
+  await DB.set("scrims/" + id, { id, title: f.title.trim(), date: f.date, time: f.time, mode: f.mode, slots: Math.max(2, +f.slots || 12), status: "open", rounds: 1, created: Date.now() });
+  e.target.reset(); e.target.time.value = "20:00"; e.target.slots.value = 12; await logAct("Criou o treino " + f.title.trim()); toast("Treino criado com inscrições abertas! ✅"); render();
+});
+$("#toggleScheduledScrim").addEventListener("click", () => {
+  const form = $("#scheduledScrimForm"); form.hidden = !form.hidden;
+  $("#toggleScheduledScrim").textContent = form.hidden ? "＋ Criar X-Treino agendado" : "− Fechar criação de agendado";
+});
+$("#cancelScheduledScrim").addEventListener("click", () => {
+  $("#scheduledScrimForm").reset(); $("#scheduledScrimForm").hidden = true; $("#toggleScheduledScrim").textContent = "＋ Criar X-Treino agendado";
+});
+$("#scheduledScrimForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!isAdmin()) return toast("Acesso restrito ao organizador", "err");
+  const f = Object.fromEntries(new FormData(e.target)), opensAt = new Date(f.registrationOpensAt).getTime();
+  if (!Number.isFinite(opensAt) || opensAt <= Date.now()) return toast("Escolha uma data e hora futuras para abrir as inscrições.", "err");
+  const id = uid();
+  await DB.set("scrims/" + id, { id, title: f.title.trim(), date: f.date, time: f.time, mode: f.mode, slots: Math.max(2, +f.slots || 12), status: "scheduled", registrationOpensAt: opensAt, rounds: 1, created: Date.now() });
+  await logAct("Criou X-Treino agendado: " + f.title.trim());
+  toast("X-Treino agendado! As inscrições abrirão automaticamente no horário escolhido. ⏰"); render();
 });
 $("#newsForm").addEventListener("submit", async e => {
   e.preventDefault(); const id = uid();
