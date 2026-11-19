@@ -938,7 +938,6 @@ function renderHome(){
   } else { roomBox.hidden = true; roomBox.innerHTML = ""; }
   $("#sTeams").textContent = teams.length; $("#sPlayers").textContent = users.length;
   $("#sScrims").textContent = arr(DB.get("scrims")).filter(x => x.status === "done").length;
-  renderPublishedAutomaticKills();
   renderPublishedManualKills();
   const rk = standings(); $("#homeRank").innerHTML = rankRows(rk, true);
   $("#homeRankInfo").textContent = rk.length ? rk.length + " time(s) • " + Math.max(...rk.map(r => r.games)) + " queda(s) disputada(s) • " + pointsDesc() : "";
@@ -1342,14 +1341,13 @@ function renderPublishedManualKills(){
   const box=$("#homeManualKills"); if(!box)return;
   const all=arr(DB.get("manualKillRankings")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
   if(!all.length){box.innerHTML="";return;}
-  box.innerHTML=all.map(pub=>`<div class="card mt"><div class="flex between wrap"><div><h2 class="title">KILL.MANUAL — ${esc(pub.scrimTitle||"X-Treino")}</h2><p class="muted small-t">Ranking individual publicado • ${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):"—"}</p></div><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Time</th><th>Abates</th></tr></thead><tbody>${(pub.players||[]).slice(0,5).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td>[${esc(p.teamTag||"")}] ${esc(p.teamName||"")}</td><td><b>${+p.kills||0}</b></td></tr>`).join("")}</tbody></table></div><p class="muted small-t mt">Veja o ranking completo na aba ABATES.</p></div>`).join("");
+  box.innerHTML=all.map(pub=>`<div class="card mt"><div class="flex between wrap"><div><h2 class="title">KILL.MANUAL — ${esc(pub.scrimTitle||"X-Treino")}</h2><p class="muted small-t">Ranking individual publicado • ${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):"—"}</p></div><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Time</th><th>Abates</th></tr></thead><tbody>${(pub.players||[]).slice(0,5).map((p,i)=>`<tr><td>${i+1}</td><td><b>${i===0?"👑 ":""}${esc(p.nick)}</b></td><td>[${esc(p.teamTag||"")}] ${esc(p.teamName||"")}</td><td><b>${+p.kills||0}</b></td></tr>`).join("")}</tbody></table></div><p class="muted small-t mt">Veja o ranking completo na aba ABATES.</p></div>`).join("");
 }
 function renderAbatesPublic(){
   const box=$("#publicAbatesList"); if(!box)return;
   const manual=arr(DB.get("manualKillRankings")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
-  const automatic=arr(DB.get("automaticKills")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
-  const html=[...manual.map(pub=>`<div class="card"><div class="flex between wrap"><h3>KILL.MANUAL — ${esc(pub.scrimTitle||"X-Treino")}</h3><span class="badge ok">PUBLICADO</span></div><p class="muted small-t">${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):""}</p><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Time</th><th>Abates</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Q5</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td>[${esc(p.teamTag||"")}] ${esc(p.teamName||"")}</td><td><b>${+p.kills||0}</b></td>${[1,2,3,4,5].map(n=>`<td>${p.history&&p.history["r"+n]!==undefined?p.history["r"+n]:"—"}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`),...automatic.map(pub=>`<div class="card"><div class="flex between wrap"><h3>AUTOMATIC.KILL — ${esc(pub.scrimTitle||"X-Treino")}</h3><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Abates</th><th>Quedas</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td><b>${+p.kills||0}</b></td><td>${+p.rounds||0}/5</td></tr>`).join("")}</tbody></table></div></div>`)].join("");
-  box.innerHTML=html||'<div class="card empty">Ainda não há rankings de abates publicados.</div>';
+  const html=manual.map(pub=>`<div class="card"><div class="flex between wrap"><h3>KILL.MANUAL — ${esc(pub.scrimTitle||"X-Treino")}</h3><span class="badge ok">PUBLICADO</span></div><p class="muted small-t">${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):""}</p><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Time</th><th>Abates</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Q5</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${i===0?"👑 ":""}${esc(p.nick)}</b></td><td>[${esc(p.teamTag||"")}] ${esc(p.teamName||"")}</td><td><b>${+p.kills||0}</b></td>${[1,2,3,4,5].map(n=>`<td>${p.history&&p.history["r"+n]!==undefined?p.history["r"+n]:"—"}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`).join("");
+  box.innerHTML=html||'<div class="card empty">Ainda não há rankings KILL.MANUAL publicados.</div>';
 }
 
 /* Ações do KILL.MANUAL */
