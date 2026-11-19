@@ -1,4 +1,18 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important} .interface-preview{max-width:180px;max-height:110px;object-fit:contain;border-radius:10px;border:1px solid var(--line)}
+
+/* PERFIL DO JOGADOR + CONFIG.MEDALHAS */
+.player-hero{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:linear-gradient(120deg,rgba(127,29,29,.22),#10121c);border:1px solid rgba(239,68,68,.28);border-radius:16px;padding:18px}
+.player-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;background:#1a1b26;border:3px solid #ef4444;display:grid;place-items:center;font:700 2rem Rajdhani;color:#fff;flex:none}
+.player-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-top:14px}
+.player-stat{background:#0c1326;border:1px solid var(--line);border-radius:12px;padding:12px}
+.player-stat b{display:block;font:700 1.8rem Rajdhani;color:#ef4444;line-height:1.1}
+.player-medals{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.player-medal{display:flex;align-items:center;gap:7px;background:#19131a;border:1px solid rgba(239,68,68,.35);border-radius:10px;padding:8px 11px}
+.player-directory{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.player-directory button{text-align:left;width:100%}
+.medal-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--line);border-radius:12px;background:#0c1326;margin-top:9px}
+@media(max-width:520px){.player-avatar{width:70px;height:70px}}
+
 </style>
 <title>SPIDER XTREINOS</title>
 <meta name="theme-color" content="#090a10">
@@ -319,10 +333,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
           <label>Função<select name="role"><option>Rush</option><option>Suporte</option><option>Sniper</option><option>Granadeiro</option><option>Capitão</option></select></label>
         </div>
         <label>Servidor<select name="server"><option>Brasil</option><option>América Latina</option></select></label>
+        <label>Foto do perfil<input type="file" id="profilePhoto" accept="image/*"></label>
+        <p class="muted small-t">A foto será reduzida antes de salvar.</p>
         <button class="btn" type="submit">Salvar perfil</button>
       </form>
     </div>
   </div>
+  <div id="publicPlayerProfile" class="mt"></div>
+  <div class="card mt"><div class="flex between wrap"><h3>JOGADORES</h3><span class="muted small-t">Toque para abrir o perfil</span></div><div id="playerDirectory" class="player-directory mt"></div></div>
 </section>
 
 <!-- RANKING -->
@@ -390,6 +408,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <button data-tab="config">Config e backup</button>
         <button data-tab="equipe" id="tabEquipe" hidden>Organizadores</button>
         <button data-tab="interface" id="tabInterface" hidden>Interface</button>
+        <button data-tab="medals" id="tabMedals" hidden>CONFIG.MEDALHAS</button>
       </div>
       <button class="btn ghost small" id="adminOut">Sair</button>
     </div>
@@ -584,6 +603,20 @@ OutroNick - 5"></textarea></label>
           <button class="btn danger small" id="resetAll">Apagar tudo</button>
         </div>
       </div>
+      <div class="atab" data-atab="medals">
+        <div class="card">
+          <h3 id="medalFormTitle">Criar medalha</h3>
+          <form id="medalForm" class="mt">
+            <input type="hidden" name="id">
+            <div class="row"><label>Nome da medalha<input name="name" required maxlength="28" placeholder="Lenda do X-Treino"></label><label>Emoji<input name="emoji" required maxlength="8" value="🏅" placeholder="🏅"></label></div>
+            <label>Descrição<input name="description" maxlength="100" placeholder="Conquista especial do jogador"></label>
+            <div class="row"><label>Conquista para desbloquear<select name="criterion"><option value="manual">Somente atribuição manual</option><option value="kills">Abates acumulados</option><option value="matches">Partidas jogadas</option><option value="booyahs">Booyahs</option></select></label><label>Meta numérica<input name="target" type="number" min="1" max="999999" value="1"></label></div>
+            <div class="actions"><button class="btn" type="submit">Salvar medalha</button><button class="btn ghost" type="button" id="medalCancelEdit">Limpar</button></div>
+          </form>
+        </div>
+        <div class="card mt"><h3>Medalhas cadastradas</h3><div id="medalConfigList"></div></div>
+        <div class="card mt"><h3>Atribuir medalha a jogador</h3><form id="medalAssignForm" class="mt"><label>Jogador<select name="player" required></select></label><label>Medalha<select name="medal" required></select></label><button class="btn" type="submit">ATRIBUIR MEDALHA</button></form><p class="muted small-t mt">As medalhas atribuídas ou desbloqueadas por conquista aparecem automaticamente no perfil público.</p></div>
+      </div>
     </div>
   </div>
 </section>
@@ -709,8 +742,9 @@ const DB = {
   },
   del(p){return this.set(p,undefined);},
   async replaceAll(obj){
-    const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills"];
+    const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings"];
     if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
+    if(isAdmin()) branches.push("manualKills");
     this.data=obj||{};this.persist();if(!this.cloud)return;
     try{for(const branch of branches){const value=this.data[branch];await this.request(branch,value===undefined?"DELETE":"PUT",value);}this.status="online";}
     catch(e){this.status="error";toast("Falha ao restaurar: "+e.message,"err");}
@@ -720,8 +754,9 @@ const DB = {
     if(!this.cloud||this.pending>0)return false;
     try{
       // Não lê a raiz inteira: cada coleção pública é consultada separadamente.
-      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills"];
+      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings"];
       if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
+      if(isAdmin()) branches.push("manualKills");
       let changed=false;
       for(const branch of branches){
         const r=await this.request(branch,"GET");
@@ -742,7 +777,7 @@ function updatePill(){
 /* =====================================================
    REGRAS DE NEGÓCIO
    ===================================================== */
-const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", callRound: 1, callPending: null, autoKillScrim: "", autoKillRound: 1, autoKillRows: [], manualKillScrim: "", manualKillRound: 1 };
+const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", callRound: 1, callPending: null, autoKillScrim: "", autoKillRound: 1, autoKillRows: [], manualKillScrim: "", manualKillRound: 1, viewPlayerUid: "", editMedalId: "" };
 
 // Posicionamento por arrastar das etiquetas no painel ADM.CALL.
 let callPinDrag = null;
@@ -990,14 +1025,61 @@ function renderMyTeam(){
   ${isCap ? `<div class="card mt"><h3>Pedidos de vaga (${reqs.length})</h3>${reqs.map(r => `<div class="rrow"><b>${esc(r.nick)}</b><span class="flex"><button class="btn small ok" data-act="accept" data-id="${esc(t.id)}" data-id2="${esc(r.uid)}">Aceitar</button><button class="btn small danger" data-act="reject" data-id="${esc(t.id)}" data-id2="${esc(r.uid)}">Rejeitar</button></span></div>`).join("") || '<p class="muted small-t mt">Nenhum pedido no momento.</p>'}</div>` : ""}`;
 }
 
+function normalizedNick(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("pt-BR").trim();}
+function playerKillTotal(uidx,user){
+  const nick=normalizedNick(user?.nick),scrims=arr(DB.get("scrims"));let total=0;
+  for(const sc of scrims){
+    const manual=DB.get("manualKillRankings/"+sc.id),automatic=DB.get("automaticKills/"+sc.id);
+    const pub=manual?.publishedAt?manual:automatic;if(!pub?.publishedAt)continue;
+    const p=(pub.players||[]).find(x=>(x.uid&&x.uid===uidx)||(!x.uid&&normalizedNick(x.nick)===nick));
+    if(p)total+=Math.max(0,+p.kills||0);
+  }
+  return total;
+}
+function playerStats(uidx,user){
+  const memberships=arr(DB.get("teams")).filter(tm=>tm.members&&tm.members[uidx]);
+  const team=myTeam()&&myTeam().members&&myTeam().members[uidx]?myTeam():memberships[0]||null;
+  const played=[];let booyahs=0,matches=0;
+  for(const sc of arr(DB.get("scrims"))){
+    const teamIds=memberships.filter(tm=>sc.regs&&sc.regs[tm.id]).map(tm=>tm.id);
+    if(!teamIds.length)continue;
+    let playedRound=false,won=false;
+    for(const [rk,round] of Object.entries(DB.get("results/"+sc.id)||{})){
+      for(const tid of teamIds){const r=round&&round[tid];if(r&&+r.place>0){playedRound=true;matches++;if(+r.place===1)won=true;}}
+    }
+    if(playedRound)played.push({id:sc.id,title:sc.title,date:sc.date,won});
+    for(const round of Object.values(DB.get("results/"+sc.id)||{}))for(const tid of teamIds)if(round&&round[tid]&&+round[tid].place===1)booyahs++;
+  }
+  return {team,kills:playerKillTotal(uidx,user),matches,booyahs,recent:played.sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,5)};
+}
+function playerMedals(uidx,stats){
+  const cfg=arr(settings().playerMedals),awards=settings().playerMedalAwards||{},given=arr(awards[uidx]).map(x=>typeof x==="string"?x:x.id);
+  return cfg.filter(m=>given.includes(m.id)||(m.criterion==="kills"&&stats.kills>=+m.target)||(m.criterion==="matches"&&stats.matches>=+m.target)||(m.criterion==="booyahs"&&stats.booyahs>=+m.target));
+}
+function renderPlayerProfile(uidx){
+  const user=DB.get("users/"+uidx);if(!user)return '<div class="card empty">Jogador não encontrado.</div>';
+  const st=playerStats(uidx,user),medals=playerMedals(uidx,st);
+  const all=arr(DB.get("users")).map(u=>({u,k:playerKillTotal(u.id,u)})).sort((a,b)=>b.k-a.k||String(a.u.nick||"").localeCompare(String(b.u.nick||""),"pt-BR"));
+  const rank=all.findIndex(x=>x.u.id===uidx)+1;
+  const photo=user.photo||"";
+  return `<div class="card"><div class="player-hero">${photo?`<img class="player-avatar" src="${esc(photo)}" alt="Foto de ${esc(user.nick)}">`:`<div class="player-avatar">${esc(String(user.nick||"S").slice(0,1).toUpperCase())}</div>`}<div><h2>${esc(user.nick||"Jogador")}</h2><p class="muted small-t">${st.team?`[${esc(st.team.tag)}] ${esc(st.team.name)}`:"Sem time atualmente"}</p><p class="muted small-t">ID Free Fire: ${esc(user.ffid||"Não informado")} • ${esc(user.server||"Brasil")}</p></div></div><div class="player-stats"><div class="player-stat"><span class="muted small-t">ABATES / PONTUAÇÃO</span><b>${st.kills}</b></div><div class="player-stat"><span class="muted small-t">RANKING</span><b>${rank||"—"}º</b></div><div class="player-stat"><span class="muted small-t">PARTIDAS JOGADAS</span><b>${st.matches}</b></div><div class="player-stat"><span class="muted small-t">BOOYAHS</span><b>${st.booyahs}</b></div></div><h3 class="sec">MEDALHAS E CONQUISTAS</h3><div class="player-medals">${medals.map(m=>`<span class="player-medal" title="${esc(m.description||"")}"><b>${esc(m.emoji||"🏅")}</b><span>${esc(m.name)}</span></span>`).join("")||'<span class="muted small-t">Ainda não conquistou medalhas.</span>'}</div><h3 class="sec">X-TREINOS RECENTES</h3>${st.recent.length?st.recent.map(x=>`<div class="rrow"><span><b>${esc(x.title||"X-Treino")}</b><span class="muted small-t"> • ${esc(x.date||"")}</span></span><span class="badge ${x.won?"ok":"off"}">${x.won?"🏆 BOOYAH":"DISPUTADO"}</span></div>`).join(""):'<p class="muted small-t">Nenhum resultado de X-Treino registrado para este jogador.</p>'}</div>`;
+}
+function renderPlayerDirectory(){
+  const box=$("#playerDirectory");if(!box)return;
+  const users=arr(DB.get("users")).sort((a,b)=>String(a.nick||"").localeCompare(String(b.nick||""),"pt-BR"));
+  box.innerHTML=users.length?users.map(u=>`<button type="button" class="card" data-act="playerprofile" data-id="${esc(u.id)}"><b>${esc(u.nick||"Jogador")}</b><span class="muted small-t">${esc((teamOf(u.id)||{}).name||"Sem time")}</span></button>`).join(""):'<p class="muted small-t">Ainda não há jogadores cadastrados.</p>';
+}
 function renderProfile(){
-  const u = me();
-  $("#authBox").hidden = !!u; $("#profileBox").hidden = !u;
-  if (!u) return;
-  $("#profNick").textContent = u.nick;
-  const t = myTeam(); $("#profTeam").textContent = t ? `Time: [${t.tag}] ${t.name}` : "Você ainda não está em um time.";
-  const f = $("#profileForm");
-  if (!f.contains(document.activeElement)){ f.ffid.value = u.ffid || ""; f.role.value = u.role || "Rush"; f.server.value = u.server || "Brasil"; }
+  const u=me();
+  $("#authBox").hidden=!!u;$("#profileBox").hidden=!u;
+  if(u){
+    $("#profNick").textContent=u.nick;
+    const t=myTeam();$("#profTeam").textContent=t?`Time: [${t.tag}] ${t.name}`:"Você ainda não está em um time.";
+    const f=$("#profileForm");if(!f.contains(document.activeElement)){f.ffid.value=u.ffid||"";f.role.value=u.role||"Rush";f.server.value=u.server||"Brasil";}
+  }
+  const target=state.viewPlayerUid&&DB.get("users/"+state.viewPlayerUid)?state.viewPlayerUid:(u?u.id:"");
+  $("#publicPlayerProfile").innerHTML=target?renderPlayerProfile(target):'<div class="card empty">Escolha um jogador na lista para ver o perfil completo.</div>';
+  renderPlayerDirectory();
 }
 
 function renderRanking(){
@@ -1016,6 +1098,13 @@ function renderSocial(){
     : '<div class="card empty" style="grid-column:1/-1">Os links ainda não foram configurados pelo organizador.</div>';
 }
 
+function renderMedalConfig(){
+  if(!isMaster())return;
+  const cfg=arr(settings().playerMedals),users=arr(DB.get("users"));
+  const list=$("#medalConfigList");if(list)list.innerHTML=cfg.length?cfg.map(m=>`<div class="medal-row"><div><b>${esc(m.emoji||"🏅")} ${esc(m.name)}</b><p class="muted small-t">${esc(m.description||"")} • ${m.criterion==="manual"?"Atribuição manual":`Meta: ${m.target} ${({kills:"abates",matches:"partidas",booyahs:"Booyahs"})[m.criterion]||""}`}</p></div><span class="flex"><button class="btn small ghost" data-act="medaledit" data-id="${esc(m.id)}">Editar</button><button class="btn small danger" data-act="medaldelete" data-id="${esc(m.id)}">Excluir</button></span></div>`).join(""):'<p class="muted small-t">Nenhuma medalha cadastrada ainda.</p>';
+  const pf=$("#medalAssignForm");if(pf){pf.elements.namedItem("player").innerHTML=users.map(u=>`<option value="${esc(u.id)}">${esc(u.nick)}</option>`).join("");pf.elements.namedItem("medal").innerHTML=cfg.map(m=>`<option value="${esc(m.id)}">${esc(m.emoji)} ${esc(m.name)}</option>`).join("");pf.querySelector('button[type="submit"]').disabled=!users.length||!cfg.length;}
+}
+function clearMedalForm(){const f=$("#medalForm");if(!f)return;f.reset();f.elements.namedItem("id").value="";f.elements.namedItem("emoji").value="🏅";f.elements.namedItem("target").value="1";$("#medalFormTitle").textContent="Criar medalha";state.editMedalId="";}
 function renderAdmin(){
   const on = isAdmin();
   $("#adminLock").hidden = on; $("#adminPanel").hidden = !on;
@@ -1024,8 +1113,9 @@ function renderAdmin(){
   $("#tabAdmCall").hidden = !master;
   $("#tabEquipe").hidden = !master;
   $("#tabInterface").hidden = !master;
+  $("#tabMedals").hidden = !master;
   $("#tabAutomaticKill").hidden = !master;
-  if (!master && ["equipe", "automaticKill", "interface", "admCall"].includes(state.adminTab)) state.adminTab = "treinos";
+  if (!master && ["equipe", "automaticKill", "interface", "admCall", "medals"].includes(state.adminTab)) state.adminTab = "treinos";
   $("#adminWho").textContent = "Conectado como " + sess.user + (master ? " (organizador principal)" : " (organizador)");
   if (master){
     const adms = arr(DB.get("admins")).sort((a, b) => a.created - b.created);
@@ -1042,6 +1132,7 @@ function renderAdmin(){
   if (state.adminTab === "automaticKill" && master) renderAutomaticKillAdmin();
   if (state.adminTab === "manualKill") renderManualKillAdmin();
   if (state.adminTab === "interface" && master) renderInterfacePanel();
+  if (state.adminTab === "medals" && master) renderMedalConfig();
 
   const scrims = scrimsSorted().reverse();
   $("#adminScrims").innerHTML = scrims.length ? scrims.map(s => {
@@ -1410,7 +1501,7 @@ document.addEventListener("click", async e => {
   if (g){ e.preventDefault(); go(g.dataset.go); return; }
 
   const tabBtn = e.target.closest("#adminTabs button");
-  if (tabBtn){ if (tabBtn.dataset.tab === "automaticKill" && !isMaster()) return toast("AUTOMATIC.KILL é exclusivo do organizador principal", "err"); state.adminTab = tabBtn.dataset.tab; renderAdmin(); return; }
+  if (tabBtn){ if (["automaticKill","medals"].includes(tabBtn.dataset.tab) && !isMaster()) return toast("Esta área é exclusiva do organizador principal", "err"); state.adminTab = tabBtn.dataset.tab; renderAdmin(); return; }
   const roundBtn = e.target.closest("#resRounds [data-round]");
   if (roundBtn){ state.resRound = +roundBtn.dataset.round; renderResults(); return; }
 
@@ -1513,6 +1604,31 @@ $("#profileForm").addEventListener("submit", async e => {
   const f = new FormData(e.target);
   await DB.set("users/" + u.id, Object.assign({}, u, { ffid: (f.get("ffid") || "").trim(), role: f.get("role"), server: f.get("server") }));
   toast("Perfil salvo ✅"); render();
+});
+
+$("#profilePhoto").addEventListener("change",async e=>{
+  const u=me(),file=e.target.files?.[0];if(!u||!file)return;
+  if(!file.type.startsWith("image/")){e.target.value="";return toast("Escolha uma imagem válida","err");}
+  try{
+    const data=await new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const c=document.createElement("canvas"),scale=Math.min(1,320/Math.max(img.width,img.height));c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);resolve(c.toDataURL("image/jpeg",.72));};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Não foi possível abrir a imagem"));};img.src=url;});
+    await DB.set("users/"+u.id,{...u,photo:data});toast("Foto do perfil atualizada!");renderProfile();
+  }catch(err){toast("Não foi possível salvar a foto: "+err.message,"err");}
+});
+$("#medalCancelEdit").addEventListener("click",clearMedalForm);
+$("#medalForm").addEventListener("submit",async e=>{
+  e.preventDefault();if(!isMaster())return toast("Somente o organizador principal pode configurar medalhas","err");
+  const f=new FormData(e.target),name=String(f.get("name")||"").trim(),emoji=String(f.get("emoji")||"🏅").trim(),criterion=String(f.get("criterion")||"manual"),target=Math.max(1,Math.min(999999,Number(f.get("target"))||1));
+  if(name.length<2)return toast("Digite um nome para a medalha","err");
+  const old=arr(settings().playerMedals),id=state.editMedalId||uid();
+  const medal={id,name,emoji,description:String(f.get("description")||"").trim(),criterion,target,updatedAt:Date.now()};
+  const next=old.filter(m=>m.id!==id);next.push(medal);
+  await DB.set("settings/playerMedals",next);await logAct((state.editMedalId?"Editou":"Criou")+" a medalha "+name);clearMedalForm();renderMedalConfig();renderProfile();toast("Medalha salva!");
+});
+$("#medalAssignForm").addEventListener("submit",async e=>{
+  e.preventDefault();if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  const f=new FormData(e.target),uidx=String(f.get("player")||""),mid=String(f.get("medal")||"");if(!uidx||!mid)return toast("Escolha jogador e medalha","err");
+  const awards={...(settings().playerMedalAwards||{})},list=arr(awards[uidx]).map(x=>typeof x==="string"?x:x.id);if(!list.includes(mid))list.push(mid);awards[uidx]=list;
+  await DB.set("settings/playerMedalAwards",awards);const player=DB.get("users/"+uidx),medal=arr(settings().playerMedals).find(m=>m.id===mid);await logAct("Atribuiu medalha "+(medal?.name||"")+" para "+(player?.nick||"jogador"));renderMedalConfig();renderProfile();toast("Medalha atribuída ao jogador!");
 });
 
 $("#teamForm").addEventListener("submit", async e => {
@@ -1737,6 +1853,19 @@ async function extraActs(act, id, id2, u, t){
   const canTeam = tid => { const tm = DB.get("teams/" + tid); return !!tm && (isAdmin() || (u && tm.captainId === u.id)); };
   const lg = txt => isAdmin() ? logAct(txt) : null;
   switch (act){
+    case "playerprofile": state.viewPlayerUid=id;go("perfil");renderProfile();return true;
+    case "medaledit": {
+      if(!isMaster())return no("Somente o organizador principal pode configurar medalhas");
+      const m=arr(settings().playerMedals).find(x=>x.id===id);if(!m)return true;
+      const f=$("#medalForm"),el=n=>f.elements.namedItem(n);el("id").value=m.id;el("name").value=m.name||"";el("emoji").value=m.emoji||"🏅";el("description").value=m.description||"";el("criterion").value=m.criterion||"manual";el("target").value=m.target||1;state.editMedalId=m.id;$("#medalFormTitle").textContent="Editar medalha";f.scrollIntoView({behavior:"smooth",block:"center"});return true;
+    }
+    case "medaldelete": {
+      if(!isMaster())return no("Acesso exclusivo do organizador principal");
+      if(!await ask("Excluir esta medalha? Os perfis deixarão de exibi-la."))return true;
+      const cfg=arr(settings().playerMedals).filter(m=>m.id!==id),awards={...(settings().playerMedalAwards||{})};
+      Object.keys(awards).forEach(uid=>{awards[uid]=arr(awards[uid]).filter(x=>(typeof x==="string"?x:x.id)!==id);});
+      await DB.set("settings/playerMedals",cfg);await DB.set("settings/playerMedalAwards",awards);await logAct("Excluiu uma medalha personalizada");clearMedalForm();renderMedalConfig();toast("Medalha excluída");return true;
+    }
     case "copyRoomId":
     case "copyRoomPassword": {
       const room = DB.get("roomCredentials") || {};
