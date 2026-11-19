@@ -176,6 +176,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <a data-go="times">Times</a>
     <a data-go="meutime">Meu time</a>
     <a data-go="ranking">Ranking</a>
+    <a data-go="abates">ABATES</a>
     <a data-go="calls">CALL</a>
     <a data-go="redes">Redes</a>
     <a data-go="perfil">Perfil</a>
@@ -213,7 +214,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <div class="card"><div class="stat" id="sScrims">0</div><p class="muted">Treinos realizados</p></div>
   </div>
 
-  <div id="homeAutomaticKills" class="mt"></div>
+  <div id="homeManualKillRankings" class="mt"></div>
 
   <h2 class="title">Ranking geral</h2>
   <div class="table-wrap"><table><thead><tr><th>#</th><th>Time</th><th>Quedas</th><th>Booyah</th><th>Abates</th><th>Pontos</th><th>Resultados das quedas</th></tr></thead><tbody id="homeRank"></tbody></table></div>
@@ -312,6 +313,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   </div>
 </section>
 
+<section class="page" id="abates">
+  <h2 class="title">ABATES</h2>
+  <p class="sub">Ranking publicado dos jogadores por X-Treino.</p>
+  <div id="publicManualKillRankings"></div>
+</section>
+
 <!-- RANKING -->
 <section class="page" id="ranking">
   <h2 class="title">Ranking</h2>
@@ -363,7 +370,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <button data-tab="calls">Sorteio de call</button>
         <button data-tab="sala">ID / Senha</button>
         <button data-tab="manualKill">Kill.manual</button>
-        <button data-tab="automaticKill" id="tabAutomaticKill" hidden>AUTOMATIC.KILL</button>
+        
         <button data-tab="pessoas">Times e jogadores</button>
         <button data-tab="avisos">Avisos</button>
         <button data-tab="logs">Logs</button>
@@ -447,10 +454,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <h3 style="color:var(--red,#e11d2e)">Kill.manual</h3>
         <p class="muted small-t">Escolha o X-Treino. A lista mostra somente jogadores dos times inscritos e dentro das vagas confirmadas. Marque apenas quem realmente jogou e informe os abates. A lista não inclui jogadores de outros times ou reservas de cadastro que não participaram.</p>
         <label class="mt">X-Treino<select id="manualKillScrim"></select></label>
+        <label class="mt">Queda<select id="manualKillRound"><option value="1">Queda 1</option><option value="2">Queda 2</option><option value="3">Queda 3</option><option value="4">Queda 4</option><option value="5">Queda 5</option></select></label>
         <div class="flex between wrap mt"><p id="manualKillInfo" class="muted small-t"></p><button class="btn ghost small" type="button" id="manualKillRefresh">ATUALIZAR LISTA</button></div>
         <div id="manualKillTeams" class="mt"></div>
-        <div class="actions mt"><button class="btn" type="button" id="manualKillSave">SALVAR PARTICIPAÇÃO E ABATES</button></div>
+        <div class="actions mt"><button class="btn ghost" type="button" id="manualKillSave">SALVAR QUEDA</button><button class="btn" type="button" id="manualKillPublish">PUBLICAR RANK</button></div>
         <p id="manualKillStatus" class="muted small-t mt"></p>
+        <div id="manualKillPublishedActions" class="mt"></div>
       </div>
     </div>
 
@@ -686,7 +695,7 @@ const DB = {
   },
   del(p){return this.set(p,undefined);},
   async replaceAll(obj){
-    const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills","manualKills"];
+    const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills","manualKills","manualKillRankings"];
     if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
     this.data=obj||{};this.persist();if(!this.cloud)return;
     try{for(const branch of branches){const value=this.data[branch];await this.request(branch,value===undefined?"DELETE":"PUT",value);}this.status="online";}
@@ -697,7 +706,9 @@ const DB = {
     if(!this.cloud||this.pending>0)return false;
     try{
       // Não lê a raiz inteira: cada coleção pública é consultada separadamente.
-      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills","manualKills"];
+      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","automaticKills","manualKillRankings"];
+      // Kill.manual é privado: somente organizadores ativos e o principal sincronizam esta coleção.
+      if(isAdmin()) branches.push("manualKills");
       if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
       let changed=false;
       for(const branch of branches){
@@ -719,7 +730,7 @@ function updatePill(){
 /* =====================================================
    REGRAS DE NEGÓCIO
    ===================================================== */
-const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", autoKillScrim: "", autoKillRound: 1, autoKillRows: [], manualKillScrim: "" };
+const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", autoKillScrim: "", autoKillRound: 1, autoKillRows: [], manualKillScrim: "", manualKillRound: 1 };
 const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","clearRoomCredentials"]);
 function adminSess(){
   try {
@@ -950,7 +961,7 @@ function renderAdmin(){
   const master = isMaster(), sess = adminSess();
   $("#tabEquipe").hidden = !master;
   $("#tabInterface").hidden = !master;
-  $("#tabAutomaticKill").hidden = !master;
+  if($("#tabAutomaticKill")) $("#tabAutomaticKill").hidden = true;
   if (!master && ["equipe", "automaticKill", "interface"].includes(state.adminTab)) state.adminTab = "treinos";
   $("#adminWho").textContent = "Conectado como " + sess.user + (master ? " (organizador principal)" : " (organizador)");
   if (master){
@@ -966,7 +977,7 @@ function renderAdmin(){
   $$(".atab").forEach(a => a.hidden = a.dataset.atab !== state.adminTab);
   if (state.adminTab === "calls") renderCallAdmin();
   if (state.adminTab === "manualKill") renderManualKill();
-  if (state.adminTab === "automaticKill" && master) renderAutomaticKillAdmin();
+  if (state.adminTab === "automaticKill") state.adminTab = "treinos";
   if (state.adminTab === "interface" && master) renderInterfacePanel();
 
   const scrims = scrimsSorted().reverse();
@@ -1018,23 +1029,41 @@ function renderResults(){
 function autoKillRoundData(){ return DB.get("automaticKillDrafts/"+(state.autoKillScrim||"")) || {}; }
 function renderManualKill(){
   const sel=$("#manualKillScrim"); if(!sel)return;
-  const scrims=scrimsSorted().slice().reverse();
-  const active=state.manualKillScrim;
+  const scrims=scrimsSorted().slice().reverse(), active=state.manualKillScrim;
   sel.innerHTML=scrims.length?scrims.map(sc=>`<option value="${esc(sc.id)}">${esc(sc.title)} — ${esc(sc.date||"")}</option>`).join(""):'<option value="">Nenhum treino cadastrado</option>';
   state.manualKillScrim=scrims.some(sc=>sc.id===active)?active:(scrims[0]?.id||""); sel.value=state.manualKillScrim;
+  const roundSel=$("#manualKillRound"); roundSel.value=String(state.manualKillRound||1);
   const sc=DB.get("scrims/"+state.manualKillScrim), box=$("#manualKillTeams");
   if(!sc){$("#manualKillInfo").textContent="Crie ou selecione um X-Treino.";box.innerHTML="";return;}
   const regs=confirmedRegs(sc).filter(r=>DB.get("teams/"+r.tid));
-  const saved=DB.get("manualKills/"+sc.id)||{}; const picked=new Map((saved.players||[]).map(p=>[p.uid,p]));
-  let count=0;
-  box.innerHTML=regs.map((r,i)=>{
-    const tm=DB.get("teams/"+r.tid); if(!tm)return "";
-    const members=Object.entries(tm.members||{});
+  const saved=DB.get("manualKills/"+sc.id)||{}, round=saved.rounds?.["r"+state.manualKillRound]||{};
+  const picked=new Map((round.players||[]).map(p=>[p.uid,p])); let count=0;
+  box.innerHTML=regs.map((r,i)=>{const tm=DB.get("teams/"+r.tid);if(!tm)return "";const members=Object.entries(tm.members||{});
     if(!members.length)return `<div class="card"><b>${i+1}. [${esc(tm.tag)}] ${esc(tm.name)}</b><p class="muted small-t">Time sem jogadores cadastrados.</p></div>`;
     return `<div class="card"><div class="flex between wrap"><b>${i+1}. [${esc(tm.tag)}] ${esc(tm.name)}</b><span class="badge ${r.checkin?"ok":"wait"}">${r.checkin?"Check-in feito":"Sem check-in"}</span></div>${members.map(([uid,nick])=>{count++;const old=picked.get(uid);return `<div class="rrow"><label style="display:flex;align-items:center;gap:9px;flex:1"><input type="checkbox" class="manual-kill-player" data-uid="${esc(uid)}" data-team="${esc(tm.id)}" data-nick="${esc(nick)}" ${old?"checked":""} style="width:auto"> <span>${esc(nick)}${uid===tm.captainId?" 👑":""}</span></label><label style="max-width:110px">Abates<input type="number" class="manual-kill-count" data-uid="${esc(uid)}" min="0" max="99" value="${old?Number(old.kills)||0:0}" inputmode="numeric"></label></div>`;}).join("")}</div>`;
   }).join("")||'<div class="card empty">Nenhum time confirmado neste X-Treino.</div>';
-  $("#manualKillInfo").textContent=`${regs.length} time(s) confirmado(s) • ${count} jogador(es) disponíveis • ${picked.size} participação(ões) já salva(s)`;
-  $("#manualKillStatus").textContent=saved.updatedAt?`Última atualização: ${new Date(saved.updatedAt).toLocaleString("pt-BR")}`:"Marque quem realmente jogou e salve. Jogadores desmarcados não entram no registro.";
+  const done=[1,2,3,4,5].filter(n=>!!saved.rounds?.["r"+n]?.updatedAt).length;
+  $("#manualKillInfo").textContent=`${regs.length} time(s) confirmado(s) • ${count} jogador(es) disponíveis • ${done}/5 quedas salvas`;
+  $("#manualKillStatus").textContent=round.updatedAt?`Queda ${state.manualKillRound} salva em ${new Date(round.updatedAt).toLocaleString("pt-BR")}`:"Marque quem realmente jogou nesta queda e salve. Cada queda fica guardada separadamente.";
+  const pub=DB.get("manualKillRankings/"+sc.id);
+  $("#manualKillPublishedActions").innerHTML=pub?'<button class="btn danger small" type="button" id="manualKillDelete">APAGAR PUBLICAÇÃO</button> <span class="muted small-t">Este ranking está visível em Início e ABATES.</span>':'';
+  const del=$("#manualKillDelete");if(del)del.addEventListener("click",deleteManualKillPublication);
+}
+function manualKillBuildRank(scId){
+  const data=DB.get("manualKills/"+scId)||{}, byUid=new Map();
+  for(let n=1;n<=5;n++)for(const p of (data.rounds?.["r"+n]?.players||[])){const old=byUid.get(p.uid)||{uid:p.uid,teamId:p.teamId,nick:p.nick,kills:0,rounds:0,roundKills:{}};old.kills+=Number(p.kills)||0;old.rounds++;old.roundKills["Q"+n]=Number(p.kills)||0;byUid.set(p.uid,old);}
+  return [...byUid.values()].sort((a,b)=>b.kills-a.kills||a.nick.localeCompare(b.nick,"pt-BR"));
+}
+async function deleteManualKillPublication(){
+  const id=state.manualKillScrim;if(!id||!isAdmin())return;
+  if(!await ask("Apagar a publicação deste X-Treino da página inicial e da aba ABATES? Os registros das quedas serão mantidos."))return;
+  try{await DB.del("manualKillRankings/"+id);await logAct("Apagou publicação Kill.manual de "+(DB.get("scrims/"+id)?.title||id));toast("Publicação apagada da página inicial e de ABATES.");render();renderManualKill();}
+  catch(e){toast("Não foi possível apagar: "+e.message,"err");}
+}
+function renderManualKillRankings(){
+  const all=Object.values(DB.get("manualKillRankings")||{}).filter(x=>x&&x.scrimId).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
+  const html=all.length?all.map(pub=>`<div class="card mt"><div class="flex between wrap"><div><h2 class="title">${esc(pub.scrimTitle||"X-Treino")}</h2><p class="muted small-t">Publicado em ${pub.publishedAt?new Date(pub.publishedAt).toLocaleString("pt-BR"):"—"}</p></div><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Abates</th><th>Quedas</th><th>Por queda</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td><b>${Number(p.kills)||0}</b></td><td>${Number(p.rounds)||0}/5</td><td>${[1,2,3,4,5].map(n=>p.roundKills?.["Q"+n]!==undefined?`Q${n}: ${p.roundKills["Q"+n]}`:`Q${n}: —`).join(" • ")}</td></tr>`).join("")}</tbody></table></div></div>`).join(""):'<div class="card empty">Nenhum ranking de abates publicado ainda.</div>';
+  const home=$("#homeManualKillRankings"), page=$("#publicManualKillRankings");if(home)home.innerHTML=all.length?'<h2 class="title">ABATES DOS JOGADORES</h2>'+html:"";if(page)page.innerHTML=html;
 }
 
 function renderAutomaticKillAdmin(){
@@ -1121,15 +1150,23 @@ function renderAutoKillReview(){
   box.innerHTML='<h3>Conferir jogadores e kills</h3><div class="table-wrap"><table><thead><tr><th>Jogador</th><th>Kills</th></tr></thead><tbody>'+state.autoKillRows.map((r,i)=>`<tr><td><input data-ak-nick="${i}" value="${esc(r.nick)}" maxlength="32"></td><td><input data-ak-kills="${i}" type="number" min="0" max="99" value="${r.kills ?? ""}"></td></tr>`).join("")+'</tbody></table></div><p class="muted small-t mt">Confira com atenção antes de salvar. O sistema não publica sem sua confirmação.</p>';
 }
 $("#manualKillScrim").addEventListener("change",e=>{state.manualKillScrim=e.target.value;renderManualKill();});
+$("#manualKillRound").addEventListener("change",e=>{state.manualKillRound=Math.max(1,Math.min(5,+e.target.value||1));renderManualKill();});
 $("#manualKillRefresh").addEventListener("click",()=>renderManualKill());
 $("#manualKillSave").addEventListener("click",async()=>{
   if(!isAdmin())return toast("Entre como organizador para continuar","err");
   const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return toast("Selecione um X-Treino","err");
-  const selected=$$("#manualKillTeams .manual-kill-player:checked");
-  const players=selected.map(ch=>{const input=$(`#manualKillTeams .manual-kill-count[data-uid="${CSS.escape(ch.dataset.uid)}"]`);return {uid:ch.dataset.uid,teamId:ch.dataset.team,nick:ch.dataset.nick,kills:Math.max(0,Math.min(99,Number(input?.value)||0))};});
+  const selected=$$("#manualKillTeams .manual-kill-player:checked"), players=selected.map(ch=>{const input=$(`#manualKillTeams .manual-kill-count[data-uid="${CSS.escape(ch.dataset.uid)}"]`);return {uid:ch.dataset.uid,teamId:ch.dataset.team,nick:ch.dataset.nick,kills:Math.max(0,Math.min(99,Number(input?.value)||0))};});
   const seen=new Set();for(const pl of players){if(seen.has(pl.uid))return toast("Jogador duplicado na lista","err");seen.add(pl.uid);}
-  try{await DB.set("manualKills/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,updatedAt:Date.now(),updatedBy:adminSess()?.user||"organizador"});await logAct(`Salvou Kill.manual de ${sc.title}: ${players.length} jogador(es)`);toast("Kill.manual salvo com sucesso!");renderManualKill();}
+  try{const path="manualKills/"+sc.id, old=DB.get(path)||{}, rounds={...(old.rounds||{})};rounds["r"+state.manualKillRound]={players,updatedAt:Date.now(),updatedBy:adminSess()?.user||"organizador"};await DB.set(path,{scrimId:sc.id,scrimTitle:sc.title,rounds,updatedAt:Date.now(),updatedBy:adminSess()?.user||"organizador"});await logAct(`Salvou Kill.manual ${sc.title} — Queda ${state.manualKillRound}: ${players.length} jogador(es)`);toast(`Queda ${state.manualKillRound} salva!`);renderManualKill();}
   catch(err){toast("Não foi possível salvar: "+err.message,"err");}
+});
+$("#manualKillPublish").addEventListener("click",async()=>{
+  if(!isAdmin())return toast("Entre como organizador para continuar","err");const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return toast("Selecione um X-Treino","err");
+  const data=DB.get("manualKills/"+sc.id)||{}, saved=[1,2,3,4,5].filter(n=>!!data.rounds?.["r"+n]?.updatedAt);if(!saved.length)return toast("Salve pelo menos uma queda antes de publicar.","err");
+  const players=manualKillBuildRank(sc.id);if(!players.length)return toast("Nenhum jogador foi registrado nas quedas salvas.","err");
+  if(!await ask(`Publicar o ranking parcial de ${sc.title} com ${players.length} jogador(es) e ${saved.length}/5 quedas salvas? Você poderá salvar outras quedas e publicar novamente depois.`))return;
+  try{await DB.set("manualKillRankings/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,publishedAt:Date.now(),publishedBy:adminSess()?.user||"organizador",rounds:saved});await logAct("Publicou ranking Kill.manual de "+sc.title);toast("Ranking publicado em Início e ABATES!");render();renderManualKill();}
+  catch(err){toast("Não foi possível publicar: "+err.message,"err");}
 });
 
 $("#autoKillScrim").addEventListener("change",e=>{state.autoKillScrim=e.target.value;state.autoKillRows=[];renderAutomaticKillAdmin();});
@@ -1230,12 +1267,7 @@ $("#autoKillPublish").addEventListener("click",async()=>{
   try{await DB.set("automaticKills/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,publishedAt:Date.now(),rounds:[1,2,3,4,5].filter(n=>(rounds["r"+n]||[]).length)});await logAct("Publicou abates automáticos de "+sc.title);toast("Abates publicados na página inicial! 🏆");render();}catch(err){toast("Não foi possível publicar: "+err.message,"err");}
 });
 $("#autoKillUnpublish").addEventListener("click",async()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");if(!state.autoKillScrim)return; if(!await ask("Remover os abates publicados deste X-Treino da página inicial?"))return;await DB.del("automaticKills/"+state.autoKillScrim);await logAct("Removeu publicação de abates");toast("Publicação removida");renderAutomaticKillAdmin();renderHome();});
-function renderPublishedAutomaticKills(){
-  const box=$("#homeAutomaticKills");if(!box)return;
-  const all=arr(DB.get("automaticKills")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
-  if(!all.length){box.innerHTML="";return;}
-  box.innerHTML=all.map(pub=>`<div class="card mt"><div class="flex between wrap"><div><h2 class="title">ABATES DOS JOGADORES</h2><p class="muted small-t">${esc(pub.scrimTitle||"X-Treino")} • Publicado em ${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):"—"}</p></div><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Abates totais</th><th>Quedas registradas</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.nick)}</b></td><td><b>${+p.kills||0}</b></td><td>${+p.rounds||0}/5</td></tr>`).join("")}</tbody></table></div></div>`).join("");
-}
+function renderPublishedAutomaticKills(){ renderManualKillRankings(); }
 
 /* contagem regressiva */
 function tick(){
