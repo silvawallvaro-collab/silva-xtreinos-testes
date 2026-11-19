@@ -368,9 +368,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <form id="scrimForm" class="mt">
           <label>Título<input name="title" required maxlength="40" placeholder="X-Treino da Noite"></label>
           <div class="row">
-            <label>Data<input type="date" name="date" required></label>
-            <label>Hora<input type="time" name="time" required value="20:00"></label>
+            <label>Data do X-Treino<input type="date" name="date" required></label>
+            <label>Hora do X-Treino<input type="time" name="time" required value="20:00"></label>
           </div>
+          <label class="mt">Abrir inscrições automaticamente em (data e hora)<input type="datetime-local" name="registrationOpensAt"><small class="muted">Deixe vazio para abrir as inscrições imediatamente. Se escolher uma data futura, o site libera as inscrições nesse horário.</small></label>
           <div class="row">
             <label>Modo<select name="mode"><option>Squad</option><option>Duo</option><option>Solo</option></select></label>
             <label>Total de vagas<input type="number" name="slots" min="2" max="48" value="12" required></label>
@@ -684,6 +685,8 @@ const myTeam = () => { const u = me(); return u ? arr(DB.get("teams")).find(t =>
 const teamOf = uidx => arr(DB.get("teams")).find(t => t.members && t.members[uidx]) || null;
 const scrimsSorted = () => arr(DB.get("scrims")).sort((a, b) => new Date(a.date + "T" + a.time) - new Date(b.date + "T" + b.time));
 const scrimRegs = s => arr(s.regs).sort((a, b) => a.at - b.at);
+// Status calculado no horário local de cada visitante: agendado vira aberto no instante programado.
+const scrimStatus = s => s && s.status === "scheduled" && Number(s.registrationOpensAt) <= Date.now() ? "open" : (s?.status || "closed");
 const confirmedRegs = s => scrimRegs(s).slice(0, +s.slots);
 const needPlayers = mode => mode === "Squad" ? 4 : mode === "Duo" ? 2 : 1;
 const pointsTable = () => { const p = settings().points, a = p ? Object.values(p).map(Number) : []; return a.length ? a : CONFIG.points; };
@@ -752,16 +755,17 @@ function scrimCard(s){
   const regs = scrimRegs(s), conf = regs.slice(0, +s.slots), t = myTeam(), u = me();
   const mine = t && s.regs && s.regs[t.id];
   const pos = mine ? regs.findIndex(r => r.tid === t.id) : -1;
-  const badge = s.status === "open" ? '<span class="badge ok">Inscrições abertas</span>' : s.status === "closed" ? '<span class="badge wait">Inscrições fechadas</span>' : '<span class="badge off">Finalizado</span>';
+  const currentStatus = scrimStatus(s);
+  const badge = currentStatus === "open" ? '<span class="badge ok">Inscrições abertas</span>' : currentStatus === "scheduled" ? `<span class="badge wait">Abre em ${new Date(+s.registrationOpensAt).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})}</span>` : currentStatus === "closed" ? '<span class="badge wait">Inscrições fechadas</span>' : '<span class="badge off">Finalizado</span>';
   let actions = "";
-  if (s.status === "open"){
+  if (currentStatus === "open"){
     if (!u) actions = '<button class="btn small" data-go="perfil">Entrar para participar</button>';
     else if (!t) actions = '<button class="btn small" data-go="meutime">Criar / entrar em um time</button>';
     else if (t.captainId !== u.id) actions = '<span class="muted small-t">Só o capitão inscreve o time.</span>';
     else if (mine) actions = `<button class="btn small ${mine.checkin ? "ok" : ""}" data-act="checkin" data-id="${s.id}">${mine.checkin ? "✔ Check-in feito" : "Fazer check-in"}</button>
       <button class="btn small danger" data-act="unreg" data-id="${s.id}">Cancelar</button>`;
     else actions = `<button class="btn small" data-act="reg" data-id="${s.id}">${conf.length >= s.slots ? "Entrar na fila de espera" : "Inscrever meu time"}</button>`;
-  } else if (mine && s.status === "closed") actions = `<button class="btn small ${mine.checkin ? "ok" : ""}" data-act="checkin" data-id="${s.id}">${mine.checkin ? "✔ Check-in feito" : "Fazer check-in"}</button>`;
+  } else if (mine && currentStatus === "closed") actions = `<button class="btn small ${mine.checkin ? "ok" : ""}" data-act="checkin" data-id="${s.id}">${mine.checkin ? "✔ Check-in feito" : "Fazer check-in"}</button>`;
   const teamsHtml = conf.map((r, i) => { const tm = DB.get("teams/" + r.tid); return tm ? `<span class="badge off" style="margin:2px">${i + 1}. [${esc(tm.tag)}] ${esc(tm.name)}${r.checkin ? " ✔" : ""}</span>` : ""; }).join("");
   const waitHtml = regs.length > s.slots ? `<p class="muted small-t mt">Fila de espera: ${regs.length - s.slots} time(s)</p>` : "";
   const myPos = mine ? `<p class="small-t mt" style="color:var(--cyan)">${pos < s.slots ? "Seu time está confirmado (vaga " + (pos + 1) + ")" : "Seu time está na fila de espera (posição " + (pos - s.slots + 1) + ")"}</p>` : "";
@@ -895,7 +899,7 @@ function renderAdmin(){
   $("#adminScrims").innerHTML = scrims.length ? scrims.map(s => {
     const regs = scrimRegs(s);
     return `<div class="card"><div class="flex between wrap"><h3>${esc(s.title)}</h3>
-      <div class="flex"><select data-status="${s.id}" style="width:auto"><option value="open"${s.status === "open" ? " selected" : ""}>Aberto</option><option value="closed"${s.status === "closed" ? " selected" : ""}>Fechado</option><option value="done"${s.status === "done" ? " selected" : ""}>Finalizado</option></select>
+      <div class="flex"><select data-status="${s.id}" style="width:auto"><option value="scheduled"${scrimStatus(s) === "scheduled" ? " selected" : ""}>Agendado</option><option value="open"${scrimStatus(s) === "open" ? " selected" : ""}>Aberto</option><option value="closed"${scrimStatus(s) === "closed" ? " selected" : ""}>Fechado</option><option value="done"${scrimStatus(s) === "done" ? " selected" : ""}>Finalizado</option></select>
       <button class="btn small danger" data-act="delscrim" data-id="${s.id}">Excluir</button></div></div>
       <p class="muted small-t">${esc(fmtDate(s))} • ${esc(s.mode)} • ${Math.min(regs.length, s.slots)}/${s.slots} vagas${regs.length > s.slots ? " (+" + (regs.length - s.slots) + " na fila)" : ""}</p>
       <div class="mt">${regs.map((r, i) => { const tm = DB.get("teams/" + r.tid); return tm ? `<div class="flex between" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>${i + 1}. [${esc(tm.tag)}] ${esc(tm.name)} ${i >= s.slots ? '<span class="badge wait">fila</span>' : ""} ${r.checkin ? '<span class="badge ok">check-in</span>' : ""}</span><button class="btn small danger" data-act="delreg" data-id="${s.id}" data-id2="${r.tid}">Remover</button></div>` : ""; }).join("") || '<span class="muted small-t">Sem inscritos.</span>'}</div></div>`;
@@ -1135,6 +1139,11 @@ function tick(){
   el.innerHTML = [[d, "dias"], [h, "horas"], [m, "min"], [s, "seg"]].map(([v, l]) => `<div><b>${String(v).padStart(2, "0")}</b><small>${l}</small></div>`).join("");
 }
 setInterval(tick, 1000);
+let lastScheduleState = "";
+setInterval(() => {
+  const scheduleState = arr(DB.get("scrims")).map(sc => sc.id + ":" + scrimStatus(sc)).join("|");
+  if (scheduleState !== lastScheduleState) { lastScheduleState = scheduleState; renderScrims(); if (isAdmin()) renderAdmin2(); }
+}, 1000);
 
 /* =====================================================
    AÇÕES (cliques)
@@ -1158,7 +1167,7 @@ document.addEventListener("click", async e => {
     if (await extraActs(act, id, id2, u, t)){ render(); return; }
     if (act === "reg"){
       const s = DB.get("scrims/" + id);
-      if (!s || s.status !== "open") return toast("Inscrições encerradas", "err");
+      if (!s || scrimStatus(s) !== "open") return toast(scrimStatus(s) === "scheduled" ? "As inscrições ainda não abriram. Aguarde o horário agendado." : "Inscrições encerradas", "err");
       if (!t || t.captainId !== u.id) return toast("Só o capitão pode inscrever", "err");
       const n = Object.keys(t.members).length, need = needPlayers(s.mode);
       if (CONFIG.enforceRoster && n < need) return toast(`Seu time precisa de pelo menos ${need} jogadores para o modo ${s.mode}`, "err");
@@ -1201,7 +1210,7 @@ document.addEventListener("click", async e => {
 
 document.addEventListener("change", async e => {
   const st = e.target.closest("[data-status]");
-  if (st){ if (!isAdmin()) return render(); const sc = DB.get("scrims/" + st.dataset.status); await DB.set(`scrims/${st.dataset.status}/status`, st.value); await logAct(`Mudou o treino ${sc ? sc.title : ""} para ${({ open: "aberto", closed: "fechado", done: "finalizado" })[st.value]}`); render(); return; }
+  if (st){ if (!isAdmin()) return render(); const sc = DB.get("scrims/" + st.dataset.status); if (st.value === "scheduled" && !(Number(sc?.registrationOpensAt) > 0)) { toast("Para agendar, crie o treino preenchendo a data e hora de abertura.", "err"); render(); return; } await DB.set(`scrims/${st.dataset.status}/status`, st.value); await logAct(`Mudou o treino ${sc ? sc.title : ""} para ${({ scheduled: "agendado", open: "aberto", closed: "fechado", done: "finalizado" })[st.value]}`); render(); return; }
   if (e.target.id === "resScrim"){ state.resScrim = e.target.value; state.resRound = 1; renderResults(); return; }
   if (e.target.id === "callAdminScrim"){ state.callScrim = e.target.value; renderCallAdmin(); return; }
   if (e.target.id === "publicCallScrim"){ state.publicCallScrim = e.target.value; renderCallsPublic(); return; }
@@ -1349,8 +1358,11 @@ $("#roomCredentialsForm").addEventListener("submit", async e => {
 $("#scrimForm").addEventListener("submit", async e => {
   e.preventDefault();
   const f = Object.fromEntries(new FormData(e.target)), id = uid();
-  await DB.set("scrims/" + id, { id, title: f.title.trim(), date: f.date, time: f.time, mode: f.mode, slots: Math.max(2, +f.slots || 12), status: "open", rounds: 1, created: Date.now() });
-  e.target.reset(); e.target.time.value = "20:00"; e.target.slots.value = 12; await logAct("Criou o treino " + f.title.trim()); toast("Treino criado ✅"); render();
+  const opensAt = f.registrationOpensAt ? new Date(f.registrationOpensAt).getTime() : 0;
+  if (f.registrationOpensAt && (!Number.isFinite(opensAt) || opensAt <= Date.now())) return toast("Escolha uma data e hora futuras para o agendamento, ou deixe vazio para abrir agora.", "err");
+  const status = opensAt > Date.now() ? "scheduled" : "open";
+  await DB.set("scrims/" + id, { id, title: f.title.trim(), date: f.date, time: f.time, mode: f.mode, slots: Math.max(2, +f.slots || 12), status, registrationOpensAt: opensAt || null, rounds: 1, created: Date.now() });
+  e.target.reset(); e.target.time.value = "20:00"; e.target.slots.value = 12; await logAct((status === "scheduled" ? "Agendou abertura das inscrições de " : "Criou o treino ") + f.title.trim()); toast(status === "scheduled" ? "Treino criado! As inscrições abrirão automaticamente no horário agendado. ⏰" : "Treino criado com inscrições abertas! ✅"); render();
 });
 $("#newsForm").addEventListener("submit", async e => {
   e.preventDefault(); const id = uid();
@@ -1650,7 +1662,7 @@ function renderAdmin2(){
   const scrims = scrimsSorted().reverse(), allTeams = arr(DB.get("teams"));
   $("#adminScrims").innerHTML = scrims.length ? scrims.map(s => {
     const regs = scrimRegs(s), free = allTeams.filter(tm => !(s.regs && s.regs[tm.id]));
-    return `<div class="card"><div class="flex between wrap"><h3>${esc(s.title)}</h3><div class="flex"><select data-status="${s.id}" style="width:auto"><option value="open"${s.status === "open" ? " selected" : ""}>Aberto</option><option value="closed"${s.status === "closed" ? " selected" : ""}>Fechado</option><option value="done"${s.status === "done" ? " selected" : ""}>Finalizado</option></select>
+    return `<div class="card"><div class="flex between wrap"><h3>${esc(s.title)}</h3><div class="flex"><select data-status="${s.id}" style="width:auto"><option value="scheduled"${scrimStatus(s) === "scheduled" ? " selected" : ""}>Agendado</option><option value="open"${scrimStatus(s) === "open" ? " selected" : ""}>Aberto</option><option value="closed"${scrimStatus(s) === "closed" ? " selected" : ""}>Fechado</option><option value="done"${scrimStatus(s) === "done" ? " selected" : ""}>Finalizado</option></select>
       <button class="btn small ghost" data-act="scrimedit" data-id="${s.id}">Editar</button><button class="btn small danger" data-act="delscrim" data-id="${s.id}">Excluir</button></div></div>
       <p class="muted small-t">${esc(fmtDate(s))} • ${esc(s.mode)} • ${Math.min(regs.length, s.slots)}/${s.slots} vagas${regs.length > s.slots ? " (+" + (regs.length - s.slots) + " na fila)" : ""}</p>
       <div class="mt">${regs.map((r, i) => { const tm = DB.get("teams/" + r.tid); return tm ? `<div class="rrow"><span>${i + 1}. [${esc(tm.tag)}] ${esc(tm.name)} ${i >= s.slots ? '<span class="badge wait">fila</span>' : ""} ${r.checkin ? '<span class="badge ok">check-in</span>' : ""}</span><button class="btn small danger" data-act="delreg" data-id="${s.id}" data-id2="${r.tid}">Remover</button></div>` : ""; }).join("") || '<span class="muted small-t">Sem inscritos.</span>'}</div>
