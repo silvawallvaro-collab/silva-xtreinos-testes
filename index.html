@@ -11,7 +11,12 @@
 .player-directory{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
 .player-directory button{text-align:left;width:100%}
 .medal-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--line);border-radius:12px;background:#0c1326;margin-top:9px}
-@media(max-width:520px){.player-avatar{width:70px;height:70px}}
+.season-head{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:linear-gradient(115deg,rgba(30,64,175,.28),rgba(8,15,40,.94));border-color:rgba(99,132,220,.35)}
+.season-kicker{font-size:.72rem;letter-spacing:.18em;color:#aebbe9;font-weight:700}.season-head h2{font:700 1.8rem Rajdhani;color:#fff;margin:2px 0}
+.season-ranking{display:grid;gap:10px;max-width:720px;margin:10px auto}
+.season-rank-row{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:12px 16px;border:1px solid #2a3a70;border-radius:13px;background:linear-gradient(110deg,rgba(10,18,50,.96),rgba(7,13,35,.94));cursor:pointer;text-align:left;width:100%;color:var(--text)}
+.season-rank-row:hover{border-color:#fbbf24;transform:translateY(-1px)}.season-rank-pos{font:700 1.6rem Rajdhani;color:#aebbe9;text-align:center}.season-rank-main b{display:block;font-weight:700}.season-rank-main small{display:block;color:#aab6dc}.season-rank-score{font:700 1.8rem Rajdhani;color:#ffb21c}.season-rank-row:nth-child(1) .season-rank-pos{color:#ffd166}.season-detail-table{width:100%;border-collapse:collapse;min-width:420px}.season-detail-table th,.season-detail-table td{text-align:center;padding:10px;border-bottom:1px solid var(--line)}.season-detail-table th{color:#aab6dc;background:transparent}
+@media(max-width:520px){.player-avatar{width:70px;height:70px}.season-rank-row{grid-template-columns:32px 1fr auto;padding:10px;gap:8px}.season-rank-score{font-size:1.45rem}}
 
 </style>
 <title>SPIDER XTREINOS</title>
@@ -345,15 +350,22 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 <!-- RANKING -->
 <section class="page" id="ranking">
-  <h2 class="title">Ranking</h2>
+  <h2 class="title">RANKINGS • SPIDER XTREINOS</h2>
   <p class="sub" id="rankSub"></p>
-  <label style="max-width:320px;margin-bottom:14px">Filtrar<select id="rankFilter"></select></label>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>#</th><th>Time</th><th>Quedas</th><th>Booyah</th><th>Abates</th><th>Pontos</th><th>Resultados das quedas</th></tr></thead>
-      <tbody id="rankBody"></tbody>
-    </table>
+  <div class="season-head card">
+    <div><span class="season-kicker">TEMPORADA MENSAL</span><h2 id="seasonTitle">SEASON ATUAL</h2><p class="muted small-t" id="seasonDates">Classificação por mês</p></div>
+    <label style="min-width:210px">Selecionar Season<select id="seasonFilter"></select></label>
   </div>
+  <h3 class="sec">RANKING DE TIMES</h3>
+  <div id="rankTeamCards" class="season-ranking"></div>
+  <div id="teamRankDetail" class="card mt" hidden></div>
+  <h3 class="sec">RANKING DE ABATES</h3>
+  <div id="playerSeasonRanking" class="season-ranking"></div>
+  <details class="card mt"><summary>Ver tabela detalhada de pontuação</summary>
+    <p class="muted small-t mt" id="pointsExplain"></p>
+    <label style="max-width:320px;margin:12px 0">Filtrar X-Treino<select id="rankFilter"></select></label>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Time</th><th>Quedas</th><th>Booyah</th><th>Abates</th><th>Pontos</th><th>Resultados das quedas</th></tr></thead><tbody id="rankBody"></tbody></table></div>
+  </details>
 </section>
 
 <!-- ABATES -->
@@ -1083,12 +1095,42 @@ function renderProfile(){
   renderPlayerDirectory();
 }
 
+function seasonKey(scrim){return String(scrim?.date||"").slice(0,7);}
+function seasonName(key){if(!/^\d{4}-\d{2}$/.test(key))return "SEASON ATUAL";const [y,m]=key.split("-").map(Number);return "SEASON " + String(m).padStart(2,"0") + " — " + new Date(y,m-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"}).toLocaleUpperCase("pt-BR");}
+function seasonScrims(key){return arr(DB.get("scrims")).filter(sc=>seasonKey(sc)===key);}
+function seasonStandings(key){
+  const list=seasonScrims(key),T={};
+  list.forEach(sc=>Object.entries(DB.get("results/"+sc.id)||{}).sort((a,b)=>(+a[0].slice(1))-(+b[0].slice(1))).forEach(([rk,round])=>Object.entries(round||{}).forEach(([tid,r])=>{
+    const tm=DB.get("teams/"+tid);if(!tm||!(+r.place>0))return;
+    const o=T[tid]||(T[tid]={tid,name:tm.name,tag:tm.tag,pts:0,kills:0,booyah:0,games:0,hist:[]});const pts=ptsOf(r);
+    o.pts+=pts;o.kills+=+r.kills||0;o.booyah+=+r.place===1?1:0;o.games++;o.hist.push({lab:(sc.title||"X-Treino")+" Q"+rk.slice(1),place:+r.place,kills:+r.kills||0,pts});
+  })));
+  return Object.values(T).sort((a,b)=>b.pts-a.pts||b.booyah-a.booyah||b.kills-a.kills);
+}
+function seasonPlayerKills(key){
+  const totals={};for(const sc of seasonScrims(key)){
+    const manual=DB.get("manualKillRankings/"+sc.id),pub=manual?.publishedAt?manual:DB.get("automaticKills/"+sc.id);if(!pub?.publishedAt)continue;
+    for(const p of pub.players||[]){const id=p.uid||String(p.nick||"").toLocaleLowerCase("pt-BR");if(!totals[id])totals[id]={uid:p.uid||"",nick:p.nick||"Jogador",teamName:p.teamName||"",kills:0};totals[id].kills+=Math.max(0,+p.kills||0);if(p.teamName)totals[id].teamName=p.teamName;}
+  }
+  return Object.values(totals).sort((a,b)=>b.kills-a.kills||a.nick.localeCompare(b.nick,"pt-BR"));
+}
+function renderTeamRankDetail(tid,key){
+  const tm=DB.get("teams/"+tid),box=$("#teamRankDetail");if(!tm||!box)return;
+  const rows=[];for(const sc of seasonScrims(key))for(const [rk,round] of Object.entries(DB.get("results/"+sc.id)||{})){const r=round?.[tid];if(r&&+r.place>0)rows.push({scrim:sc.title,round:rk.slice(1),place:+r.place,kills:+r.kills||0,pts:ptsOf(r)});}
+  const rank=seasonStandings(key).findIndex(x=>x.tid===tid)+1,total=rows.reduce((a,x)=>a+x.kills,0),wins=rows.filter(x=>x.place===1).length,points=rows.reduce((a,x)=>a+x.pts,0);
+  box.hidden=false;box.innerHTML=`<div class="flex between wrap"><div><h3>[${esc(tm.tag)}] ${esc(tm.name)}</h3><p class="muted small-t">Detalhes da ${esc(seasonName(key))}</p></div><button class="btn ghost small" type="button" data-act="rankdetailclose">Fechar</button></div><div class="player-stats"><div class="player-stat"><span class="muted small-t">POSIÇÃO</span><b>${rank||"—"}º</b></div><div class="player-stat"><span class="muted small-t">ABATES</span><b>${total}</b></div><div class="player-stat"><span class="muted small-t">BOOYAHS</span><b>${wins}</b></div><div class="player-stat"><span class="muted small-t">PONTOS</span><b>${points}</b></div></div><div class="table-wrap mt"><table class="season-detail-table"><thead><tr><th>X-Treino / Queda</th><th>Colocação</th><th>Abates</th><th>Pontos</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.scrim)} • Q${r.round}</td><td>${r.place}º</td><td>${r.kills}</td><td><b>${r.pts}</b></td></tr>`).join("")||'<tr><td colspan="4">Sem resultados nesta Season.</td></tr>'}</tbody></table></div>`;
+  box.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
 function renderRanking(){
-  const sel = $("#rankFilter"), cur = sel.value;
-  sel.innerHTML = '<option value="">Geral (todos os treinos)</option>' + scrimsSorted().reverse().map(s => `<option value="${s.id}">${esc(s.title)} — ${esc(s.date)}</option>`).join("");
-  sel.value = [...sel.options].some(o => o.value === cur) ? cur : "";
-  $("#rankBody").innerHTML = rankRows(standings(sel.value), true);
-  $("#rankSub").textContent = pointsDesc();
+  const sel=$("#rankFilter"),cur=sel.value;sel.innerHTML='<option value="">Geral (todos os treinos)</option>'+scrimsSorted().reverse().map(sc=>`<option value="${esc(sc.id)}">${esc(sc.title)} — ${esc(sc.date)}</option>`).join("");sel.value=[...sel.options].some(o=>o.value===cur)?cur:"";
+  const seasonSel=$("#seasonFilter"),old=seasonSel.value,keys=[...new Set(arr(DB.get("scrims")).map(seasonKey).filter(k=>/^\d{4}-\d{2}$/.test(k)))].sort().reverse();
+  const now=new Date(),current=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");if(!keys.includes(current))keys.unshift(current);
+  seasonSel.innerHTML=keys.map(k=>`<option value="${k}">${esc(seasonName(k))}</option>`).join("");seasonSel.value=keys.includes(old)?old:current;const key=seasonSel.value;
+  const ss=seasonScrims(key),teams=seasonStandings(key),players=seasonPlayerKills(key);$("#seasonTitle").textContent=seasonName(key);$("#seasonDates").textContent=ss.length?ss.length+" X-Treino(s) contabilizado(s) nesta temporada":"Nenhum X-Treino registrado neste mês";
+  $("#rankTeamCards").innerHTML=teams.length?teams.map((t,i)=>`<button type="button" class="season-rank-row" data-act="rankteam" data-id="${esc(t.tid)}"><span class="season-rank-pos">${i+1}</span><span class="season-rank-main"><b>[${esc(t.tag)}] ${esc(t.name)}</b><small>${t.kills} abates • ${t.booyah} Booyah${t.booyah===1?"":"s"}</small></span><strong class="season-rank-score">${t.pts}</strong></button>`).join(""):'<div class="card empty">Ainda não há pontuação de times nesta Season.</div>';
+  $("#playerSeasonRanking").innerHTML=players.length?players.map((p,i)=>`<button type="button" class="season-rank-row" data-act="${p.uid?"playerprofile":"noop"}" data-id="${esc(p.uid)}"><span class="season-rank-pos">${i+1}</span><span class="season-rank-main"><b>${esc(p.nick)}</b><small>${esc(p.teamName||"Jogador")}</small></span><strong class="season-rank-score">${p.kills}</strong></button>`).join(""):'<div class="card empty">Ainda não há ranking individual publicado nesta Season.</div>';
+  $("#rankBody").innerHTML=rankRows(standings(sel.value),true);$("#rankSub").textContent=pointsDesc();$("#pointsExplain").textContent=pointsDesc();
+  const detail=$("#teamRankDetail");if(detail)detail.hidden=true;
 }
 
 function renderSocial(){
@@ -1508,6 +1550,8 @@ document.addEventListener("click", async e => {
 
   const b = e.target.closest("[data-act]"); if (!b) return;
   const act = b.dataset.act, id = b.dataset.id || b.dataset.round, id2 = b.dataset.id2, u = me(), t = myTeam();
+  if(act === "rankteam"){renderTeamRankDetail(id,$("#seasonFilter").value);return;}
+  if(act === "rankdetailclose"){$("#teamRankDetail").hidden=true;return;}
   if (ADMIN_ACTS.has(act) && !isAdmin()){ render(); return toast("Sessão do organizador encerrada", "err"); }
   if (["admtoggle", "admdel", "logclear"].includes(act) && !isMaster()) return toast("Só o organizador principal pode fazer isso", "err");
   try {
@@ -1570,6 +1614,7 @@ document.addEventListener("change", async e => {
   if (e.target.id === "publicCallScrim"){ state.publicCallScrim = e.target.value; state.callPending=null; renderCallsPublic(); return; }
   if (e.target.id === "callRoundSelect"){ state.callRound=+e.target.value||1; state.callPending=null; renderCallsPublic(); return; }
   if (e.target.id === "rankFilter"){ renderRanking(); return; }
+  if (e.target.id === "seasonFilter"){ renderRanking(); return; }
 
 });
 
@@ -1855,6 +1900,9 @@ async function extraActs(act, id, id2, u, t){
   const lg = txt => isAdmin() ? logAct(txt) : null;
   switch (act){
     case "playerprofile": state.viewPlayerUid=id;go("perfil");renderProfile();return true;
+    case "rankteam": renderTeamRankDetail(id,$("#seasonFilter").value);return true;
+    case "rankdetailclose": $("#teamRankDetail").hidden=true;return true;
+    case "noop": return true;
     case "medaledit": {
       if(!isMaster())return no("Somente o organizador principal pode configurar medalhas");
       const m=arr(settings().playerMedals).find(x=>x.id===id);if(!m)return true;
@@ -2132,5 +2180,13 @@ document.addEventListener("focusout", () => { if (pendingRender) setTimeout(() =
 })();
 </script>
 
+<script>
+let spiderInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();spiderInstallPrompt=e;});
+window.addEventListener("appinstalled",()=>{spiderInstallPrompt=null;const h=document.getElementById("installAppHint");if(h)h.textContent="SPIDER XTREINOS instalado com sucesso!";});
+const spiderInstallButton=document.getElementById("installAppBtn");
+if(spiderInstallButton)spiderInstallButton.addEventListener("click",async()=>{if(spiderInstallPrompt){spiderInstallPrompt.prompt();await spiderInstallPrompt.userChoice;spiderInstallPrompt=null;}else{const h=document.getElementById("installAppHint");if(h)h.textContent=/iphone|ipad|ipod/i.test(navigator.userAgent)?"No Safari: toque em Compartilhar e depois Adicionar à Tela de Início.":"Abra o menu do navegador e escolha Instalar aplicativo ou Criar atalho quando essa opção estiver disponível.";}});
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
+</script>
 </body>
 </html>
