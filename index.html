@@ -584,6 +584,16 @@ OutroNick - 5"></textarea></label>
           <button class="btn" type="submit">CRIAR E ATIVAR SEASON</button>
         </form>
       </div>
+      <div class="card mt" id="seasonScoreCard">
+        <h3>Configurar pontuação da Season</h3>
+        <p class="muted small-t">Escolha a pontuação por colocação, por abate e o bônus de Booyah. Essas regras valem somente para a Season selecionada e não alteram os rankings normais.</p>
+        <label class="mt">Season para configurar<select id="seasonScoreTarget"></select></label>
+        <div class="row mt"><label>Pontos por abate<input id="seasonKillPoints" type="number" min="0" max="999" step="0.5" value="1"></label><label>Bônus extra por Booyah<input id="seasonBooyahBonus" type="number" min="0" max="999" step="0.5" value="0"></label></div>
+        <p class="muted small-t mt">Pontos por colocação (1º ao 12º)</p>
+        <div class="row" id="seasonPlacementPoints"></div>
+        <div class="actions mt"><button class="btn" type="button" id="saveSeasonPoints">SALVAR PONTUAÇÃO</button></div>
+        <p class="muted small-t mt" id="seasonPointsStatus">Selecione uma Season para editar suas regras.</p>
+      </div>
       <h3 class="sec">Temporadas criadas</h3>
       <div id="seasonAdminList" class="grid mt"></div>
     </div>
@@ -1128,11 +1138,13 @@ function renderProfile(){
 function seasonKey(scrim){return String(scrim?.date||"").slice(0,7);}
 function seasonName(key){if(String(key).startsWith("custom:")){const found=arr(settings().seasons).find(x=>x.id===String(key).slice(7));return found?.name||"SEASON ARQUIVADA";}if(!/^\d{4}-\d{2}$/.test(key))return "SEASON ATUAL";const [y,m]=key.split("-").map(Number);return "SEASON " + String(m).padStart(2,"0") + " — " + new Date(y,m-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"}).toLocaleUpperCase("pt-BR");}
 function seasonScrims(key){if(String(key).startsWith("custom:")){const found=arr(settings().seasons).find(x=>x.id===String(key).slice(7));if(!found)return [];return arr(DB.get("scrims")).filter(sc=>String(sc.date||"")>=found.start&&String(sc.date||"")<=found.end);}return arr(DB.get("scrims")).filter(sc=>seasonKey(sc)===key);}
+function seasonScoreConfig(key){if(!String(key).startsWith("custom:"))return null;const x=arr(settings().seasons).find(z=>z.id===String(key).slice(7));return x?.scoring||null;}
+function seasonPtsOf(r,key){const c=seasonScoreConfig(key);if(!c)return ptsOf(r);const pos=+r.place||0,table=Array.isArray(c.placements)?c.placements:CONFIG.points;return (table[pos-1]||0)+(+r.kills||0)*(Number(c.killPts)||0)+(pos===1?(Number(c.booyahBonus)||0):0);}
 function seasonStandings(key){
   const list=seasonScrims(key),T={};
   list.forEach(sc=>Object.entries(DB.get("results/"+sc.id)||{}).sort((a,b)=>(+a[0].slice(1))-(+b[0].slice(1))).forEach(([rk,round])=>Object.entries(round||{}).forEach(([tid,r])=>{
     const tm=DB.get("teams/"+tid);if(!tm||!(+r.place>0))return;
-    const o=T[tid]||(T[tid]={tid,name:tm.name,tag:tm.tag,pts:0,kills:0,booyah:0,games:0,hist:[]});const pts=ptsOf(r);
+    const o=T[tid]||(T[tid]={tid,name:tm.name,tag:tm.tag,pts:0,kills:0,booyah:0,games:0,hist:[]});const pts=seasonPtsOf(r,key);
     o.pts+=pts;o.kills+=+r.kills||0;o.booyah+=+r.place===1?1:0;o.games++;o.hist.push({lab:(sc.title||"X-Treino")+" Q"+rk.slice(1),place:+r.place,kills:+r.kills||0,pts});
   })));
   return Object.values(T).sort((a,b)=>b.pts-a.pts||b.booyah-a.booyah||b.kills-a.kills);
@@ -1146,7 +1158,7 @@ function seasonPlayerKills(key){
 }
 function renderTeamRankDetail(tid,key){
   const tm=DB.get("teams/"+tid),box=$("#teamRankDetail");if(!tm||!box)return;
-  const rows=[];for(const sc of seasonScrims(key))for(const [rk,round] of Object.entries(DB.get("results/"+sc.id)||{})){const r=round?.[tid];if(r&&+r.place>0)rows.push({scrim:sc.title,round:rk.slice(1),place:+r.place,kills:+r.kills||0,pts:ptsOf(r)});}
+  const rows=[];for(const sc of seasonScrims(key))for(const [rk,round] of Object.entries(DB.get("results/"+sc.id)||{})){const r=round?.[tid];if(r&&+r.place>0)rows.push({scrim:sc.title,round:rk.slice(1),place:+r.place,kills:+r.kills||0,pts:seasonPtsOf(r,key)});}
   const rank=seasonStandings(key).findIndex(x=>x.tid===tid)+1,total=rows.reduce((a,x)=>a+x.kills,0),wins=rows.filter(x=>x.place===1).length,points=rows.reduce((a,x)=>a+x.pts,0);
   box.hidden=false;box.innerHTML=`<div class="flex between wrap"><div><h3>[${esc(tm.tag)}] ${esc(tm.name)}</h3><p class="muted small-t">Detalhes da ${esc(seasonName(key))}</p></div><button class="btn ghost small" type="button" data-act="rankdetailclose">Fechar</button></div><div class="player-stats"><div class="player-stat"><span class="muted small-t">POSIÇÃO</span><b>${rank||"—"}º</b></div><div class="player-stat"><span class="muted small-t">ABATES</span><b>${total}</b></div><div class="player-stat"><span class="muted small-t">BOOYAHS</span><b>${wins}</b></div><div class="player-stat"><span class="muted small-t">PONTOS</span><b>${points}</b></div></div><div class="table-wrap mt"><table class="season-detail-table"><thead><tr><th>X-Treino / Queda</th><th>Colocação</th><th>Abates</th><th>Pontos</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.scrim)} • Q${r.round}</td><td>${r.place}º</td><td>${r.kills}</td><td><b>${r.pts}</b></td></tr>`).join("")||'<tr><td colspan="4">Sem resultados nesta Season.</td></tr>'}</tbody></table></div>`;
   box.scrollIntoView({behavior:"smooth",block:"nearest"});
@@ -1183,6 +1195,10 @@ function renderSeasonAdminPanel(){
   if(!isMaster())return;
   const list=$("#seasonAdminList");if(!list)return;
   const seasons=arr(settings().seasons).slice().sort((a,b)=>(b.created||0)-(a.created||0));
+  const target=$("#seasonScoreTarget"),oldTarget=target?.value; if(target){target.innerHTML=seasons.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}${x.status==="active"?" • ATIVA":""}</option>`).join("");if(seasons.some(x=>x.id===oldTarget))target.value=oldTarget;else target.value=(seasons.find(x=>x.status==="active")||seasons[0]||{}).id||"";}
+  const selected=seasons.find(x=>x.id===target?.value),cfg=selected?.scoring||{placements:pointsTable().slice(0,12),killPts:killPts(),booyahBonus:0};
+  const placementBox=$("#seasonPlacementPoints");if(placementBox)placementBox.innerHTML=Array.from({length:12},(_,i)=>`<label>${i+1}º lugar<input type="number" min="0" max="999" step="0.5" data-season-place="${i}" value="${Number((cfg.placements||CONFIG.points)[i]??0)}"></label>`).join("");
+  if($("#seasonKillPoints"))$("#seasonKillPoints").value=Number(cfg.killPts??killPts());if($("#seasonBooyahBonus"))$("#seasonBooyahBonus").value=Number(cfg.booyahBonus||0);if($("#seasonPointsStatus"))$("#seasonPointsStatus").textContent=selected?`Editando pontuação de ${selected.name}.`:"Crie uma Season para configurar a pontuação.";
   list.innerHTML=seasons.length?seasons.map(x=>`<div class="card"><div class="flex between wrap"><b>${esc(x.name)}</b><span class="badge ${x.status==="active"?"ok":"off"}">${x.status==="active"?"ATIVA":"ARQUIVADA"}</span></div><p class="muted small-t mt">${esc(x.start)} até ${esc(x.end)}</p><div class="actions mt"><button class="btn small ghost" data-act="seasonview" data-id="${esc(x.id)}">Ver ranking</button>${x.status==="active"?`<button class="btn small danger" data-act="seasonclose" data-id="${esc(x.id)}">Encerrar e arquivar</button>`:`<button class="btn small" data-act="seasonactivate" data-id="${esc(x.id)}">Ativar novamente</button>`}</div></div>`).join(""):'<div class="card empty">Nenhuma Season criada ainda.</div>';
 }
 
@@ -1822,7 +1838,9 @@ $("#interfaceLogo").addEventListener("change",async e=>{try{interfaceLogoData=aw
 $("#interfaceBackground").addEventListener("change",async e=>{try{interfaceBackgroundData=await readInterfaceImage(e.target.files[0]);$("#interfaceBackgroundPreview").innerHTML=interfaceBackgroundData?`<img class="interface-preview" alt="Prévia do fundo" src="${interfaceBackgroundData}">`:"";}catch(_){toast("Não consegui carregar essa imagem.","err");}});
 $("#interfaceForm").addEventListener("submit",async e=>{e.preventDefault();if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const f=e.target,old=settings().interface||{},cfg={...old,primary:f.elements.primary.value,secondary:f.elements.secondary.value,overlay:+f.elements.overlay.value,textColor:f.elements.textColor.value,cardColor:f.elements.cardColor.value,fontFamily:f.elements.fontFamily.value,headingFont:f.elements.headingFont.value,fontSize:Math.max(12,Math.min(20,+f.elements.fontSize.value||16)),buttonRadius:Math.max(0,Math.min(32,+f.elements.buttonRadius.value||12)),navLabels:f.elements.navLabels.value};if(interfaceLogoData)cfg.logo=interfaceLogoData;if(interfaceBackgroundData)cfg.background=interfaceBackgroundData;const brand=String(f.elements.brand.value||"SPIDER XTREINOS").trim()||"SPIDER XTREINOS";try{await DB.set("settings/brand",brand);await DB.set("settings/interface",cfg);interfaceLogoData="";interfaceBackgroundData="";await logAct("Atualizou a aparência do site");render();toast("Interface salva! Todos verão as alterações.");}catch(err){toast("Não foi possível salvar a interface: "+err.message,"err");}});
 $("#interfaceReset").addEventListener("click",async()=>{if(!isMaster())return;if(!await ask("Restaurar cores, fundo e logo padrão?"))return;try{await DB.del("settings/interface");await DB.set("settings/brand","SPIDER XTREINOS");interfaceLogoData="";interfaceBackgroundData="";render();toast("Aparência padrão restaurada.");}catch(err){toast("Falha ao restaurar: "+err.message,"err");}});
-$("#seasonCreateForm").addEventListener("submit",async e=>{e.preventDefault();if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const f=e.target,name=String(f.elements.name.value||"").trim(),start=f.elements.start.value,end=f.elements.end.value;if(!name||!start||!end||end<start)return toast("Confira o nome e as datas da Season.","err");const seasons=arr(settings().seasons).map(x=>({...x,status:"archived"}));const id="s"+Date.now().toString(36);seasons.push({id,name,start,end,status:"active",created:Date.now()});try{await DB.set("settings/seasons",seasons);await logAct("Criou a Season "+name);f.reset();renderSeasonAdminPanel();renderRanking();toast("Season criada e ativada!");}catch(err){toast("Não foi possível criar a Season: "+err.message,"err");}});
+$("#seasonScoreTarget")?.addEventListener("change",()=>renderSeasonAdminPanel());
+$("#saveSeasonPoints")?.addEventListener("click",async()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const id=$("#seasonScoreTarget")?.value;if(!id)return toast("Crie uma Season primeiro.","err");const placements=Array.from(document.querySelectorAll("[data-season-place]")).map(el=>Math.max(0,Number(el.value)||0));const scoring={placements,killPts:Math.max(0,Number($("#seasonKillPoints").value)||0),booyahBonus:Math.max(0,Number($("#seasonBooyahBonus").value)||0)};const seasons=arr(settings().seasons).map(x=>x.id===id?{...x,scoring}:x);try{await DB.set("settings/seasons",seasons);await logAct("Atualizou pontuação da Season "+(seasons.find(x=>x.id===id)?.name||""));renderSeasonAdminPanel();renderRanking();toast("Pontuação da Season salva!");}catch(err){toast("Não foi possível salvar a pontuação: "+err.message,"err");}});
+$("#seasonCreateForm").addEventListener("submit",async e=>{e.preventDefault();if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const f=e.target,name=String(f.elements.name.value||"").trim(),start=f.elements.start.value,end=f.elements.end.value;if(!name||!start||!end||end<start)return toast("Confira o nome e as datas da Season.","err");const seasons=arr(settings().seasons).map(x=>({...x,status:"archived"}));const id="s"+Date.now().toString(36);seasons.push({id,name,start,end,status:"active",created:Date.now(),scoring:{placements:pointsTable().slice(0,12),killPts:killPts(),booyahBonus:0}});try{await DB.set("settings/seasons",seasons);await logAct("Criou a Season "+name);f.reset();renderSeasonAdminPanel();renderRanking();toast("Season criada e ativada!");}catch(err){toast("Não foi possível criar a Season: "+err.message,"err");}});
 
 
 $("#roomCredentialsForm").addEventListener("submit", async e => {
