@@ -1005,7 +1005,8 @@ async function logAct(text){
 const me = () => { const id = AUTH.user?.uid; return id ? DB.get("users/" + id) || null : null; };
 const myTeam = () => { const u = me(); return u ? arr(DB.get("teams")).find(t => t.members && t.members[u.id]) || null : null; };
 const teamOf = uidx => arr(DB.get("teams")).find(t => t.members && t.members[uidx]) || null;
-const scrimsSorted = () => arr(DB.get("scrims")).sort((a, b) => new Date(a.date + "T" + a.time) - new Date(b.date + "T" + b.time));
+const scrimsAll = () => arr(DB.get("scrims")).sort((a, b) => new Date(a.date + "T" + a.time) - new Date(b.date + "T" + b.time));
+const scrimsSorted = () => arr(DB.get("scrims")).filter(s => !s.archived).sort((a, b) => new Date(a.date + "T" + a.time) - new Date(b.date + "T" + b.time));
 const scrimRegs = s => arr(s.regs).sort((a, b) => a.at - b.at);
 // Status calculado no horário local de cada visitante: agendado vira aberto no instante programado.
 const scrimStatus = s => s && s.status === "scheduled" && Number(s.registrationOpensAt) <= Date.now() ? "open" : (s?.status || "closed");
@@ -1319,7 +1320,7 @@ function stRecords(){
   const mostBoo=Object.values(boo).sort((a,b)=>b.v-a.v)[0]||null;
   return [["Mais abates em uma queda (time)",kq,"abates"],["Mais abates em uma queda (jogador)",kqp,"abates"],["Mais Booyahs (time)",mostBoo,"Booyahs"],["Maior pontuação em um X-Treino",bestPts,"pontos"]];
 }
-const stLastScrims=n=>scrimsSorted().slice().reverse().filter(sc=>standings(sc.id).length).slice(0,n);
+const stLastScrims=n=>scrimsAll().slice().reverse().filter(sc=>standings(sc.id).length).slice(0,n);
 function stPodium(rows){
   const meds=["🥇","🥈","🥉"];
   return '<div class="sv-podium" style="margin:6px auto 12px">'+[1,0,2].map(i=>{const r=rows[i];
@@ -1423,7 +1424,7 @@ function renderSeasonSummary(key,teams,players,cs){
 }
 $("#seasonViewTabs")?.addEventListener("click",e=>{const b=e.target.closest("[data-sview]");if(!b)return;state.seasonView=b.dataset.sview;applySeasonView();});
 function renderRanking(){
-  const sel=$("#rankFilter"),cur=sel.value;sel.innerHTML='<option value="">Geral (todos os treinos)</option>'+scrimsSorted().reverse().map(sc=>`<option value="${esc(sc.id)}">${esc(sc.title)} — ${esc(sc.date)}</option>`).join("");sel.value=[...sel.options].some(o=>o.value===cur)?cur:"";
+  const sel=$("#rankFilter"),cur=sel.value;sel.innerHTML='<option value="">Geral (todos os treinos)</option>'+scrimsAll().reverse().map(sc=>`<option value="${esc(sc.id)}">${esc(sc.title)} — ${esc(sc.date)}</option>`).join("");sel.value=[...sel.options].some(o=>o.value===cur)?cur:"";
   const seasonSel=$("#seasonFilter"),old=seasonSel.value,custom=arr(settings().seasons).slice().sort((a,b)=>(b.created||0)-(a.created||0)),months=[...new Set(arr(DB.get("scrims")).map(seasonKey).filter(k=>/^\d{4}-\d{2}$/.test(k)))].sort().reverse();
   const now=new Date(),current=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");if(!months.includes(current))months.unshift(current);
   const keys=[...custom.map(x=>"custom:"+x.id),...months];
@@ -1743,9 +1744,19 @@ function renderPublishedAutomaticKills(){
    ===================================================== */
 /* mantém o ranking individual público (e a Season) sempre igual ao que foi salvo nas quedas */
 async function syncManualKillPublic(sc){
-  const totals=manualKillTotals(sc.id),rounds=[1,2,3,4,5].filter(n=>(DB.get(`manualKills/${sc.id}/r${n}`)||[]).length);
-  if(!totals.length){if(DB.get("manualKillRankings/"+sc.id))await DB.del("manualKillRankings/"+sc.id);return;}
-  await DB.set("manualKillRankings/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players:totals,publishedAt:Date.now(),rounds});
+  /* Junta as quedas salvas agora com o que já estava publicado: apagar uma queda do registro NÃO tira os abates da Season. */
+  const live=manualKillTotals(sc.id),old=DB.get("manualKillRankings/"+sc.id),T={};
+  const liveRounds=new Set([1,2,3,4,5].filter(n=>(DB.get(`manualKills/${sc.id}/r${n}`)||[]).length));
+  const put=(p,h)=>{const k=p.uid||String(p.nick||"").toLocaleLowerCase("pt-BR");
+    const o=T[k]||(T[k]={uid:p.uid||"",nick:p.nick||"Jogador",teamId:p.teamId||"",teamName:p.teamName||"",teamTag:p.teamTag||"",kills:0,rounds:0,history:{}});
+    if(p.nick)o.nick=p.nick;if(p.teamName){o.teamName=p.teamName;o.teamTag=p.teamTag||o.teamTag;o.teamId=p.teamId||o.teamId;}
+    for(const [r,v] of Object.entries(h||{}))o.history[r]=Math.max(0,+v||0);};
+  for(const p of arr(old&&old.players)){const h={};for(const [r,v] of Object.entries(p.history||{}))if(!liveRounds.has(+r.slice(1)))h[r]=v;put(p,h);}
+  for(const p of live)put(p,p.history||{});
+  const players=Object.values(T).map(o=>{const v=Object.values(o.history);o.kills=v.reduce((a,x)=>a+x,0);o.rounds=v.length;return o;}).filter(o=>o.rounds>0).sort((a,b)=>b.kills-a.kills||a.nick.localeCompare(b.nick,"pt-BR"));
+  if(!players.length)return;
+  const rounds=[1,2,3,4,5].filter(n=>players.some(p=>p.history["r"+n]!==undefined));
+  await DB.set("manualKillRankings/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,publishedAt:Date.now(),rounds});
 }
 function manualKillRounds(){ return DB.get("manualKills/"+(state.manualKillScrim||"")) || {}; }
 function manualKillRoster(scrim){
@@ -1820,8 +1831,8 @@ $("#manualKillSaveRound").addEventListener("click",async()=>{
 $("#manualKillClearRound").addEventListener("click",async()=>{
   if(!isAdmin())return toast("Acesso de organizador necessário.","err");
   const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return;
-  if(!await ask(`Apagar os abates manuais da Queda ${state.manualKillRound} de ${sc.title}?`))return;
-  try{await DB.del(`manualKills/${sc.id}/r${state.manualKillRound}`);await syncManualKillPublic(sc);await logAct(`Apagou KILL.MANUAL da Queda ${state.manualKillRound} — ${sc.title}`);toast("Queda apagada. A Season foi atualizada.");renderManualKillAdmin();renderRanking();renderPublishedManualKills();renderAbatesPublic();}
+  if(!await ask(`Apagar os abates manuais da Queda ${state.manualKillRound} de ${sc.title}? Os abates já publicados continuam valendo na Season.`))return;
+  try{await DB.del(`manualKills/${sc.id}/r${state.manualKillRound}`);await syncManualKillPublic(sc);await logAct(`Apagou KILL.MANUAL da Queda ${state.manualKillRound} — ${sc.title}`);toast("Queda apagada do registro. Os abates continuam salvos na Season.");renderManualKillAdmin();renderRanking();renderPublishedManualKills();renderAbatesPublic();}
   catch(err){toast("Não foi possível apagar a queda: "+err.message,"err");}
 });
 $("#manualKillPublish").addEventListener("click",async()=>{
@@ -1829,14 +1840,14 @@ $("#manualKillPublish").addEventListener("click",async()=>{
   const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return toast("Selecione um X-Treino.","err");
   const players=manualKillTotals(sc.id);if(!players.length)return toast("Salve pelo menos uma queda antes de publicar.","err");
   if(!await ask(`Publicar o ranking KILL.MANUAL de ${sc.title} com ${players.length} jogador(es)?`))return;
-  try{await DB.set("manualKillRankings/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,publishedAt:Date.now(),rounds:[1,2,3,4,5].filter(n=>(manualKillRounds()["r"+n]||[]).length)});await logAct("Publicou KILL.MANUAL de "+sc.title);toast("Ranking KILL.MANUAL publicado! 🏆");render();}
+  try{await syncManualKillPublic(sc);await logAct("Publicou KILL.MANUAL de "+sc.title);toast("Ranking KILL.MANUAL publicado! 🏆");render();}
   catch(err){toast("Não foi possível publicar: "+err.message,"err");}
 });
 $("#manualKillUnpublish").addEventListener("click",async()=>{
   if(!isAdmin())return toast("Acesso de organizador necessário.","err");
   const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return;
   if(!DB.get("manualKillRankings/"+sc.id))return toast("Este X-Treino não tem publicação.","err");
-  if(!await ask(`Apagar somente a publicação do KILL.MANUAL de ${sc.title}? Os registros salvos das quedas serão mantidos.`))return;
+  if(!await ask(`Apagar a publicação do KILL.MANUAL de ${sc.title}? Isso TIRA esses abates da Season (os registros das quedas são mantidos).`))return;
   try{await DB.del("manualKillRankings/"+sc.id);await logAct("Removeu publicação KILL.MANUAL de "+sc.title);toast("Publicação removida. Os registros das quedas foram mantidos.");render();}
   catch(err){toast("Não foi possível remover a publicação: "+err.message,"err");}
 });
@@ -1898,7 +1909,11 @@ document.addEventListener("click", async e => {
     else if (act === "leave"){ if (await ask("Sair do time?")){ await removeMember(t, u.id); toast("Você saiu do time"); } }
     else if (act === "kick"){ if (await ask("Expulsar este jogador?")){ await removeMember(t, id); toast("Jogador removido"); } }
     else if (act === "addround"){ const s = DB.get("scrims/" + state.resScrim); await DB.set(`scrims/${s.id}/rounds`, (+s.rounds || 1) + 1); state.resRound = (+s.rounds || 1) + 1; }
-    else if (act === "delscrim"){ if (await ask("Excluir este treino e seus resultados?")){ const sc = DB.get("scrims/" + id); await DB.del("scrims/" + id); await DB.del("results/" + id); await logAct("Excluiu o treino " + (sc ? sc.title : id)); } }
+    else if (act === "delscrim"){
+      const sc = DB.get("scrims/" + id), has = !!(DB.get("results/" + id) || DB.get("manualKillRankings/" + id) || DB.get("automaticKills/" + id));
+      if (has){ if (await ask("Este treino tem resultados. Ele sai das listas, mas os pontos dos times e os abates continuam salvos na Season. Continuar?")){ await DB.set("scrims/" + id, { ...sc, archived: true }); await logAct("Arquivou o treino " + (sc ? sc.title : id) + " (resultados mantidos na Season)"); toast("Treino arquivado. Season mantida ✅"); } }
+      else if (await ask("Excluir este treino?")){ await DB.del("scrims/" + id); await logAct("Excluiu o treino " + (sc ? sc.title : id)); }
+    }
     else if (act === "delreg"){ const tm = DB.get("teams/" + id2), sc = DB.get("scrims/" + id); await DB.del(`scrims/${id}/regs/${id2}`); await logAct(`Removeu o time ${tm ? tm.name : id2} do treino ${sc ? sc.title : id}`); }
     else if (act === "delteam"){ if (await ask("Excluir este time?")){ const tm = DB.get("teams/" + id); await removeTeam(id); await logAct("Excluiu o time " + (tm ? tm.name : id)); } }
     else if (act === "deluser"){
