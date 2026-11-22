@@ -59,27 +59,16 @@
 #maintOverlay .mt-ico{font-size:3.2rem}.mt-cd{font:700 2.6rem Rajdhani,sans-serif;color:#fbbf24;margin:14px 0;letter-spacing:.04em}
 #maintBanner{position:sticky;top:0;z-index:9000;padding:9px 14px;text-align:center;font-weight:700;font-size:.9rem;background:#7c2d12;color:#fff;border-bottom:1px solid #fbbf24}
 #maintBanner.on{background:#7f1d1d}
+.page.page-maint-block > :not(.page-maint-card){display:none!important}
+.page-maint-card{max-width:680px;margin:36px auto;padding:28px;border:1px solid var(--line);border-radius:16px;background:var(--card);text-align:center}
+.maint-area-option{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.025)}
+.maint-area-option input{width:auto;min-width:18px;min-height:18px}
+
 .xr{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid var(--line,#26335f)}
 .bp{border:1px solid #fbbf24;background:linear-gradient(120deg,rgba(251,191,36,.14),var(--card,#101933));border-radius:16px;padding:16px 18px}
 .bp .k{font-size:.72rem;letter-spacing:.18em;color:#fbbf24;font-weight:700}.bp .n{font:700 2rem Rajdhani,sans-serif;color:#fff;margin:2px 0}
 .bp .g{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px}.bp .g div{display:flex;flex-direction:column}.bp .g b{font:700 1.5rem Rajdhani,sans-serif;color:#fff}.bp .g small{color:var(--muted,#9aa8d6)}
 #artCanvas{max-width:100%;height:auto;border-radius:12px;border:1px solid var(--line,#26335f)}
-
-#elite{--ec:#22d3ee;--eb:#3b82f6;--eg:rgba(34,211,238,.35)}
-#elite .el-hero{padding:22px 18px;border:1px solid var(--ec);border-radius:18px;background:linear-gradient(120deg,rgba(59,130,246,.22),rgba(6,10,22,.9) 70%);box-shadow:0 0 28px var(--eg),inset 0 0 40px rgba(34,211,238,.06);animation:elIn .5s ease}
-#elite .el-k{font-size:.72rem;letter-spacing:.2em;color:var(--ec);font-weight:700}#elite .el-hero h2{font:700 2.1rem Rajdhani,sans-serif;color:#fff;margin:2px 0;text-shadow:0 0 14px var(--eg)}
-#elite .el-tabs{display:flex;gap:8px;overflow-x:auto;padding:12px 0;scrollbar-width:thin}
-#elite .el-tabs button{flex:0 0 auto;background:rgba(15,23,42,.8);color:#cbd5e1;border:1px solid #1e3a8a;border-radius:999px;padding:9px 16px;font:700 .9rem Rajdhani,sans-serif;letter-spacing:.06em;cursor:pointer;transition:.2s}
-#elite .el-tabs button:hover{border-color:var(--ec);color:#fff}#elite .el-tabs button.active{background:linear-gradient(120deg,var(--eb),var(--ec));color:#04101f;border-color:transparent;box-shadow:0 0 14px var(--eg)}
-#elite .el-pane{animation:elIn .35s ease}#elite .el-card{border:1px solid #1e3a8a;border-radius:16px;background:linear-gradient(160deg,rgba(15,23,42,.95),rgba(8,15,40,.95));padding:14px 16px;margin-top:12px;transition:.2s}
-#elite .el-card:hover{border-color:var(--ec);box-shadow:0 0 16px rgba(34,211,238,.18)}#elite h3,#elite h4{color:#fff}#elite h4{margin:10px 0 4px;color:var(--ec)}
-#elite .el-champ{display:flex;flex-direction:column;gap:2px;margin:10px 0;padding:12px;border-radius:12px;border:1px solid #fbbf24;background:rgba(251,191,36,.08);font-size:1.15rem}#elite .el-champ small{color:#9aa8d6;font-size:.82rem}
-#elite .el-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}#elite details summary{cursor:pointer;padding:4px 0}
-#elite .el-mvp{display:inline-flex;gap:6px;align-items:center;padding:3px 10px;border-radius:999px;background:rgba(34,211,238,.12);border:1px solid var(--ec);color:var(--ec);font-weight:700;font-size:.8rem}
-#elite .el-search{width:100%;margin:6px 0}#elite .el-plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
-#elite .el-plist button{text-align:left;border:1px solid #1e3a8a;background:rgba(15,23,42,.9);color:#e8eeff;border-radius:12px;padding:10px;cursor:pointer;display:flex;flex-direction:column;transition:.2s}#elite .el-plist button:hover{border-color:var(--ec)}
-@keyframes elIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media(max-width:640px){#elite .el-two{grid-template-columns:1fr}#elite .el-hero h2{font-size:1.6rem}}
 </style>
 <title>SPIDER XTREINOS</title>
 <meta name="theme-color" content="#090a10">
@@ -270,7 +259,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <a data-go="redes">Redes</a>
     <a data-go="perfil">Perfil</a>
     <a data-go="admin">Organizador</a>
-    <a data-go="elite">ELITE</a>
   </nav>
   <div class="hright">
     <span class="pill local" id="syncPill"><b></b><span>Local</span></span>
@@ -412,18 +400,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   </div>
   <div id="publicPlayerProfile" class="mt"></div>
   <div class="card mt"><div class="flex between wrap"><h3>JOGADORES</h3><span class="muted small-t">Toque para abrir o perfil</span></div><div id="playerDirectory" class="player-directory mt"></div></div>
-</section>
-
-<!-- CENTRAL DE ELITE -->
-<section class="page" id="elite">
-  <div class="el-hero"><span class="el-k">SPIDER XTREINOS</span><h2>CENTRAL DE ELITE</h2><p class="muted small-t">Rankings, MVPs, histórico de quedas, Hall da Fama, jogadores e avisos — tudo calculado automaticamente com os resultados do site.</p></div>
-  <div class="el-tabs" id="elTabs"><button data-el="rank" class="active">RANKING</button><button data-el="mvp">MVPs</button><button data-el="hist">QUEDAS</button><button data-el="hall">HALL DA FAMA</button><button data-el="players">JOGADORES</button><button data-el="news">AVISOS</button></div>
-  <div class="el-pane" data-pane="rank"><label>Season<select id="elSeason"></select></label><div id="elRank"></div></div>
-  <div class="el-pane" data-pane="mvp" hidden><div id="elMvp"></div></div>
-  <div class="el-pane" data-pane="hist" hidden><label>X-Treino<select id="elScrim"></select></label><div id="elHist"></div></div>
-  <div class="el-pane" data-pane="hall" hidden><div id="elHall"></div></div>
-  <div class="el-pane" data-pane="players" hidden><input class="el-search" id="elSearch" type="search" placeholder="Buscar jogador pelo nick" autocomplete="off"><div id="elPlayerList" class="el-plist"></div><div id="elPlayerProfile" class="mt"></div></div>
-  <div class="el-pane" data-pane="news" hidden><div id="elNews"></div></div>
 </section>
 
 <!-- ESTATÍSTICAS -->
@@ -645,7 +621,7 @@ OutroNick - 5"></textarea></label>
 
     <div class="atab" data-atab="avisos" hidden>
       <div class="card">
-        <form id="newsForm"><label>Categoria<select name="cat"><option>Treino</option><option>Data e horário</option><option>Inscrições</option><option>Regras</option><option selected>Comunicado</option></select></label><label>Novo aviso<input name="text" required maxlength="200"></label><button class="btn" type="submit">Publicar</button></form>
+        <form id="newsForm"><label>Novo aviso<input name="text" required maxlength="200"></label><button class="btn" type="submit">Publicar</button></form>
       </div>
       <div id="adminNews" class="mt"></div>
     </div>
@@ -710,9 +686,15 @@ OutroNick - 5"></textarea></label>
     </div>
 
     <div class="atab" data-atab="maintenance" hidden>
-      <div class="card"><h3>🔧 Modo manutenção</h3><p class="muted small-t">Exclusivo do organizador principal. Horários de Brasília (UTC-3). Entra e sai sozinho nos horários programados, e o organizador principal continua acessando o painel.</p>
+      <div class="card"><h3>🔧 Modo manutenção geral</h3><p class="muted small-t">Exclusivo do Organizador Principal. Bloqueia o site inteiro para visitantes; seu acesso principal continua liberado.</p>
         <div id="maintStatus" class="mt"></div>
-        <div class="actions mt"><button class="btn" type="button" id="maintToggle">ATIVAR MANUTENÇÃO AGORA</button></div></div>
+        <div class="actions mt"><button class="btn" type="button" id="maintToggle">ATIVAR MANUTENÇÃO GERAL</button></div></div>
+      <div class="card mt"><h3>🎛️ Manutenção por aba ou categoria</h3><p class="muted small-t">Marque somente as áreas que deseja bloquear. As demais continuam funcionando normalmente. As alterações são compartilhadas com os visitantes.</p>
+        <div class="actions mt"><button class="btn ghost small" type="button" id="maintSelectAll">SELECIONAR TODAS</button><button class="btn ghost small" type="button" id="maintSelectNone">LIMPAR SELEÇÃO</button></div>
+        <div id="maintAreas" class="grid g2 mt"></div>
+        <label class="mt">Mensagem das áreas bloqueadas<textarea id="maintAreaMessage" rows="2" maxlength="200" placeholder="Esta área está temporariamente em manutenção. Voltamos em breve!"></textarea></label>
+        <div class="actions mt"><button class="btn" type="button" id="maintSaveAreas">SALVAR MANUTENÇÃO DAS ÁREAS</button></div>
+        <p class="muted small-t mt" id="maintAreasStatus"></p></div>
       <div class="card mt"><h3>Agendamento</h3>
         <form id="maintForm" class="mt">
           <div class="row"><label>Início — data<input type="date" name="sd"></label><label>Início — hora<input type="time" name="st"></label></div>
@@ -726,7 +708,7 @@ OutroNick - 5"></textarea></label>
     <div class="atab" data-atab="arts" hidden>
       <div class="card"><h3>🎨 SPIDER ARTS — gerador de artes</h3><p class="muted small-t">Usa os dados reais do site. Ajuste e baixe a imagem para postar. Título/subtítulo vazios usam o texto automático.</p>
         <div id="artForm" class="mt">
-          <div class="row"><label>Tipo de arte<select id="artType"><option value="top3">Top 3 de times</option><option value="top5">Top 5 jogadores</option><option value="campeao">Campeão da Season</option><option value="abates">Ranking de abates</option><option value="queda">Resultado de uma queda</option><option value="mvp">MVP da Season</option><option value="selecao">Seleção da Season</option><option value="mvpqueda">MVP da queda</option></select></label>
+          <div class="row"><label>Tipo de arte<select id="artType"><option value="top3">Top 3 de times</option><option value="top5">Top 5 jogadores</option><option value="campeao">Campeão da Season</option><option value="abates">Ranking de abates</option><option value="queda">Resultado de uma queda</option><option value="mvp">MVP da Season</option><option value="selecao">Seleção da Season</option></select></label>
             <label>Season<select id="artSeason"></select></label>
             <label>Formato<select id="artSize"><option value="1080x1350">Feed 1080×1350</option><option value="1080x1080">Quadrado 1080×1080</option><option value="1080x1920">Story 1080×1920</option></select></label></div>
           <div class="row" id="artQRow" hidden><label>X-Treino<select id="artScrim"></select></label><label>Queda<select id="artRound"></select></label></div>
@@ -1034,8 +1016,7 @@ async function logAct(text){
 const me = () => { const id = AUTH.user?.uid; return id ? DB.get("users/" + id) || null : null; };
 const myTeam = () => { const u = me(); return u ? arr(DB.get("teams")).find(t => t.members && t.members[u.id]) || null : null; };
 const teamOf = uidx => arr(DB.get("teams")).find(t => t.members && t.members[uidx]) || null;
-const scrimsAll = () => arr(DB.get("scrims")).sort((a, b) => new Date(a.date + "T" + a.time) - new Date(b.date + "T" + b.time));
-const scrimsSorted = () => arr(DB.get("scrims")).filter(s => !s.archived).sort((a, b) => new Date(a.date + "T" + a.time) - new Date(b.date + "T" + b.time));
+const scrimsSorted = () => arr(DB.get("scrims")).sort((a, b) => new Date(a.date + "T" + a.time) - new Date(b.date + "T" + b.time));
 const scrimRegs = s => arr(s.regs).sort((a, b) => a.at - b.at);
 // Status calculado no horário local de cada visitante: agendado vira aberto no instante programado.
 const scrimStatus = s => s && s.status === "scheduled" && Number(s.registrationOpensAt) <= Date.now() ? "open" : (s?.status || "closed");
@@ -1113,7 +1094,7 @@ function applyInterface(){
   document.body.style.fontFamily=`var(--font-body)`;
   document.querySelectorAll("h1,h2,h3,.brand,.btn,.nav a,.tabs button,th").forEach(el=>el.style.fontFamily="var(--font-heading)");
   const navLabels=String(cfg.navLabels||"").split(",").map(x=>x.trim());
-  if(navLabels.length===10 && navLabels.every(Boolean)) document.querySelectorAll(".nav a").forEach((a,i)=>{if(navLabels[i])a.textContent=navLabels[i];});
+  if(navLabels.length===10 && navLabels.every(Boolean)) document.querySelectorAll(".nav a").forEach((a,i)=>a.textContent=navLabels[i]);
   document.querySelectorAll(".btn").forEach(el=>el.style.borderRadius="var(--button-radius)");
   const bg=cfg.background||"";
   document.body.style.backgroundImage=bg?`linear-gradient(rgba(6,10,22,${(Number(cfg.overlay??72))/100}),rgba(6,10,22,${(Number(cfg.overlay??72))/100})),url("${bg}")`:"radial-gradient(900px 500px at 85% -10%,rgba(225,29,46,.25),transparent 60%),radial-gradient(700px 400px at -10% 35%,rgba(153,27,27,.12),transparent 60%)";
@@ -1252,7 +1233,7 @@ function playerMedals(uidx,stats){
   const cfg=arr(settings().playerMedals),awards=settings().playerMedalAwards||{},given=arr(awards[uidx]).map(x=>typeof x==="string"?x:x.id);
   return cfg.filter(m=>given.includes(m.id)||(m.criterion==="kills"&&stats.kills>=+m.target)||(m.criterion==="matches"&&stats.matches>=+m.target)||(m.criterion==="booyahs"&&stats.booyahs>=+m.target));
 }
-function renderPlayerProfileBase(uidx){
+function renderPlayerProfile(uidx){
   const user=DB.get("users/"+uidx);if(!user)return '<div class="card empty">Jogador não encontrado.</div>';
   const st=playerStats(uidx,user),medals=playerMedals(uidx,st);
   const all=arr(DB.get("users")).map(u=>({u,k:playerKillTotal(u.id,u)})).sort((a,b)=>b.k-a.k||String(a.u.nick||"").localeCompare(String(b.u.nick||""),"pt-BR"));
@@ -1292,12 +1273,25 @@ function seasonStandings(key){
   })));
   return Object.values(T).sort((a,b)=>b.pts-a.pts||b.booyah-a.booyah||b.kills-a.kills);
 }
+function seasonKillRowsForScrim(sc){
+  // Quando KILL.MANUAL foi usado neste X-Treino, a fonte de verdade são
+  // os registros das quedas. Nunca voltar para AUTOMATIC.KILL depois de apagar.
+  const raw = DB.get("manualKills/" + sc.id) || {};
+  const hasManual = !!DB.get("manualKillSources/" + sc.id) ||
+    !!DB.get("manualKillRankings/" + sc.id) || Object.keys(raw).length > 0;
+  if (hasManual) return manualKillTotals(sc.id);
+  const auto = DB.get("automaticKills/" + sc.id);
+  return auto?.publishedAt ? (auto.players || []) : [];
+}
 function seasonPlayerKills(key){
   const totals={};for(const sc of seasonScrims(key)){
-    const manual=DB.get("manualKillRankings/"+sc.id),pub=manual?.publishedAt?manual:DB.get("automaticKills/"+sc.id);if(!pub?.publishedAt)continue;
-    for(const p of pub.players||[]){const id=p.uid||String(p.nick||"").toLocaleLowerCase("pt-BR");if(!totals[id])totals[id]={uid:p.uid||"",nick:p.nick||"Jogador",teamName:p.teamName||"",kills:0};totals[id].kills+=Math.max(0,+p.kills||0);if(p.teamName)totals[id].teamName=p.teamName;}
+    for(const p of seasonKillRowsForScrim(sc)){
+      const id=p.uid||String(p.nick||"").toLocaleLowerCase("pt-BR");
+      if(!totals[id])totals[id]={uid:p.uid||"",nick:p.nick||"Jogador",teamName:p.teamName||"",kills:0};
+      totals[id].kills+=Math.max(0,+p.kills||0);if(p.teamName)totals[id].teamName=p.teamName;
+    }
   }
-  return Object.values(totals).sort((a,b)=>b.kills-a.kills||a.nick.localeCompare(b.nick,"pt-BR"));
+  return Object.values(totals).filter(p=>p.kills>0).sort((a,b)=>b.kills-a.kills||a.nick.localeCompare(b.nick,"pt-BR"));
 }
 function renderTeamRankDetail(tid,key){
   const tm=DB.get("teams/"+tid),box=$("#teamRankDetail");if(!tm||!box)return;
@@ -1349,7 +1343,7 @@ function stRecords(){
   const mostBoo=Object.values(boo).sort((a,b)=>b.v-a.v)[0]||null;
   return [["Mais abates em uma queda (time)",kq,"abates"],["Mais abates em uma queda (jogador)",kqp,"abates"],["Mais Booyahs (time)",mostBoo,"Booyahs"],["Maior pontuação em um X-Treino",bestPts,"pontos"]];
 }
-const stLastScrims=n=>scrimsAll().slice().reverse().filter(sc=>standings(sc.id).length).slice(0,n);
+const stLastScrims=n=>scrimsSorted().slice().reverse().filter(sc=>standings(sc.id).length).slice(0,n);
 function stPodium(rows){
   const meds=["🥇","🥈","🥉"];
   return '<div class="sv-podium" style="margin:6px auto 12px">'+[1,0,2].map(i=>{const r=rows[i];
@@ -1453,7 +1447,7 @@ function renderSeasonSummary(key,teams,players,cs){
 }
 $("#seasonViewTabs")?.addEventListener("click",e=>{const b=e.target.closest("[data-sview]");if(!b)return;state.seasonView=b.dataset.sview;applySeasonView();});
 function renderRanking(){
-  const sel=$("#rankFilter"),cur=sel.value;sel.innerHTML='<option value="">Geral (todos os treinos)</option>'+scrimsAll().reverse().map(sc=>`<option value="${esc(sc.id)}">${esc(sc.title)} — ${esc(sc.date)}</option>`).join("");sel.value=[...sel.options].some(o=>o.value===cur)?cur:"";
+  const sel=$("#rankFilter"),cur=sel.value;sel.innerHTML='<option value="">Geral (todos os treinos)</option>'+scrimsSorted().reverse().map(sc=>`<option value="${esc(sc.id)}">${esc(sc.title)} — ${esc(sc.date)}</option>`).join("");sel.value=[...sel.options].some(o=>o.value===cur)?cur:"";
   const seasonSel=$("#seasonFilter"),old=seasonSel.value,custom=arr(settings().seasons).slice().sort((a,b)=>(b.created||0)-(a.created||0)),months=[...new Set(arr(DB.get("scrims")).map(seasonKey).filter(k=>/^\d{4}-\d{2}$/.test(k)))].sort().reverse();
   const now=new Date(),current=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");if(!months.includes(current))months.unshift(current);
   const keys=[...custom.map(x=>"custom:"+x.id),...months];
@@ -1504,6 +1498,7 @@ function renderAdmin(){
   $("#tabMedals").hidden = !master;
   $("#tabAutomaticKill").hidden = !master;
   if (!master && ["equipe", "automaticKill", "interface", "seasonAdmin", "admCall", "medals"].includes(state.adminTab)) state.adminTab = "treinos";
+  if (!master && (settings().maintenance?.areas || {})["tab:" + state.adminTab]) state.adminTab = "treinos";
   $("#adminWho").textContent = "Conectado como " + sess.user + (master ? " (organizador principal)" : " (organizador)");
   if (master){
     const adms = arr(DB.get("admins")).sort((a, b) => a.created - b.created);
@@ -1540,7 +1535,7 @@ function renderAdmin(){
   const users = arr(DB.get("users"));
   $("#adminUsers").innerHTML = users.length ? users.map(x => `<div class="card"><div class="flex between"><b>${esc(x.nick)}</b><button class="btn small danger" data-act="deluser" data-id="${x.id}">Excluir</button></div><p class="muted small-t">ID: ${esc(x.ffid || "—")} • ${esc(x.role || "")}</p></div>`).join("") : '<div class="card empty">Nenhum jogador.</div>';
   const news = arr(DB.get("news")).sort((a, b) => b.at - a.at);
-  $("#adminNews").innerHTML = news.map(n => `<div class="card flex between" style="margin-bottom:10px"><span>${n.cat ? `<span class="badge off">${esc(n.cat)}</span> ` : ""}${esc(n.text)}</span><button class="btn small danger" data-act="delnews" data-id="${n.id}">Excluir</button></div>`).join("");
+  $("#adminNews").innerHTML = news.map(n => `<div class="card flex between" style="margin-bottom:10px"><span>${esc(n.text)}</span><button class="btn small danger" data-act="delnews" data-id="${n.id}">Excluir</button></div>`).join("");
 }
 
 function renderResults(){
@@ -1773,10 +1768,9 @@ function renderPublishedAutomaticKills(){
    ===================================================== */
 /* mantém o ranking individual público (e a Season) sempre igual ao que foi salvo nas quedas */
 async function syncManualKillPublic(sc){
-  /* Fonte única: as quedas salvas no KILL.MANUAL. Editou/apagou -> recalcula. Sem quedas, deixa a publicação VAZIA
-     (marcador) para que ninguém use abates de outra fonte no lugar dos resultados manuais. */
-  const players=manualKillTotals(sc.id),rounds=[1,2,3,4,5].filter(n=>(DB.get(`manualKills/${sc.id}/r${n}`)||[]).length);
-  await DB.set("manualKillRankings/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,publishedAt:Date.now(),rounds,cleared:!players.length});
+  const totals=manualKillTotals(sc.id),rounds=[1,2,3,4,5].filter(n=>(DB.get(`manualKills/${sc.id}/r${n}`)||[]).length);
+  if(!totals.length){if(DB.get("manualKillRankings/"+sc.id))await DB.del("manualKillRankings/"+sc.id);return;}
+  await DB.set("manualKillRankings/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players:totals,publishedAt:Date.now(),rounds});
 }
 function manualKillRounds(){ return DB.get("manualKills/"+(state.manualKillScrim||"")) || {}; }
 function manualKillRoster(scrim){
@@ -1826,13 +1820,13 @@ function renderManualKillAdmin(){
 }
 function renderPublishedManualKills(){
   const box=$("#homeManualKills"); if(!box)return;
-  const all=arr(DB.get("manualKillRankings")).filter(x=>(x.players||[]).length).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
+  const all=arr(DB.get("manualKillRankings")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
   if(!all.length){box.innerHTML="";return;}
   box.innerHTML=all.map(pub=>`<div class="card mt"><div class="flex between wrap"><div><h2 class="title">KILL.MANUAL — ${esc(pub.scrimTitle||"X-Treino")}</h2><p class="muted small-t">Ranking individual publicado • ${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):"—"}</p></div><span class="badge ok">PUBLICADO</span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Time</th><th>Abates</th></tr></thead><tbody>${(pub.players||[]).slice(0,5).map((p,i)=>`<tr><td>${i+1}</td><td><b>${i===0?"👑 ":""}${esc(p.nick)}</b></td><td>[${esc(p.teamTag||"")}] ${esc(p.teamName||"")}</td><td><b>${+p.kills||0}</b></td></tr>`).join("")}</tbody></table></div><p class="muted small-t mt">Veja o ranking completo na aba ABATES.</p></div>`).join("");
 }
 function renderAbatesPublic(){
   const box=$("#publicAbatesList"); if(!box)return;
-  const manual=arr(DB.get("manualKillRankings")).filter(x=>(x.players||[]).length).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
+  const manual=arr(DB.get("manualKillRankings")).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
   const html=manual.map(pub=>`<div class="card"><div class="flex between wrap"><h3>KILL.MANUAL — ${esc(pub.scrimTitle||"X-Treino")}</h3><span class="badge ok">PUBLICADO</span></div><p class="muted small-t">${pub.publishedAt?new Date(pub.publishedAt).toLocaleDateString("pt-BR"):""}</p><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Time</th><th>Abates</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Q5</th></tr></thead><tbody>${(pub.players||[]).map((p,i)=>`<tr><td>${i+1}</td><td><b>${i===0?"👑 ":""}${esc(p.nick)}</b></td><td>[${esc(p.teamTag||"")}] ${esc(p.teamName||"")}</td><td><b>${+p.kills||0}</b></td>${[1,2,3,4,5].map(n=>`<td>${p.history&&p.history["r"+n]!==undefined?p.history["r"+n]:"—"}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`).join("");
   box.innerHTML=html||'<div class="card empty">Ainda não há rankings KILL.MANUAL publicados.</div>';
 }
@@ -1845,14 +1839,14 @@ $("#manualKillSaveRound").addEventListener("click",async()=>{
   const rows=$$("#manualKillRoster [data-manual-uid]").map(input=>({uid:input.dataset.manualUid,nick:input.dataset.manualNick,teamId:input.dataset.teamId,teamName:input.dataset.teamName,teamTag:input.dataset.teamTag,kills:Number(input.value)}));
   if(rows.length!==players.length)return toast("A lista de jogadores mudou. Atualize e tente novamente.","err");
   if(rows.some(r=>!Number.isInteger(r.kills)||r.kills<0||r.kills>99))return toast("Use abates inteiros entre 0 e 99.","err");
-  try{await DB.set(`manualKills/${sc.id}/r${state.manualKillRound}`,rows);await syncManualKillPublic(sc);await logAct(`Salvou KILL.MANUAL da Queda ${state.manualKillRound} — ${sc.title}`);toast(`KILL.MANUAL — Queda ${state.manualKillRound} salva! A Season foi atualizada.`);renderManualKillAdmin();renderRanking();renderPublishedManualKills();renderAbatesPublic();}
+  try{await DB.set("manualKillSources/"+sc.id,true);await DB.set(`manualKills/${sc.id}/r${state.manualKillRound}`,rows);await syncManualKillPublic(sc);await logAct(`Salvou KILL.MANUAL da Queda ${state.manualKillRound} — ${sc.title}`);toast(`KILL.MANUAL — Queda ${state.manualKillRound} salva! A Season foi atualizada.`);renderManualKillAdmin();renderRanking();renderStats();renderExtra();renderPublishedManualKills();renderAbatesPublic();}
   catch(err){toast("Não foi possível salvar a queda: "+err.message,"err");}
 });
 $("#manualKillClearRound").addEventListener("click",async()=>{
   if(!isAdmin())return toast("Acesso de organizador necessário.","err");
   const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return;
-  if(!await ask(`Apagar os abates manuais da Queda ${state.manualKillRound} de ${sc.title}? Eles saem dos rankings atuais (MVP, Season, perfil). As Seasons já encerradas guardadas no Hall da Fama não mudam.`))return;
-  try{await DB.del(`manualKills/${sc.id}/r${state.manualKillRound}`);await syncManualKillPublic(sc);await logAct(`Apagou KILL.MANUAL da Queda ${state.manualKillRound} — ${sc.title}`);toast("Queda apagada. Rankings e MVP atualizados.");renderManualKillAdmin();renderRanking();renderPublishedManualKills();renderAbatesPublic();}
+  if(!await ask(`Apagar os abates manuais da Queda ${state.manualKillRound} de ${sc.title}?`))return;
+  try{await DB.set("manualKillSources/"+sc.id,true);await DB.del(`manualKills/${sc.id}/r${state.manualKillRound}`);await syncManualKillPublic(sc);await logAct(`Apagou KILL.MANUAL da Queda ${state.manualKillRound} — ${sc.title}`);toast("Queda apagada. A Season foi atualizada.");renderManualKillAdmin();renderRanking();renderStats();renderExtra();renderPublishedManualKills();renderAbatesPublic();}
   catch(err){toast("Não foi possível apagar a queda: "+err.message,"err");}
 });
 $("#manualKillPublish").addEventListener("click",async()=>{
@@ -1860,14 +1854,14 @@ $("#manualKillPublish").addEventListener("click",async()=>{
   const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return toast("Selecione um X-Treino.","err");
   const players=manualKillTotals(sc.id);if(!players.length)return toast("Salve pelo menos uma queda antes de publicar.","err");
   if(!await ask(`Publicar o ranking KILL.MANUAL de ${sc.title} com ${players.length} jogador(es)?`))return;
-  try{await syncManualKillPublic(sc);await logAct("Publicou KILL.MANUAL de "+sc.title);toast("Ranking KILL.MANUAL publicado! 🏆");render();}
+  try{await DB.set("manualKillRankings/"+sc.id,{scrimId:sc.id,scrimTitle:sc.title,players,publishedAt:Date.now(),rounds:[1,2,3,4,5].filter(n=>(manualKillRounds()["r"+n]||[]).length)});await logAct("Publicou KILL.MANUAL de "+sc.title);toast("Ranking KILL.MANUAL publicado! 🏆");render();}
   catch(err){toast("Não foi possível publicar: "+err.message,"err");}
 });
 $("#manualKillUnpublish").addEventListener("click",async()=>{
   if(!isAdmin())return toast("Acesso de organizador necessário.","err");
   const sc=DB.get("scrims/"+state.manualKillScrim);if(!sc)return;
   if(!DB.get("manualKillRankings/"+sc.id))return toast("Este X-Treino não tem publicação.","err");
-  if(!await ask(`Apagar a publicação do KILL.MANUAL de ${sc.title}? Isso TIRA esses abates dos rankings (os registros das quedas são mantidos).`))return;
+  if(!await ask(`Apagar somente a publicação do KILL.MANUAL de ${sc.title}? Os registros salvos das quedas serão mantidos.`))return;
   try{await DB.del("manualKillRankings/"+sc.id);await logAct("Removeu publicação KILL.MANUAL de "+sc.title);toast("Publicação removida. Os registros das quedas foram mantidos.");render();}
   catch(err){toast("Não foi possível remover a publicação: "+err.message,"err");}
 });
@@ -1897,7 +1891,7 @@ document.addEventListener("click", async e => {
   if (g){ e.preventDefault(); go(g.dataset.go); return; }
 
   const tabBtn = e.target.closest("#adminTabs button");
-  if (tabBtn){ if (["automaticKill","medals","seasonAdmin","interface","maintenance"].includes(tabBtn.dataset.tab) && !isMaster()) return toast("Esta área é exclusiva do organizador principal", "err"); state.adminTab = tabBtn.dataset.tab; renderAdmin(); return; }
+  if (tabBtn){ if (["automaticKill","medals","seasonAdmin","interface","maintenance","arts"].includes(tabBtn.dataset.tab) && !isMaster()) return toast("Esta área é exclusiva do organizador principal", "err"); if(!isMaster() && (settings().maintenance?.areas || {})["tab:"+tabBtn.dataset.tab]) return toast("Esta categoria está temporariamente em manutenção", "err"); state.adminTab = tabBtn.dataset.tab; renderAdmin(); return; }
   const roundBtn = e.target.closest("#resRounds [data-round]");
   if (roundBtn){ state.resRound = +roundBtn.dataset.round; renderResults(); return; }
 
@@ -1929,11 +1923,7 @@ document.addEventListener("click", async e => {
     else if (act === "leave"){ if (await ask("Sair do time?")){ await removeMember(t, u.id); toast("Você saiu do time"); } }
     else if (act === "kick"){ if (await ask("Expulsar este jogador?")){ await removeMember(t, id); toast("Jogador removido"); } }
     else if (act === "addround"){ const s = DB.get("scrims/" + state.resScrim); await DB.set(`scrims/${s.id}/rounds`, (+s.rounds || 1) + 1); state.resRound = (+s.rounds || 1) + 1; }
-    else if (act === "delscrim"){
-      const sc = DB.get("scrims/" + id), has = !!(DB.get("results/" + id) || DB.get("manualKillRankings/" + id) || DB.get("automaticKills/" + id));
-      if (has){ if (await ask("Este treino tem resultados. Ele sai das listas, mas os pontos dos times e os abates continuam salvos na Season. Continuar?")){ await DB.set("scrims/" + id, { ...sc, archived: true }); await logAct("Arquivou o treino " + (sc ? sc.title : id) + " (resultados mantidos na Season)"); toast("Treino arquivado. Season mantida ✅"); } }
-      else if (await ask("Excluir este treino?")){ await DB.del("scrims/" + id); await logAct("Excluiu o treino " + (sc ? sc.title : id)); }
-    }
+    else if (act === "delscrim"){ if (await ask("Excluir este treino e seus resultados?")){ const sc = DB.get("scrims/" + id); await DB.del("scrims/" + id); await DB.del("results/" + id); await logAct("Excluiu o treino " + (sc ? sc.title : id)); } }
     else if (act === "delreg"){ const tm = DB.get("teams/" + id2), sc = DB.get("scrims/" + id); await DB.del(`scrims/${id}/regs/${id2}`); await logAct(`Removeu o time ${tm ? tm.name : id2} do treino ${sc ? sc.title : id}`); }
     else if (act === "delteam"){ if (await ask("Excluir este time?")){ const tm = DB.get("teams/" + id); await removeTeam(id); await logAct("Excluiu o time " + (tm ? tm.name : id)); } }
     else if (act === "deluser"){
@@ -2187,7 +2177,7 @@ $("#scheduledScrimForm").addEventListener("submit", async e => {
 });
 $("#newsForm").addEventListener("submit", async e => {
   e.preventDefault(); const id = uid();
-  const fd = new FormData(e.target); await DB.set("news/" + id, { id, text: fd.get("text").trim(), cat: fd.get("cat") || "Comunicado", at: Date.now() });
+  await DB.set("news/" + id, { id, text: new FormData(e.target).get("text").trim(), at: Date.now() });
   await logAct("Publicou um aviso"); e.target.reset(); toast("Aviso publicado"); render();
 });
 function fillConfig(){
@@ -2196,9 +2186,8 @@ function fillConfig(){
 }
 $("#configForm").addEventListener("submit", async e => {
   e.preventDefault();
-  if (!isMaster()) return toast("Somente o organizador principal altera as configurações", "err");
   const f = Object.fromEntries(new FormData(e.target));
-  await DB.set("settings/brand", f.brand.trim() || "ZEUX X-TREINOS FF"); await DB.set("settings/whatsapp", f.whatsapp.trim()); await DB.set("settings/instagram", f.instagram.trim()); await DB.set("settings/youtube", f.youtube.trim()); await DB.set("settings/discord", f.discord.trim());
+  await DB.set("settings", { ...settings(), brand: f.brand.trim() || "ZEUX X-TREINOS FF", whatsapp: f.whatsapp.trim(), instagram: f.instagram.trim(), youtube: f.youtube.trim(), discord: f.discord.trim() });
   await logAct("Alterou as configurações"); toast("Configurações salvas ✅"); render();
 });
 /* janelas dentro da página (o viewer bloqueia confirm() e downloads) */
@@ -2541,26 +2530,54 @@ function maintState(now = Date.now()){
   const active = !!m.manual || !!(s && now >= s && (!e || now < e));
   return { m, s, e, active, upcoming: !active && !!s && now < s };
 }
+const MAINT_PAGE_LABELS = {inicio:"Início",treinos:"Treinos",times:"Times",meutime:"Meu time",perfil:"Perfil",estatisticas:"Estatísticas",ranking:"Ranking",abates:"ABATES",calls:"CALL",redes:"Redes",admin:"Organizador"};
+function maintAreaKey(page){ return "page:" + page; }
 function renderMaintenance(){
   const S = maintState(), now = Date.now(), master = isMaster(), cur = ($("section.page.active") || {}).id;
   const onLogin = state.maintLogin && cur === "admin" && !isAdmin();
-  const block = S.active && !master && !onLogin, ov = $("#maintOverlay"), ban = $("#maintBanner");
-  ov.hidden = !block; document.body.style.overflow = block ? "hidden" : "";
-  if (block){
+  const globalBlock = S.active && !master && !onLogin;
+  const areas = S.m.areas || {};
+  const areaBlock = !S.active && !master && !onLogin && !!areas[maintAreaKey(cur)];
+  const block = globalBlock || areaBlock, ov = $("#maintOverlay"), ban = $("#maintBanner");
+  // Manutenção geral mantém o bloqueio total já existente; manutenção por área preserva a navegação.
+  ov.hidden = !globalBlock; document.body.style.overflow = globalBlock ? "hidden" : "";
+  if (globalBlock){
     $("#maintMsg").textContent = S.m.message || "Estamos em manutenção. Voltamos em breve!";
     $("#maintWindow").textContent = S.e && !S.m.manual ? "Retorno previsto: " + fmtBRT(S.e) + " (Brasília)" : "";
     $("#maintCd").textContent = S.e && !S.m.manual ? cdTxt(S.e - now) : "";
   }
+  // Cada página possui seu próprio aviso. O menu continua disponível para abrir outras áreas.
+  $$('section.page').forEach(page => {
+    const blocked = !S.active && !master && !onLogin && !!areas[maintAreaKey(page.id)];
+    page.classList.toggle("page-maint-block", blocked);
+    let card = page.querySelector(".page-maint-card");
+    if (blocked){
+      if (!card){ card = document.createElement("div"); card.className = "page-maint-card"; page.prepend(card); }
+      const label = MAINT_PAGE_LABELS[page.id] || page.id;
+      card.innerHTML = '<div style="font-size:2.5rem">🔧</div><h2>ÁREA EM MANUTENÇÃO</h2><p class="muted">' + esc(label) + ' está temporariamente indisponível.</p><p>' + esc(S.m.areaMessage || S.m.message || "Estamos realizando melhorias. Volte em breve!") + '</p>';
+    } else if (card) card.remove();
+  });
   let txt = "", on = false;
-  if (master && S.active){ on = true; txt = "🔧 MANUTENÇÃO ATIVA — visitantes bloqueados" + (S.m.manual ? " (manual)" : S.e ? " • termina em " + cdTxt(S.e - now) : ""); }
+  if (master && S.active){ on = true; txt = "🔧 MANUTENÇÃO GERAL ATIVA — visitantes bloqueados" + (S.m.manual ? " (manual)" : S.e ? " • termina em " + cdTxt(S.e - now) : ""); }
   else if (S.upcoming && S.m.warn !== false && !(S.e && S.e <= now)) txt = "⚠ Manutenção programada para " + fmtBRT(S.s) + " (Brasília) — começa em " + cdTxt(S.s - now);
+  else if (!S.active && !master){ const labels=Object.keys(areas).filter(k=>areas[k]).map(k=>MAINT_PAGE_LABELS[k.replace(/^page:/,"")] || k); if(labels.length) txt="🔧 Áreas em manutenção: "+labels.join(" • "); }
   ban.hidden = !txt; ban.classList.toggle("on", on); ban.textContent = txt;
   const st = $("#maintStatus");
-  if (st && master) st.innerHTML = `<span class="badge ${S.active ? "err" : "ok"}">${S.active ? "MANUTENÇÃO ATIVA" : "SITE NO AR"}</span> <span class="muted small-t">${S.m.manual ? "Ativada manualmente. " : ""}${S.s ? "Início: " + fmtBRT(S.s) + ". " : ""}${S.e ? "Término: " + fmtBRT(S.e) + ". " : ""}${S.upcoming ? "Começa em " + cdTxt(S.s - now) + "." : S.active && S.e && !S.m.manual ? "Termina em " + cdTxt(S.e - now) + "." : ""}</span>`;
-  $("#maintToggle") && ($("#maintToggle").textContent = S.m.manual ? "DESATIVAR MANUTENÇÃO AGORA" : "ATIVAR MANUTENÇÃO AGORA");
+  if (st && master) st.innerHTML = `<span class="badge ${S.active ? "err" : "ok"}">${S.active ? "MANUTENÇÃO GERAL ATIVA" : "SITE NO AR"}</span> <span class="muted small-t">${S.m.manual ? "Ativada manualmente. " : ""}${S.s ? "Início: " + fmtBRT(S.s) + ". " : ""}${S.e ? "Término: " + fmtBRT(S.e) + ". " : ""}${S.upcoming ? "Começa em " + cdTxt(S.s - now) + "." : S.active && S.e && !S.m.manual ? "Termina em " + cdTxt(S.e - now) + "." : ""}</span>`;
+  $("#maintToggle") && ($("#maintToggle").textContent = S.m.manual ? "DESATIVAR MANUTENÇÃO GERAL" : "ATIVAR MANUTENÇÃO GERAL");
+  const areasStatus=$("#maintAreasStatus");
+  if(areasStatus && master){ const count=Object.keys(areas).filter(k=>areas[k]).length; areasStatus.textContent=count ? count+" área(s) atualmente bloqueada(s)." : "Nenhuma área individual está em manutenção."; }
 }
 function renderMaintAdmin(){
   const f = $("#maintForm"), M = maint(), sig = JSON.stringify(M);
+  const host=$("#maintAreas");
+  if(host && isMaster()){
+    const pages=PAGES.map(id=>({key:maintAreaKey(id),label:MAINT_PAGE_LABELS[id]||id,kind:"Página"}));
+    const adminTabs=$$("#adminTabs button").map(b=>({key:"tab:"+b.dataset.tab,label:b.textContent.trim(),kind:"Categoria do organizador"}));
+    const targets=pages.concat(adminTabs);
+    host.innerHTML=targets.map(x=>`<label class="maint-area-option"><input type="checkbox" data-maint-area="${esc(x.key)}" ${M.areas&&M.areas[x.key]?"checked":""}><span><b>${esc(x.label)}</b><small class="muted" style="display:block">${x.kind}</small></span></label>`).join("");
+    const msg=$("#maintAreaMessage"); if(msg && document.activeElement!==msg) msg.value=M.areaMessage||"";
+  }
   if (f.dataset.sig !== sig && !f.contains(document.activeElement)){
     f.dataset.sig = sig; const E = f.elements;
     E.sd.value = M.start ? dBRT(+M.start) : ""; E.st.value = M.start ? tBRT(+M.start) : "";
@@ -2568,6 +2585,18 @@ function renderMaintAdmin(){
     E.msg.value = M.message || ""; E.warn.checked = M.warn !== false;
   }
 }
+$("#maintSelectAll").addEventListener("click", () => { if(!isMaster())return; $$("[data-maint-area]").forEach(x=>x.checked=true); });
+$("#maintSelectNone").addEventListener("click", () => { if(!isMaster())return; $$("[data-maint-area]").forEach(x=>x.checked=false); });
+$("#maintSaveAreas").addEventListener("click", async () => {
+  if(!isMaster()) return toast("Acesso exclusivo do Organizador Principal", "err");
+  const M=maint(), areas={};
+  $$("[data-maint-area]").forEach(x=>{ if(x.checked) areas[x.dataset.maintArea]=true; });
+  try{
+    await DB.set("settings/maintenance", {...M, areas, areaMessage:$("#maintAreaMessage").value.trim()});
+    await logAct("Atualizou manutenção por área: "+(Object.keys(areas).join(", ")||"nenhuma"));
+    toast("Manutenção das áreas salva!"); renderMaintenance(); renderMaintAdmin();
+  }catch(err){toast("Não foi possível salvar: "+err.message,"err");}
+});
 $("#maintAdminBtn").addEventListener("click", () => { state.maintLogin = true; go("admin"); renderMaintenance(); });
 document.addEventListener("click", () => setTimeout(renderMaintenance, 0));
 window.addEventListener("hashchange", () => setTimeout(renderMaintenance, 0));
@@ -2602,16 +2631,14 @@ $("#maintCancel").addEventListener("click", async () => {
 function selPlayers(key){
   const T = {};
   for (const sc of seasonScrims(key)){
-    const manual = DB.get("manualKillRankings/" + sc.id), pub = manual?.publishedAt ? manual : DB.get("automaticKills/" + sc.id);
-    if (!pub?.publishedAt) continue;
-    for (const p of pub.players || []){
+    for (const p of seasonKillRowsForScrim(sc)){
       const id = p.uid || String(p.nick || "").toLocaleLowerCase("pt-BR");
       const o = T[id] || (T[id] = { uid: p.uid || "", nick: p.nick || "Jogador", team: "", kills: 0, rounds: 0 });
       o.kills += Math.max(0, +p.kills || 0); o.rounds += +p.rounds || 0;
       if (p.teamName) o.team = (p.teamTag ? "[" + p.teamTag + "] " : "") + p.teamName;
     }
   }
-  return Object.values(T).sort((a, b) => b.kills - a.kills || a.nick.localeCompare(b.nick, "pt-BR"));
+  return Object.values(T).filter(p => p.kills > 0).sort((a, b) => b.kills - a.kills || a.nick.localeCompare(b.nick, "pt-BR"));
 }
 function selConfig(){ const c = settings().selectionConfig || {}; return { title: c.title || "SELEÇÃO DA SEASON", size: Math.max(1, Math.min(11, +c.size || 5)) }; }
 const selection = key => selPlayers(key).filter(p => p.kills > 0).slice(0, selConfig().size);
@@ -2683,10 +2710,6 @@ function artData(type, key){
     case "campeao": { const t = teams[0]; return { title: "CAMPEÃO DA SEASON", sub: sn, hero: t ? { label: "🏆 CAMPEÃO", main: tr(t), sub: Object.values(DB.get("teams/" + t.tid)?.members || {}).join(" • "), val: t.pts, unit: "PONTOS • " + t.kills + " ABATES" } : null }; }
     case "mvp": { const p = pl[0]; return { title: "MVP DA SEASON", sub: sn, hero: p ? { label: "⭐ MVP", main: p.nick, sub: p.team || "", val: p.kills, unit: "ABATES NA SEASON" } : null }; }
     case "selecao": return { title: selConfig().title, sub: sn, rows: selection(key).map(pr) };
-    case "mvpqueda": {
-      const sid = $("#artScrim").value, rn = $("#artRound").value, r = eliteRounds().find(x => x.sid === sid && x.rk === rn);
-      return { title: "MVP DA QUEDA " + String(rn || "").slice(1), sub: r ? r.title : "", hero: r && r.mvp ? { label: "⭐ MVP DA QUEDA", main: r.mvp.nick, sub: r.mvp.team || "", val: r.mvp.kills, unit: "ABATES NA QUEDA" } : null };
-    }
     case "queda": {
       const sid = $("#artScrim").value, rn = $("#artRound").value, sc = DB.get("scrims/" + sid), res = DB.get(`results/${sid}/${rn}`) || {};
       const rows = Object.entries(res).map(([tid, r]) => ({ r, tm: DB.get("teams/" + tid) })).filter(x => x.tm && +x.r.place > 0).sort((a, b) => a.r.place - b.r.place)
@@ -2744,20 +2767,18 @@ function renderArtsControls(){
   if (ss.dataset.sig !== ssig && !ss.contains(document.activeElement)){ const cur = ss.value; ss.innerHTML = sc.map(x => `<option value="${esc(x.id)}">${esc(x.title)} — ${esc(x.date)}</option>`).join(""); ss.dataset.sig = ssig; if (sc.some(x => x.id === cur)) ss.value = cur; }
   const rs = $("#artRound"), rounds = Object.keys(DB.get("results/" + ss.value) || {}).sort((a, b) => +a.slice(1) - +b.slice(1)), rsig = ss.value + rounds.join();
   if (rs.dataset.sig !== rsig && !rs.contains(document.activeElement)){ const cur = rs.value; rs.innerHTML = rounds.map(r => `<option value="${r}">Queda ${r.slice(1)}</option>`).join(""); rs.dataset.sig = rsig; if (rounds.includes(cur)) rs.value = cur; }
-  $("#artQRow").hidden = !["queda", "mvpqueda"].includes($("#artType").value);
-  $("#artBgFile").disabled = $("#artLogoFile").disabled = !isMaster();
+  $("#artQRow").hidden = $("#artType").value !== "queda";
   if (state.adminTab === "arts") artDraw();
 }
 let artTimer;
-$("#artForm").addEventListener("input", () => { clearTimeout(artTimer); artTimer = setTimeout(() => { $("#artQRow").hidden = !["queda", "mvpqueda"].includes($("#artType").value); renderArtsControls(); artDraw(); }, 120); });
+$("#artForm").addEventListener("input", () => { clearTimeout(artTimer); artTimer = setTimeout(() => { $("#artQRow").hidden = $("#artType").value !== "queda"; renderArtsControls(); artDraw(); }, 120); });
 $("#artForm").addEventListener("change", e => {
   const f = e.target.files && e.target.files[0]; if (!f || !/^image\//.test(f.type)) return;
-  if (!isMaster()){ e.target.value = ""; return toast("Logo e fundo personalizados: só o organizador principal", "err"); }
   const rd = new FileReader(); rd.onload = () => { const im = new Image(); im.onload = () => { if (e.target.id === "artBgFile") ART.bgImg = im; else ART.logoImg = im; artDraw(); }; im.src = rd.result; }; rd.readAsDataURL(f);
 });
 $("#artClear").addEventListener("click", () => { ART.bgImg = null; ART.logoImg = null; $("#artBgFile").value = ""; $("#artLogoFile").value = ""; artDraw(); });
 $("#artDownload").addEventListener("click", () => {
-  if (!isAdmin()) return toast("Acesso de organizador necessário", "err");
+  if (!isMaster()) return toast("Acesso exclusivo do organizador principal", "err");
   artDraw();
   try {
     $("#artCanvas").toBlob(async b => {
@@ -2771,153 +2792,10 @@ $("#artDownload").addEventListener("click", () => {
 function renderExtra(){
   try {
     renderMaintenance(); renderBest();
-    const m = isMaster(); $("#tabMaint").hidden = !m; $("#tabArts").hidden = !isAdmin();
-    if (m){ renderMaintAdmin(); renderSelectionAdmin(); hallAutoArchive(); }
-    if (isAdmin()) renderArtsControls();
-    renderElite();
+    const m = isMaster(); $("#tabMaint").hidden = !m; $("#tabArts").hidden = !m;
+    if (m){ renderMaintAdmin(); renderSelectionAdmin(); renderArtsControls(); }
   } catch(e){ console.error(e); }
 }
-
-/* =====================================================
-   CENTRAL DE ELITE — tudo derivado das fontes oficiais:
-   results/ (equipes), manualKillRankings/ (KILL.MANUAL) e, só quando não há manual, automaticKills/.
-   ===================================================== */
-const elDay = d => String(d || "").split("-").reverse().join("/");
-function seasonKeyOfScrim(sc){ const d = String(sc.date || ""), c = arr(settings().seasons).filter(x => d >= x.start && d <= x.end).sort((a, b) => (b.created || 0) - (a.created || 0))[0]; return c ? "custom:" + c.id : seasonKey(sc); }
-function eliteResolveTeam(p){
-  if (p.teamName) return (p.teamTag ? "[" + p.teamTag + "] " : "") + p.teamName;
-  const nn = normalizedNick(p.nick), u = (p.uid && DB.get("users/" + p.uid)) || arr(DB.get("users")).find(x => normalizedNick(x.nick) === nn), t = u && teamOf(u.id);
-  return t ? "[" + t.tag + "] " + t.name : "";
-}
-function eliteRounds(){
-  const out = [];
-  for (const sc of arr(DB.get("scrims"))){
-    const res = DB.get("results/" + sc.id) || {}, man = DB.get("manualKillRankings/" + sc.id), pubSrc = man?.publishedAt ? man : DB.get("automaticKills/" + sc.id), key = seasonKeyOfScrim(sc);
-    const pl = pubSrc?.publishedAt ? arr(pubSrc.players) : [], nums = new Set(Object.keys(res).map(k => +k.slice(1)));
-    pl.forEach(p => Object.keys(p.history || {}).forEach(k => nums.add(+k.slice(1))));
-    for (const n of [...nums].filter(Boolean).sort((a, b) => a - b)){
-      const rk = "r" + n, seen = new Set(), pk = [];
-      for (const p of pl){
-        if ((p.history || {})[rk] === undefined) continue;
-        const id = p.uid || normalizedNick(p.nick); if (seen.has(id)) continue; seen.add(id);
-        pk.push({ uid: p.uid || "", nick: p.nick || "Jogador", team: eliteResolveTeam(p), kills: Math.max(0, +p.history[rk] || 0) });
-      }
-      pk.sort((a, b) => b.kills - a.kills || a.nick.localeCompare(b.nick, "pt-BR"));
-      const teams = Object.entries(res[rk] || {}).map(([tid, r]) => { const tm = DB.get("teams/" + tid); return tm && +r.place > 0 ? { tid, name: tm.name, tag: tm.tag, place: +r.place, kills: +r.kills || 0, pts: seasonPtsOf(r, key) } : null; }).filter(Boolean).sort((a, b) => a.place - b.place);
-      out.push({ sid: sc.id, title: sc.title || "X-Treino", date: sc.date || "", n, rk, key, teams, pk, mvp: pk[0] && pk[0].kills > 0 ? pk[0] : null });
-    }
-  }
-  return out.sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.n - a.n);
-}
-function hallBuild(key){
-  const { custom } = stSeasonKeys(), teams = seasonStandings(key), pl = selPlayers(key).filter(p => p.kills > 0), ids = new Set(seasonScrims(key).map(x => x.id)), rounds = eliteRounds().filter(r => ids.has(r.sid));
-  const t = x => ({ tid: x.tid, tag: x.tag, name: x.name, pts: x.pts, kills: x.kills, booyah: x.booyah });
-  return { key, name: seasonName(key), range: stRange(key, stCustom(key, custom)), savedAt: Date.now(),
-    champion: teams[0] ? { ...t(teams[0]), members: Object.values(DB.get("teams/" + teams[0].tid)?.members || {}) } : null,
-    top3: teams.slice(0, 3).map(t), top5: pl.slice(0, 5).map(p => ({ nick: p.nick, team: p.team || "", kills: p.kills })),
-    mvp: pl[0] ? { nick: pl[0].nick, team: pl[0].team || "", kills: pl[0].kills } : null,
-    stats: { teams: teams.length, scrims: ids.size, rounds: rounds.length, kills: teams.reduce((a, x) => a + x.kills, 0) } };
-}
-function hallEntries(){
-  const { keys, custom } = stSeasonKeys(), out = [];
-  for (const k of keys){
-    if (!seasonIsFinished(k, stCustom(k, custom))) continue;
-    const snap = settings().hallOfFame?.[selSnapId(k)];
-    if (snap) out.push(snap); else { const b = hallBuild(k); if (b.champion || b.top5.length) out.push({ ...b, live: true }); }
-  }
-  return out;
-}
-function hallAwards(h){
-  const a = [], t3 = arr(h.top3), tg = x => "[" + x.tag + "] " + x.name;
-  if (h.champion) a.push({ award: "🏆 Campeão da Season", who: tg(h.champion), members: arr(h.champion.members) });
-  if (t3[1]) a.push({ award: "🥈 Vice-campeão", who: tg(t3[1]) }); if (t3[2]) a.push({ award: "🥉 3º lugar", who: tg(t3[2]) });
-  if (h.mvp) a.push({ award: "⭐ MVP da Season", who: h.mvp.nick, nick: h.mvp.nick });
-  const t5 = arr(h.top5); if (t5[0]) a.push({ award: "🎯 Artilheiro (mais abates)", who: t5[0].nick, nick: t5[0].nick });
-  return a;
-}
-async function hallAutoArchive(){
-  if (!isMaster() || state.hallArch) return; state.hallArch = true;
-  try {
-    const { keys, custom } = stSeasonKeys();
-    for (const k of keys){
-      if (!seasonIsFinished(k, stCustom(k, custom)) || settings().hallOfFame?.[selSnapId(k)]) continue;
-      const h = hallBuild(k); if (!h.champion && !h.top5.length) continue;
-      await DB.set("settings/hallOfFame/" + selSnapId(k), h);
-    }
-  } catch(e){} finally { state.hallArch = false; }
-}
-function playerAdvanced(uid, u){
-  const nn = normalizedNick(u.nick), me2 = p => (p.uid && p.uid === uid) || normalizedNick(p.nick) === nn;
-  const mine = eliteRounds().filter(r => r.pk.some(me2)), tm = teamOf(uid), { keys, def } = stSeasonKeys();
-  const seasons = keys.filter(k => selPlayers(k).some(me2)), pos = selPlayers(def).filter(p => p.kills > 0).findIndex(me2) + 1;
-  const mvps = mine.filter(r => r.mvp && me2(r.mvp)).length;
-  const awards = [];
-  for (const h of hallEntries()) for (const a of hallAwards(h)){
-    if ((a.nick && normalizedNick(a.nick) === nn) || (a.members && a.members.some(m => normalizedNick(m) === nn))) awards.push(a.award + " — " + h.name);
-    else if (a.award.startsWith("🎯") === false && a.award.startsWith("⭐") === false && a.award.startsWith("🏆") === false) continue;
-  }
-  for (const h of hallEntries()) if (arr(h.top5).some(p => normalizedNick(p.nick) === nn) && !awards.some(x => x.includes("🎯") && x.endsWith(h.name))) awards.push("🔟 Top 5 de abates — " + h.name);
-  const hist = mine.slice(0, 8).map(r => { const p = r.pk.find(me2), tr = tm && r.teams.find(x => x.tid === tm.id); return `<div class="xr"><span>${esc(elDay(r.date))} • ${esc(r.title)} • Queda ${r.n}${r.mvp && me2(r.mvp) ? ' <span class="el-mvp">⭐ MVP</span>' : ""}</span><span><b>${p.kills}</b> abates${tr ? " • " + tr.place + "º lugar" : ""}</span></div>`; }).join("");
-  return `<div class="el-card"><h3>Perfil avançado</h3>
-    <div class="player-stats"><div class="player-stat"><span class="muted small-t">POSIÇÃO NA SEASON</span><b>${pos ? pos + "º" : "—"}</b></div><div class="player-stat"><span class="muted small-t">MVPs DE QUEDA</span><b>${mvps}</b></div><div class="player-stat"><span class="muted small-t">QUEDAS COM ABATES</span><b>${mine.length}</b></div><div class="player-stat"><span class="muted small-t">SEASONS DISPUTADAS</span><b>${seasons.length}</b></div></div>
-    <h4>Seasons disputadas</h4><p class="small-t">${seasons.length ? seasons.map(k => esc(seasonName(k))).join(" • ") : "Nenhuma ainda."}</p>
-    <h4>Premiações recebidas</h4>${awards.length ? awards.map(a => `<div class="xr"><span>${esc(a)}</span></div>`).join("") : '<p class="muted small-t">Nenhuma premiação ainda.</p>'}
-    <h4>Histórico de desempenho</h4>${hist || '<p class="muted small-t">Sem quedas com abates registrados.</p>'}</div>`;
-}
-function renderPlayerProfile(uidx){ const base = renderPlayerProfileBase(uidx), u = DB.get("users/" + uidx); return u ? base + '<div id="elAdv">' + playerAdvanced(uidx, u) + "</div>" : base; }
-
-function elSel(sel, opts, def){ const sig = opts.map(o => o[0] + o[1]).join("|"); if (sel.dataset.sig !== sig && !sel.contains(document.activeElement)){ const cur = sel.value; sel.innerHTML = opts.map(o => `<option value="${esc(o[0])}">${esc(o[1])}</option>`).join(""); sel.dataset.sig = sig; sel.value = opts.some(o => o[0] === cur) ? cur : def; } return sel.value; }
-function renderElite(){
-  if (!$("#elite")) return;
-  const tab = state.elTab || "rank";
-  $$("#elTabs button").forEach(b => b.classList.toggle("active", b.dataset.el === tab)); $$("#elite .el-pane").forEach(p => p.hidden = p.dataset.pane !== tab);
-  if (tab === "rank"){
-    const { keys, def } = stSeasonKeys(), key = elSel($("#elSeason"), keys.map(k => [k, seasonName(k)]), def) || def;
-    const teams = seasonStandings(key).slice(0, 12), pl = selPlayers(key).filter(p => p.kills > 0).slice(0, 15);
-    $("#elRank").innerHTML = bestHtml(key) + `<div class="el-card"><h3>Equipes • ${esc(seasonName(key))}</h3>${teams.length ? `<div class="table-wrap"><table><thead><tr><th>#</th><th>Equipe</th><th>Quedas</th><th>Booyah</th><th>Abates</th><th>Pontos</th></tr></thead><tbody>${teams.map((t, i) => `<tr><td>${i + 1}</td><td>[${esc(t.tag)}] ${esc(t.name)}</td><td>${t.games}</td><td>${t.booyah}</td><td>${t.kills}</td><td><b>${t.pts}</b></td></tr>`).join("")}</tbody></table></div>` : '<p class="empty">Sem resultados nesta Season.</p>'}</div>`
-      + `<div class="el-card"><h3>Jogadores por abates</h3>${pl.length ? `<div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Equipe</th><th>Abates</th></tr></thead><tbody>${pl.map((p, i) => `<tr><td>${i + 1}</td><td>${p.uid ? `<a href="javascript:void(0)" data-elplayer="${esc(p.uid)}">${esc(p.nick)}</a>` : esc(p.nick)}</td><td>${esc(p.team || "—")}</td><td><b>${p.kills}</b></td></tr>`).join("")}</tbody></table></div>` : '<p class="empty">Sem abates publicados nesta Season.</p>'}</div>`;
-  } else if (tab === "mvp"){
-    const R = eliteRounds().filter(r => r.mvp), cnt = {};
-    R.forEach(r => { const k = normalizedNick(r.mvp.nick); (cnt[k] = cnt[k] || { nick: r.mvp.nick, team: r.mvp.team, n: 0 }).n++; });
-    const top = Object.values(cnt).sort((a, b) => b.n - a.n || a.nick.localeCompare(b.nick, "pt-BR")).slice(0, 5);
-    $("#elMvp").innerHTML = (top.length ? `<div class="el-card"><h3>Mais MVPs de queda</h3>${top.map((t, i) => `<div class="xr"><span>${i + 1}º <b>${esc(t.nick)}</b> <span class="muted small-t">${esc(t.team || "")}</span></span><b>${t.n} MVP${t.n > 1 ? "s" : ""}</b></div>`).join("")}</div>` : "")
-      + (R.length ? `<div class="el-card"><h3>Histórico de MVPs</h3>${R.slice(0, 80).map(r => `<div class="xr"><span>${esc(elDay(r.date))} • ${esc(r.title)} • Queda ${r.n}</span><span><span class="el-mvp">⭐ ${esc(r.mvp.nick)}</span> <span class="muted small-t">${esc(r.mvp.team || "")}</span> <b>${r.mvp.kills}</b> abates</span></div>`).join("")}</div>` : '<div class="el-card empty">Os MVPs aparecem quando os abates por queda forem lançados no KILL.MANUAL ou AUTOMATIC.KILL.</div>');
-  } else if (tab === "hist"){
-    const all = eliteRounds(), sc = [...new Map(all.map(r => [r.sid, r.title + " — " + elDay(r.date)])).entries()], sid = elSel($("#elScrim"), [["", "Todos os treinos"], ...sc], "");
-    const R = all.filter(r => !sid || r.sid === sid).slice(0, 60);
-    $("#elHist").innerHTML = R.length ? R.map(r => `<details class="el-card"><summary><b>${esc(elDay(r.date))} • ${esc(r.title)} • Queda ${r.n}</b> ${r.teams[0] ? `<span class="muted small-t">🏆 ${esc("[" + r.teams[0].tag + "] " + r.teams[0].name)}</span>` : ""} ${r.mvp ? `<span class="el-mvp">⭐ ${esc(r.mvp.nick)} • ${r.mvp.kills}</span>` : ""}</summary>
-      ${r.teams.length ? `<div class="table-wrap mt"><table><thead><tr><th>Class.</th><th>Equipe</th><th>Booyah</th><th>Abates</th><th>Pontos</th></tr></thead><tbody>${r.teams.map(t => `<tr><td>${t.place}º</td><td>[${esc(t.tag)}] ${esc(t.name)}</td><td>${t.place === 1 ? "🏆" : "—"}</td><td>${t.kills}</td><td><b>${t.pts}</b></td></tr>`).join("")}</tbody></table></div>` : '<p class="muted small-t mt">Resultado das equipes ainda não lançado.</p>'}
-      ${r.pk.length ? `<h4>Abates dos jogadores</h4>${r.pk.slice(0, 8).map(p => `<div class="xr"><span>${esc(p.nick)} <span class="muted small-t">${esc(p.team)}</span></span><b>${p.kills}</b></div>`).join("")}` : ""}</details>`).join("") : '<div class="el-card empty">Nenhuma queda registrada ainda.</div>';
-  } else if (tab === "hall"){
-    const H = hallEntries();
-    $("#elHall").innerHTML = H.length ? H.map(h => `<div class="el-card"><div class="flex between wrap"><div><h3>${esc(h.name)}</h3><p class="muted small-t">${esc(h.range || "")}${h.live ? " • calculado ao vivo (será guardado pelo organizador principal)" : " • registro guardado"}</p></div>${isMaster() && !h.live ? `<button class="btn ghost small" data-hall-redo="${esc(h.key)}">Recalcular registro</button>` : ""}</div>
-      ${h.champion ? `<div class="el-champ">🏆 <b>[${esc(h.champion.tag)}] ${esc(h.champion.name)}</b><small>${h.champion.pts} pts • ${h.champion.kills} abates • ${h.champion.booyah} Booyah</small><small>${esc(arr(h.champion.members).join(" • "))}</small></div>` : ""}
-      <div class="el-two"><div><h4>Top 3 equipes</h4>${arr(h.top3).map((t, i) => `<div class="xr"><span>${i + 1}º [${esc(t.tag)}] ${esc(t.name)}</span><b>${t.pts} pts</b></div>`).join("") || '<p class="muted small-t">—</p>'}</div>
-      <div><h4>Top 5 jogadores (abates)</h4>${arr(h.top5).map((p, i) => `<div class="xr"><span>${i + 1}º ${esc(p.nick)} <span class="muted small-t">${esc(p.team || "")}</span></span><b>${p.kills}</b></div>`).join("") || '<p class="muted small-t">—</p>'}</div></div>
-      ${h.mvp ? `<p class="mt">⭐ MVP da Season: <b>${esc(h.mvp.nick)}</b> • ${esc(h.mvp.team || "")} • ${h.mvp.kills} abates</p>` : ""}
-      <p class="muted small-t">${h.stats ? h.stats.teams + " equipes • " + h.stats.scrims + " treinos • " + h.stats.rounds + " quedas • " + h.stats.kills + " abates" : ""}</p>
-      <details><summary><b>Histórico de premiações</b></summary>${hallAwards(h).map(a => `<div class="xr"><span>${esc(a.award)}</span><span>${esc(a.who)}</span></div>`).join("")}</details></div>`).join("") : '<div class="el-card empty">O Hall da Fama guarda as Seasons encerradas. Ainda não há nenhuma.</div>';
-  } else if (tab === "players"){
-    const q = normalizedNick($("#elSearch").value), us = arr(DB.get("users")).filter(u => !q || normalizedNick(u.nick).includes(q)).sort((a, b) => String(a.nick).localeCompare(String(b.nick), "pt-BR")).slice(0, 60);
-    $("#elPlayerList").innerHTML = us.map(u => `<button type="button" data-elplayer="${esc(u.id)}"><b>${esc(u.nick || "Jogador")}</b><span class="muted small-t">${esc((teamOf(u.id) || {}).name || "Sem time")}</span></button>`).join("") || '<p class="muted small-t">Nenhum jogador encontrado.</p>';
-    $("#elPlayerProfile").innerHTML = state.elPlayer && DB.get("users/" + state.elPlayer) ? renderPlayerProfile(state.elPlayer) : "";
-  } else if (tab === "news"){
-    const N = arr(DB.get("news")).sort((a, b) => b.at - a.at);
-    $("#elNews").innerHTML = N.length ? N.map(n => `<div class="el-card"><span class="badge off">${esc(n.cat || "Comunicado")}</span> <span class="muted small-t">${esc(new Date(n.at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }))}</span><p class="mt">${esc(n.text)}</p></div>`).join("") : '<div class="el-card empty">Nenhum aviso publicado.</div>';
-  }
-}
-document.addEventListener("click", async e => {
-  const b = e.target.closest("#elTabs [data-el]"); if (b){ state.elTab = b.dataset.el; renderElite(); return; }
-  const pl = e.target.closest("[data-elplayer]"); if (pl){ state.elTab = "players"; state.elPlayer = pl.dataset.elplayer; go("elite"); renderElite(); $("#elPlayerProfile").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
-  const rd = e.target.closest("[data-hall-redo]");
-  if (rd){
-    if (!isMaster()) return toast("Acesso exclusivo do organizador principal", "err");
-    if (!await ask("Recalcular o registro desta Season com os dados atuais? Substitui o registro guardado.")) return;
-    await DB.set("settings/hallOfFame/" + selSnapId(rd.dataset.hallRedo), hallBuild(rd.dataset.hallRedo)); await logAct("Recalculou o Hall da Fama: " + seasonName(rd.dataset.hallRedo)); toast("Registro atualizado ✅"); renderElite();
-  }
-});
-$("#elSearch").addEventListener("input", () => renderElite());
-$("#elSeason").addEventListener("change", renderElite); $("#elScrim").addEventListener("change", renderElite);
 
 /* =====================================================
    INICIALIZAÇÃO
