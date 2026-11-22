@@ -52,6 +52,18 @@
 .st-team{border:1px solid var(--gold);border-radius:16px;padding:16px;background:var(--card);margin-bottom:10px}
 .st-link{background:none;border:0;color:var(--gold);font:inherit;font-weight:700;cursor:pointer;padding:8px 0}
 @media(max-width:520px){.st-rankbtns{gap:8px}.st-acc>button{font-size:1.12rem}}
+
+#maintOverlay[hidden],#maintBanner[hidden]{display:none!important}
+#maintOverlay{position:fixed;inset:0;z-index:99999;background:radial-gradient(900px 500px at 80% -10%,rgba(225,29,46,.3),transparent 60%),#060a16;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+#maintOverlay .mt-box{max-width:520px;width:100%}#maintOverlay h1{font:700 2.4rem Rajdhani,sans-serif;color:#fff;margin:6px 0}
+#maintOverlay .mt-ico{font-size:3.2rem}.mt-cd{font:700 2.6rem Rajdhani,sans-serif;color:#fbbf24;margin:14px 0;letter-spacing:.04em}
+#maintBanner{position:sticky;top:0;z-index:9000;padding:9px 14px;text-align:center;font-weight:700;font-size:.9rem;background:#7c2d12;color:#fff;border-bottom:1px solid #fbbf24}
+#maintBanner.on{background:#7f1d1d}
+.xr{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid var(--line,#26335f)}
+.bp{border:1px solid #fbbf24;background:linear-gradient(120deg,rgba(251,191,36,.14),var(--card,#101933));border-radius:16px;padding:16px 18px}
+.bp .k{font-size:.72rem;letter-spacing:.18em;color:#fbbf24;font-weight:700}.bp .n{font:700 2rem Rajdhani,sans-serif;color:#fff;margin:2px 0}
+.bp .g{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px}.bp .g div{display:flex;flex-direction:column}.bp .g b{font:700 1.5rem Rajdhani,sans-serif;color:#fff}.bp .g small{color:var(--muted,#9aa8d6)}
+#artCanvas{max-width:100%;height:auto;border-radius:12px;border:1px solid var(--line,#26335f)}
 </style>
 <title>SPIDER XTREINOS</title>
 <meta name="theme-color" content="#090a10">
@@ -62,21 +74,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
-<style id="spider-features-style">
-#spiderMaintenanceOverlay{position:fixed;inset:0;z-index:99990;background:radial-gradient(circle at 50% 15%,#202b52,#070b18 65%);color:#fff;display:none;align-items:center;justify-content:center;padding:24px;text-align:center}
-#spiderMaintenanceBanner{position:fixed;z-index:99980;top:0;left:0;right:0;padding:12px 16px;background:#17284b;color:#fff;text-align:center;border-bottom:2px solid #72e5ff;font-weight:700;display:none}#spiderMaintenanceOverlay .sm-box{max-width:620px;width:100%;border:1px solid #394b7d;border-radius:22px;padding:30px;background:rgba(7,13,31,.94);box-shadow:0 20px 80px #0008}
-#spiderMaintenanceOverlay h1{font:800 clamp(2rem,6vw,3.2rem) Rajdhani,sans-serif;margin:8px 0;color:#fff}
-#spiderMaintenanceOverlay .sm-clock{font:800 clamp(1.7rem,5vw,2.5rem) Rajdhani;color:#72e5ff;margin:14px 0}
-.spider-art-preview{width:100%;max-width:520px;display:block;margin:14px auto;border-radius:14px;border:1px solid var(--line);background:#080d1b}
-.spider-art-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
-.spider-feature-note{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(100,130,200,.07);font-size:.84rem}
-#spiderBestSeason{border:1px solid rgba(90,190,255,.35);background:linear-gradient(120deg,rgba(18,54,95,.88),rgba(12,20,43,.95));border-radius:15px;padding:14px;margin:12px 0}
-#spiderBestSeason .sbs-kicker{font-size:.72rem;letter-spacing:.15em;color:#9bdcff;font-weight:800}
-#spiderBestSeason .sbs-name{font:800 1.45rem Rajdhani;color:#fff;margin:3px 0}
-#spiderBestSeason .sbs-meta{color:#c4d5f3;font-size:.85rem}
-</style>
-
 </head><body>
 <style>
 :root{
@@ -288,6 +285,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   <div class="card home-next" id="homeNext"></div>
 
   <button type="button" class="st-home mt" data-go="estatisticas" id="homeStatsCard"><span><b>Estatísticas</b><small>Rankings, recordes, times e jogadores</small></span><i>›</i></button>
+  <div id="homeBestPlayer" class="mt"></div>
 
   <div class="grid g3 mt">
     <div class="card"><div class="stat" id="sTeams">0</div><p class="muted">Times cadastrados</p></div>
@@ -408,6 +406,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <div class="flex wrap" style="gap:10px"><span class="st-pill" id="stPill"></span><select id="stSeason" aria-label="Escolher Season" style="width:auto;max-width:100%"></select></div>
     <div class="st-search"><input id="stSearch" type="search" placeholder="Nome do time" autocomplete="off" aria-label="Nome do time"></div>
     <div id="stSearchOut"></div>
+    <div id="stBest" class="mt"></div>
     <div id="stBody"></div>
   </div>
 </section>
@@ -495,6 +494,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <button data-tab="equipe" id="tabEquipe" hidden>Organizadores</button>
         <button data-tab="interface" id="tabInterface" hidden>Interface</button>
         <button data-tab="seasonAdmin" id="tabSeasonAdmin" hidden>SEASON</button>
+        <button data-tab="maintenance" id="tabMaint" hidden>MANUTENÇÃO</button>
+        <button data-tab="arts" id="tabArts" hidden>SPIDER ARTS</button>
         <button data-tab="medals" id="tabMedals" hidden>CONFIG.MEDALHAS</button>
       </div>
       <button class="btn ghost small" id="adminOut">Sair</button>
@@ -668,8 +669,44 @@ OutroNick - 5"></textarea></label>
         <div class="actions mt"><button class="btn" type="button" id="saveSeasonPoints">SALVAR PONTUAÇÃO</button></div>
         <p class="muted small-t mt" id="seasonPointsStatus">Selecione uma Season para editar suas regras.</p>
       </div>
+      <div class="card mt" id="selCard"><h3>Seleção da Season (equipe do mês)</h3>
+        <p class="muted small-t">Escolhe automaticamente os jogadores com mais abates da Season (KILL.MANUAL / AUTOMATIC.KILL publicados). Atualiza sozinha a cada abate e queda lançados.</p>
+        <div class="row mt"><label>Título<input id="selTitle" maxlength="40" placeholder="SELEÇÃO DA SEASON"></label><label>Jogadores na seleção (1 a 11)<input id="selSize" type="number" min="1" max="11" value="5"></label></div>
+        <label>Season<select id="selSeason"></select></label>
+        <div class="actions mt"><button class="btn" type="button" id="selSave">SALVAR CONFIGURAÇÃO</button><button class="btn ghost" type="button" id="selArchive">SALVAR SELEÇÃO NO HISTÓRICO</button></div>
+        <div id="selLive" class="mt"></div>
+        <h3 class="sec">Histórico de seleções</h3><div id="selHistory"></div></div>
       <h3 class="sec">Temporadas criadas</h3>
       <div id="seasonAdminList" class="grid mt"></div>
+    </div>
+
+    <div class="atab" data-atab="maintenance" hidden>
+      <div class="card"><h3>🔧 Modo manutenção</h3><p class="muted small-t">Exclusivo do organizador principal. Horários de Brasília (UTC-3). Entra e sai sozinho nos horários programados, e o organizador principal continua acessando o painel.</p>
+        <div id="maintStatus" class="mt"></div>
+        <div class="actions mt"><button class="btn" type="button" id="maintToggle">ATIVAR MANUTENÇÃO AGORA</button></div></div>
+      <div class="card mt"><h3>Agendamento</h3>
+        <form id="maintForm" class="mt">
+          <div class="row"><label>Início — data<input type="date" name="sd"></label><label>Início — hora<input type="time" name="st"></label></div>
+          <div class="row"><label>Término — data<input type="date" name="ed"></label><label>Término — hora<input type="time" name="et"></label></div>
+          <label>Mensagem para os visitantes<textarea name="msg" rows="2" maxlength="200" placeholder="Estamos em manutenção. Voltamos em breve!"></textarea></label>
+          <label style="display:flex;flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="warn" checked style="width:auto"> Avisar os visitantes antes (aviso + contagem regressiva)</label>
+          <div class="actions mt"><button class="btn" type="submit">SALVAR AGENDAMENTO</button><button class="btn danger" type="button" id="maintCancel">CANCELAR AGENDAMENTO</button></div>
+        </form></div>
+    </div>
+
+    <div class="atab" data-atab="arts" hidden>
+      <div class="card"><h3>🎨 SPIDER ARTS — gerador de artes</h3><p class="muted small-t">Usa os dados reais do site. Ajuste e baixe a imagem para postar. Título/subtítulo vazios usam o texto automático.</p>
+        <div id="artForm" class="mt">
+          <div class="row"><label>Tipo de arte<select id="artType"><option value="top3">Top 3 de times</option><option value="top5">Top 5 jogadores</option><option value="campeao">Campeão da Season</option><option value="abates">Ranking de abates</option><option value="queda">Resultado de uma queda</option><option value="mvp">MVP da Season</option><option value="selecao">Seleção da Season</option></select></label>
+            <label>Season<select id="artSeason"></select></label>
+            <label>Formato<select id="artSize"><option value="1080x1350">Feed 1080×1350</option><option value="1080x1080">Quadrado 1080×1080</option><option value="1080x1920">Story 1080×1920</option></select></label></div>
+          <div class="row" id="artQRow" hidden><label>X-Treino<select id="artScrim"></select></label><label>Queda<select id="artRound"></select></label></div>
+          <div class="row"><label>Título<input id="artTitle" maxlength="40"></label><label>Subtítulo<input id="artSub" maxlength="70"></label><label>Rodapé<input id="artFoot" maxlength="60" placeholder="SPIDER XTREINOS"></label></div>
+          <div class="row"><label>Cor principal<input type="color" id="artC1" value="#e11d2e"></label><label>Cor de destaque<input type="color" id="artC2" value="#fbbf24"></label><label>Cor do texto<input type="color" id="artC3" value="#ffffff"></label><label>Cor de fundo<input type="color" id="artC4" value="#0a0e1c"></label></div>
+          <div class="row"><label>Imagem de fundo<input type="file" id="artBgFile" accept="image/*"></label><label>Logo<input type="file" id="artLogoFile" accept="image/*"></label></div>
+          <div class="actions mt"><button class="btn ghost small" type="button" id="artClear">Remover fundo e logo enviados</button><button class="btn" type="button" id="artDownload">⬇ GERAR E BAIXAR PNG</button></div>
+        </div></div>
+      <div class="card mt" style="text-align:center"><canvas id="artCanvas" width="1080" height="1350"></canvas></div>
     </div>
 
     <div class="atab" data-atab="equipe" hidden>
@@ -747,6 +784,8 @@ OutroNick - 5"></textarea></label>
 <div class="toast" id="toast"></div>
 <noscript><p style="padding:20px;text-align:center">Ative o JavaScript para usar o site.</p></noscript>
 
+<div id="maintOverlay" hidden><div class="mt-box"><div class="mt-ico">🔧</div><h1>EM MANUTENÇÃO</h1><p id="maintMsg"></p><p id="maintWindow" class="muted small-t"></p><div id="maintCd" class="mt-cd"></div><button type="button" class="btn ghost small" id="maintAdminBtn">Acesso do organizador principal</button></div></div>
+<div id="maintBanner" hidden></div>
 <script>
 /* =====================================================
    CONFIGURAÇÃO — edite aqui
@@ -1054,7 +1093,7 @@ function render(){
   const st = settings(), brand = st.brand || "SPIDER XTREINOS";
   applyInterface();
   $("#brandName").textContent = brand; $("#footBrand").textContent = brand; document.title = brand + " • Free Fire";
-  renderHome(); renderScrims(); renderTeams(); renderMyTeam(); renderProfile(); renderRanking(); renderStats(); renderSocial(); renderCallsPublic(); renderAbatesPublic(); renderAdmin(); renderAdmin2(); renderCallAdmin();
+  renderHome(); renderScrims(); renderTeams(); renderMyTeam(); renderProfile(); renderRanking(); renderStats(); renderSocial(); renderCallsPublic(); renderAbatesPublic(); renderAdmin(); renderAdmin2(); renderCallAdmin(); renderExtra();
 }
 
 function scrimCard(s){
@@ -1434,7 +1473,7 @@ function renderAdmin(){
   $("#tabSeasonAdmin").hidden = !master;
   $("#tabMedals").hidden = !master;
   $("#tabAutomaticKill").hidden = !master;
-  if (!master && ["equipe", "automaticKill", "interface", "seasonAdmin", "admCall", "medals", "maintenance", "spiderArts"].includes(state.adminTab)) state.adminTab = "treinos";
+  if (!master && ["equipe", "automaticKill", "interface", "seasonAdmin", "admCall", "medals"].includes(state.adminTab)) state.adminTab = "treinos";
   $("#adminWho").textContent = "Conectado como " + sess.user + (master ? " (organizador principal)" : " (organizador)");
   if (master){
     const adms = arr(DB.get("admins")).sort((a, b) => a.created - b.created);
@@ -1827,7 +1866,7 @@ document.addEventListener("click", async e => {
   if (g){ e.preventDefault(); go(g.dataset.go); return; }
 
   const tabBtn = e.target.closest("#adminTabs button");
-  if (tabBtn){ if (["automaticKill","medals","seasonAdmin","interface","maintenance","spiderArts"].includes(tabBtn.dataset.tab) && !isMaster()) return toast("Esta área é exclusiva do organizador principal", "err"); state.adminTab = tabBtn.dataset.tab; renderAdmin(); return; }
+  if (tabBtn){ if (["automaticKill","medals","seasonAdmin","interface","maintenance","arts"].includes(tabBtn.dataset.tab) && !isMaster()) return toast("Esta área é exclusiva do organizador principal", "err"); state.adminTab = tabBtn.dataset.tab; renderAdmin(); return; }
   const roundBtn = e.target.closest("#resRounds [data-round]");
   if (roundBtn){ state.resRound = +roundBtn.dataset.round; renderResults(); return; }
 
@@ -2452,6 +2491,250 @@ function renderAdmin2(){
 }
 
 /* =====================================================
+   MANUTENÇÃO • SELEÇÃO DA SEASON • MELHOR JOGADOR • SPIDER ARTS
+   ===================================================== */
+const BRT = "America/Sao_Paulo";
+const brtMs = (d, t) => d && t ? Date.parse(d + "T" + t + ":00-03:00") : 0;
+const fmtBRT = ms => new Date(ms).toLocaleString("pt-BR", { timeZone: BRT, dateStyle: "short", timeStyle: "short" });
+const dBRT = ms => new Date(ms).toLocaleDateString("sv-SE", { timeZone: BRT });
+const tBRT = ms => new Date(ms).toLocaleTimeString("sv-SE", { timeZone: BRT, hour: "2-digit", minute: "2-digit" });
+const cdTxt = ms => { ms = Math.max(0, Math.floor(ms / 1000)); const d = Math.floor(ms / 86400), h = Math.floor(ms % 86400 / 3600), m = Math.floor(ms % 3600 / 60), s = ms % 60; return (d ? d + "d " : "") + [h, m, s].map(x => String(x).padStart(2, "0")).join(":"); };
+const maint = () => settings().maintenance || {};
+function maintState(now = Date.now()){
+  const m = maint(), s = +m.start || 0, e = +m.end || 0;
+  const active = !!m.manual || !!(s && now >= s && (!e || now < e));
+  return { m, s, e, active, upcoming: !active && !!s && now < s };
+}
+function renderMaintenance(){
+  const S = maintState(), now = Date.now(), master = isMaster(), cur = ($("section.page.active") || {}).id;
+  const onLogin = state.maintLogin && cur === "admin" && !isAdmin();
+  const block = S.active && !master && !onLogin, ov = $("#maintOverlay"), ban = $("#maintBanner");
+  ov.hidden = !block; document.body.style.overflow = block ? "hidden" : "";
+  if (block){
+    $("#maintMsg").textContent = S.m.message || "Estamos em manutenção. Voltamos em breve!";
+    $("#maintWindow").textContent = S.e && !S.m.manual ? "Retorno previsto: " + fmtBRT(S.e) + " (Brasília)" : "";
+    $("#maintCd").textContent = S.e && !S.m.manual ? cdTxt(S.e - now) : "";
+  }
+  let txt = "", on = false;
+  if (master && S.active){ on = true; txt = "🔧 MANUTENÇÃO ATIVA — visitantes bloqueados" + (S.m.manual ? " (manual)" : S.e ? " • termina em " + cdTxt(S.e - now) : ""); }
+  else if (S.upcoming && S.m.warn !== false && !(S.e && S.e <= now)) txt = "⚠ Manutenção programada para " + fmtBRT(S.s) + " (Brasília) — começa em " + cdTxt(S.s - now);
+  ban.hidden = !txt; ban.classList.toggle("on", on); ban.textContent = txt;
+  const st = $("#maintStatus");
+  if (st && master) st.innerHTML = `<span class="badge ${S.active ? "err" : "ok"}">${S.active ? "MANUTENÇÃO ATIVA" : "SITE NO AR"}</span> <span class="muted small-t">${S.m.manual ? "Ativada manualmente. " : ""}${S.s ? "Início: " + fmtBRT(S.s) + ". " : ""}${S.e ? "Término: " + fmtBRT(S.e) + ". " : ""}${S.upcoming ? "Começa em " + cdTxt(S.s - now) + "." : S.active && S.e && !S.m.manual ? "Termina em " + cdTxt(S.e - now) + "." : ""}</span>`;
+  $("#maintToggle") && ($("#maintToggle").textContent = S.m.manual ? "DESATIVAR MANUTENÇÃO AGORA" : "ATIVAR MANUTENÇÃO AGORA");
+}
+function renderMaintAdmin(){
+  const f = $("#maintForm"), M = maint(), sig = JSON.stringify(M);
+  if (f.dataset.sig !== sig && !f.contains(document.activeElement)){
+    f.dataset.sig = sig; const E = f.elements;
+    E.sd.value = M.start ? dBRT(+M.start) : ""; E.st.value = M.start ? tBRT(+M.start) : "";
+    E.ed.value = M.end ? dBRT(+M.end) : ""; E.et.value = M.end ? tBRT(+M.end) : "";
+    E.msg.value = M.message || ""; E.warn.checked = M.warn !== false;
+  }
+}
+$("#maintAdminBtn").addEventListener("click", () => { state.maintLogin = true; go("admin"); renderMaintenance(); });
+document.addEventListener("click", () => setTimeout(renderMaintenance, 0));
+window.addEventListener("hashchange", () => setTimeout(renderMaintenance, 0));
+setInterval(() => { try { renderMaintenance(); } catch(e){} }, 1000);
+$("#maintToggle").addEventListener("click", async () => {
+  if (!isMaster()) return toast("Acesso exclusivo do organizador principal", "err");
+  const M = maint(), on = !M.manual;
+  if (on && !await ask("Ativar a manutenção agora? Os visitantes serão bloqueados.")) return;
+  await DB.set("settings/maintenance", { ...M, manual: on });
+  await logAct(on ? "Ativou o modo manutenção" : "Desativou o modo manutenção"); toast(on ? "Manutenção ativada" : "Manutenção desativada"); render();
+});
+$("#maintForm").addEventListener("submit", async e => {
+  e.preventDefault(); if (!isMaster()) return toast("Acesso exclusivo do organizador principal", "err");
+  const E = e.target.elements, start = brtMs(E.sd.value, E.st.value), end = brtMs(E.ed.value, E.et.value);
+  if ((E.sd.value && !E.st.value) || (E.ed.value && !E.et.value)) return toast("Informe data e hora juntas", "err");
+  if (end && !start) return toast("Defina também o início", "err");
+  if (start && end && end <= start) return toast("O término precisa ser depois do início", "err");
+  const o = { manual: !!maint().manual, warn: E.warn.checked };
+  if (start) o.start = start; if (end) o.end = end; if (E.msg.value.trim()) o.message = E.msg.value.trim();
+  await DB.set("settings/maintenance", o);
+  await logAct("Agendou manutenção" + (start ? " de " + fmtBRT(start) : "") + (end ? " até " + fmtBRT(end) : "")); toast("Agendamento salvo ✅"); render();
+});
+$("#maintCancel").addEventListener("click", async () => {
+  if (!isMaster()) return toast("Acesso exclusivo do organizador principal", "err");
+  const M = maint(); if (!M.start && !M.end) return toast("Não há agendamento", "err");
+  if (!await ask("Cancelar o agendamento da manutenção?")) return;
+  const o = { manual: !!M.manual, warn: M.warn !== false }; if (M.message) o.message = M.message;
+  await DB.set("settings/maintenance", o); await logAct("Cancelou o agendamento de manutenção"); toast("Agendamento cancelado"); render();
+});
+
+/* ---------- jogadores da Season / Seleção ---------- */
+function selPlayers(key){
+  const T = {};
+  for (const sc of seasonScrims(key)){
+    const manual = DB.get("manualKillRankings/" + sc.id), pub = manual?.publishedAt ? manual : DB.get("automaticKills/" + sc.id);
+    if (!pub?.publishedAt) continue;
+    for (const p of pub.players || []){
+      const id = p.uid || String(p.nick || "").toLocaleLowerCase("pt-BR");
+      const o = T[id] || (T[id] = { uid: p.uid || "", nick: p.nick || "Jogador", team: "", kills: 0, rounds: 0 });
+      o.kills += Math.max(0, +p.kills || 0); o.rounds += +p.rounds || 0;
+      if (p.teamName) o.team = (p.teamTag ? "[" + p.teamTag + "] " : "") + p.teamName;
+    }
+  }
+  return Object.values(T).sort((a, b) => b.kills - a.kills || a.nick.localeCompare(b.nick, "pt-BR"));
+}
+function selConfig(){ const c = settings().selectionConfig || {}; return { title: c.title || "SELEÇÃO DA SEASON", size: Math.max(1, Math.min(11, +c.size || 5)) }; }
+const selection = key => selPlayers(key).filter(p => p.kills > 0).slice(0, selConfig().size);
+const selSnapId = key => String(key).replace(/[^\w-]/g, "_");
+const selRows = list => list.map((p, i) => `<div class="xr"><span><b>${i + 1}º ${esc(p.nick)}</b> <span class="muted small-t">${esc(p.team || "Sem time")}</span></span><span><b>${p.kills}</b> abates${p.rounds ? ` <span class="muted small-t">• ${p.rounds} quedas • média ${(p.kills / p.rounds).toFixed(1)}</span>` : ""}</span></div>`).join("");
+const selSnap = (key, list, by) => ({ key, season: seasonName(key), title: selConfig().title, players: list.map(p => ({ nick: p.nick, team: p.team || "", kills: p.kills, rounds: p.rounds || 0 })), savedAt: Date.now(), by });
+const selHistoryList = () => arr(settings().seasonSelections).sort((a, b) => b.savedAt - a.savedAt);
+async function selAutoArchive(){
+  if (!isMaster() || state.selArch) return; state.selArch = true;
+  try {
+    const { keys, custom } = stSeasonKeys();
+    for (const k of keys){
+      if (!seasonIsFinished(k, stCustom(k, custom))) continue;
+      if (settings().seasonSelections?.[selSnapId(k)]) continue;
+      const list = selection(k); if (!list.length) continue;
+      await DB.set("settings/seasonSelections/" + selSnapId(k), selSnap(k, list, "auto"));
+    }
+  } catch(e){} finally { state.selArch = false; }
+}
+function renderSelectionAdmin(){
+  const { keys, def } = stSeasonKeys(), sel = $("#selSeason"), sig = keys.join("|") + arr(settings().seasons).map(x => x.name).join("|");
+  if (sel.dataset.sig !== sig && !sel.contains(document.activeElement)){ const cur = sel.value; sel.innerHTML = keys.map(k => `<option value="${esc(k)}">${esc(seasonName(k))}</option>`).join(""); sel.dataset.sig = sig; sel.value = keys.includes(cur) ? cur : def; }
+  const cfg = selConfig(), t = $("#selTitle"), n = $("#selSize");
+  if (!$("#selCard").contains(document.activeElement)){ t.value = (settings().selectionConfig || {}).title || ""; n.value = cfg.size; }
+  const live = selection(sel.value);
+  $("#selLive").innerHTML = `<p class="muted small-t">Seleção atual • ${esc(seasonName(sel.value))}</p>` + (live.length ? selRows(live) : '<p class="empty">Ainda não há abates publicados nesta Season.</p>');
+  const h = selHistoryList();
+  $("#selHistory").innerHTML = h.length ? h.map(x => `<div class="card mt"><b>${esc(x.title)} — ${esc(x.season)}</b> <span class="muted small-t">salva em ${esc(fmtBRT(x.savedAt))} (${x.by === "auto" ? "automática" : "manual"})</span>${selRows(arr(x.players))}</div>`).join("") : '<p class="empty">Nenhuma seleção guardada ainda. As Seasons encerradas são guardadas automaticamente.</p>';
+  selAutoArchive();
+}
+$("#selSave").addEventListener("click", async () => {
+  if (!isMaster()) return toast("Acesso exclusivo do organizador principal", "err");
+  const size = Math.max(1, Math.min(11, parseInt($("#selSize").value, 10) || 5)), title = $("#selTitle").value.trim();
+  const o = { size }; if (title) o.title = title;
+  await DB.set("settings/selectionConfig", o); await logAct("Configurou a Seleção da Season"); toast("Configuração salva ✅"); render();
+});
+$("#selArchive").addEventListener("click", async () => {
+  if (!isMaster()) return toast("Acesso exclusivo do organizador principal", "err");
+  const k = $("#selSeason").value, list = selection(k); if (!list.length) return toast("Não há jogadores com abates nesta Season", "err");
+  await DB.set("settings/seasonSelections/" + selSnapId(k), selSnap(k, list, "manual")); await logAct("Salvou a seleção no histórico: " + seasonName(k)); toast("Seleção guardada no histórico ✅"); render();
+});
+
+/* ---------- Melhor jogador + seleção públicos ---------- */
+function bestHtml(key){
+  const pl = selPlayers(key).filter(p => p.kills > 0), b = pl[0];
+  if (!b) return `<div class="bp"><div class="k">MELHOR JOGADOR DA SEASON</div><p class="muted small-t mt">Ainda não há abates publicados na ${esc(seasonName(key))}.</p></div>`;
+  return `<div class="bp"><div class="k">⭐ MELHOR JOGADOR DA SEASON</div><div class="n">${esc(b.nick)}</div><div class="muted">${esc(b.team || "Sem time")}</div>
+    <div class="g"><div><b>${b.kills}</b><small>kills na Season</small></div><div><b>1º</b><small>posição no ranking</small></div><div><b>${esc(seasonName(key))}</b><small>Season</small></div></div></div>`;
+}
+function renderBest(){
+  const def = stSeasonKeys().def, h = $("#homeBestPlayer"), s = $("#stBest");
+  if (h) h.innerHTML = bestHtml(def);
+  if (s){
+    const key = state.stSeason || def, list = selection(key), hist = selHistoryList().slice(0, 6);
+    s.innerHTML = bestHtml(key) + `<div class="card mt"><h3>${esc(selConfig().title)} • ${esc(seasonName(key))}</h3>${list.length ? selRows(list) : '<p class="empty">Sem dados ainda.</p>'}</div>`
+      + (hist.length ? `<details class="card mt"><summary><b>Seleções anteriores</b></summary>${hist.map(x => `<h4 style="margin:12px 0 4px">${esc(x.season)}</h4>${selRows(arr(x.players))}`).join("")}</details>` : "");
+  }
+}
+
+/* ---------- SPIDER ARTS ---------- */
+const ART = { bgImg: null, logoImg: null, defLogo: null };
+function artData(type, key){
+  const sn = seasonName(key), teams = seasonStandings(key), pl = selPlayers(key).filter(p => p.kills > 0), tr = t => `[${t.tag}] ${t.name}`;
+  const pr = (p, i) => ({ pos: i + 1, main: p.nick, sub: p.team || "", val: p.kills, unit: "ABATES" });
+  switch (type){
+    case "top3": return { title: "TOP 3 TIMES", sub: sn, rows: teams.slice(0, 3).map((t, i) => ({ pos: i + 1, main: tr(t), sub: `${t.kills} abates • ${t.booyah} Booyah • ${t.games} quedas`, val: t.pts, unit: "PTS" })) };
+    case "top5": return { title: "TOP 5 JOGADORES", sub: sn, rows: pl.slice(0, 5).map(pr) };
+    case "abates": return { title: "RANKING DE ABATES", sub: sn, rows: pl.slice(0, 10).map(pr) };
+    case "campeao": { const t = teams[0]; return { title: "CAMPEÃO DA SEASON", sub: sn, hero: t ? { label: "🏆 CAMPEÃO", main: tr(t), sub: Object.values(DB.get("teams/" + t.tid)?.members || {}).join(" • "), val: t.pts, unit: "PONTOS • " + t.kills + " ABATES" } : null }; }
+    case "mvp": { const p = pl[0]; return { title: "MVP DA SEASON", sub: sn, hero: p ? { label: "⭐ MVP", main: p.nick, sub: p.team || "", val: p.kills, unit: "ABATES NA SEASON" } : null }; }
+    case "selecao": return { title: selConfig().title, sub: sn, rows: selection(key).map(pr) };
+    case "queda": {
+      const sid = $("#artScrim").value, rn = $("#artRound").value, sc = DB.get("scrims/" + sid), res = DB.get(`results/${sid}/${rn}`) || {};
+      const rows = Object.entries(res).map(([tid, r]) => ({ r, tm: DB.get("teams/" + tid) })).filter(x => x.tm && +x.r.place > 0).sort((a, b) => a.r.place - b.r.place)
+        .map(x => ({ pos: +x.r.place, main: `[${x.tm.tag}] ${x.tm.name}`, sub: (+x.r.kills || 0) + " abates", val: seasonPtsOf(x.r, key), unit: "PTS" }));
+      return { title: "RESULTADO • QUEDA " + String(rn || "").slice(1), sub: sc ? sc.title : "", rows };
+    }
+  }
+  return { title: "", sub: "", rows: [] };
+}
+const artRR = (c, x, y, w, h, r) => { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+const artFit = (c, t, w) => { t = String(t || ""); if (c.measureText(t).width <= w) return t; while (t.length > 1 && c.measureText(t + "…").width > w) t = t.slice(0, -1); return t + "…"; };
+const artCover = (c, im, W, H) => { const s = Math.max(W / im.width, H / im.height), w = im.width * s, h = im.height * s; c.drawImage(im, (W - w) / 2, (H - h) / 2, w, h); };
+function artDefLogo(){ if (!ART.defLogo){ const el = $("#brandLogo"); if (!el || !el.src) return null; const im = new Image(); im.onload = () => artDraw(); im.src = el.src; ART.defLogo = im; } return ART.defLogo; }
+function artDraw(){
+  const cv = $("#artCanvas"); if (!cv || !$("#artSeason").value) return;
+  const [W, H] = $("#artSize").value.split("x").map(Number); if (cv.width !== W) cv.width = W; if (cv.height !== H) cv.height = H;
+  const c = cv.getContext("2d"), P = $("#artC1").value, S = $("#artC2").value, T = $("#artC3").value, B = $("#artC4").value;
+  const key = $("#artSeason").value, type = $("#artType").value, d = artData(type, key);
+  $("#artTitle").placeholder = d.title; $("#artSub").placeholder = d.sub || "";
+  const title = $("#artTitle").value.trim() || d.title, sub = $("#artSub").value.trim() || d.sub || "", foot = $("#artFoot").value.trim() || settings().brand || "SPIDER XTREINOS";
+  c.clearRect(0, 0, W, H); c.fillStyle = B; c.fillRect(0, 0, W, H);
+  if (ART.bgImg){ artCover(c, ART.bgImg, W, H); c.fillStyle = B + "b3"; c.fillRect(0, 0, W, H); }
+  const g = c.createRadialGradient(W * .9, 0, 0, W * .9, 0, H * .8); g.addColorStop(0, P + "77"); g.addColorStop(1, P + "00"); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.fillStyle = P; c.fillRect(0, 0, W, 16);
+  const logo = ART.logoImg || artDefLogo(); let ty = 140;
+  if (logo && logo.complete && logo.naturalWidth){ const lh = 150, lw = lh * logo.naturalWidth / logo.naturalHeight; c.drawImage(logo, (W - lw) / 2, 50, lw, lh); ty = 260; }
+  c.textAlign = "center"; c.fillStyle = T; c.font = "700 84px Rajdhani,Inter,sans-serif"; c.fillText(artFit(c, title.toUpperCase(), W - 120), W / 2, ty + 60);
+  c.fillStyle = S; c.font = "600 38px Inter,sans-serif"; c.fillText(artFit(c, sub, W - 120), W / 2, ty + 115);
+  c.fillStyle = P; c.fillRect(W / 2 - 90, ty + 140, 180, 8);
+  const y0 = ty + 190, y1 = H - 150, x = 60, w = W - 120;
+  if (d.hero){
+    const hh = Math.min(560, y1 - y0), hy = y0 + (y1 - y0 - hh) / 2; artRR(c, x, hy, w, hh, 34); c.fillStyle = "rgba(255,255,255,.08)"; c.fill(); c.lineWidth = 4; c.strokeStyle = S; c.stroke();
+    c.fillStyle = S; c.font = "700 44px Rajdhani,sans-serif"; c.fillText(d.hero.label, W / 2, hy + hh * .17);
+    c.fillStyle = T; c.font = "700 88px Rajdhani,Inter,sans-serif"; c.fillText(artFit(c, d.hero.main, w - 60), W / 2, hy + hh * .42);
+    c.fillStyle = T + "b3"; c.font = "500 32px Inter,sans-serif"; c.fillText(artFit(c, d.hero.sub, w - 60), W / 2, hy + hh * .55);
+    c.fillStyle = P; c.font = "700 150px Rajdhani,sans-serif"; c.fillText(String(d.hero.val), W / 2, hy + hh * .85);
+    c.fillStyle = S; c.font = "700 34px Rajdhani,sans-serif"; c.fillText(d.hero.unit, W / 2, hy + hh * .95);
+  } else if (d.rows && d.rows.length){
+    const n = d.rows.length, gap = 18, rh = Math.min(150, (y1 - y0 - gap * (n - 1)) / n);
+    d.rows.forEach((r, i) => {
+      const y = y0 + i * (rh + gap); artRR(c, x, y, w, rh, 22); c.fillStyle = "rgba(255,255,255,.08)"; c.fill(); c.lineWidth = 3; c.strokeStyle = r.pos === 1 ? "#fbbf24" : P + "88"; c.stroke();
+      c.textAlign = "center"; c.fillStyle = r.pos === 1 ? "#fbbf24" : S; c.font = `700 ${rh * .5}px Rajdhani,sans-serif`; c.fillText(r.pos + "º", x + rh * .65, y + rh * .65);
+      c.textAlign = "left"; c.fillStyle = T; c.font = `700 ${rh * .34}px Rajdhani,Inter,sans-serif`; c.fillText(artFit(c, r.main, w - rh * 1.4 - 280), x + rh * 1.3, y + rh * .5);
+      c.fillStyle = T + "b3"; c.font = `500 ${rh * .2}px Inter,sans-serif`; c.fillText(artFit(c, r.sub, w - rh * 1.4 - 280), x + rh * 1.3, y + rh * .8);
+      c.textAlign = "right"; c.fillStyle = P; c.font = `700 ${rh * .5}px Rajdhani,sans-serif`; c.fillText(String(r.val), x + w - 28, y + rh * .55);
+      c.fillStyle = S; c.font = `700 ${rh * .2}px Rajdhani,sans-serif`; c.fillText(r.unit, x + w - 28, y + rh * .85);
+    });
+  } else { c.fillStyle = T + "99"; c.font = "600 44px Inter,sans-serif"; c.fillText("Sem dados para esta arte ainda", W / 2, (y0 + y1) / 2); }
+  c.textAlign = "center"; c.fillStyle = T; c.font = "700 40px Rajdhani,Inter,sans-serif"; c.fillText(artFit(c, foot.toUpperCase(), W - 120), W / 2, H - 70);
+}
+function renderArtsControls(){
+  const { keys, def } = stSeasonKeys(), sel = $("#artSeason"), sig = keys.join("|") + arr(settings().seasons).map(x => x.name).join("|");
+  if (sel.dataset.sig !== sig && !sel.contains(document.activeElement)){ const cur = sel.value; sel.innerHTML = keys.map(k => `<option value="${esc(k)}">${esc(seasonName(k))}</option>`).join(""); sel.dataset.sig = sig; sel.value = keys.includes(cur) ? cur : def; }
+  const sc = arr(DB.get("scrims")).sort((a, b) => String(b.date).localeCompare(String(a.date))), ss = $("#artScrim"), ssig = sc.map(x => x.id + x.title).join("|");
+  if (ss.dataset.sig !== ssig && !ss.contains(document.activeElement)){ const cur = ss.value; ss.innerHTML = sc.map(x => `<option value="${esc(x.id)}">${esc(x.title)} — ${esc(x.date)}</option>`).join(""); ss.dataset.sig = ssig; if (sc.some(x => x.id === cur)) ss.value = cur; }
+  const rs = $("#artRound"), rounds = Object.keys(DB.get("results/" + ss.value) || {}).sort((a, b) => +a.slice(1) - +b.slice(1)), rsig = ss.value + rounds.join();
+  if (rs.dataset.sig !== rsig && !rs.contains(document.activeElement)){ const cur = rs.value; rs.innerHTML = rounds.map(r => `<option value="${r}">Queda ${r.slice(1)}</option>`).join(""); rs.dataset.sig = rsig; if (rounds.includes(cur)) rs.value = cur; }
+  $("#artQRow").hidden = $("#artType").value !== "queda";
+  if (state.adminTab === "arts") artDraw();
+}
+let artTimer;
+$("#artForm").addEventListener("input", () => { clearTimeout(artTimer); artTimer = setTimeout(() => { $("#artQRow").hidden = $("#artType").value !== "queda"; renderArtsControls(); artDraw(); }, 120); });
+$("#artForm").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0]; if (!f || !/^image\//.test(f.type)) return;
+  const rd = new FileReader(); rd.onload = () => { const im = new Image(); im.onload = () => { if (e.target.id === "artBgFile") ART.bgImg = im; else ART.logoImg = im; artDraw(); }; im.src = rd.result; }; rd.readAsDataURL(f);
+});
+$("#artClear").addEventListener("click", () => { ART.bgImg = null; ART.logoImg = null; $("#artBgFile").value = ""; $("#artLogoFile").value = ""; artDraw(); });
+$("#artDownload").addEventListener("click", () => {
+  if (!isMaster()) return toast("Acesso exclusivo do organizador principal", "err");
+  artDraw();
+  try {
+    $("#artCanvas").toBlob(async b => {
+      if (!b) return toast("Não foi possível gerar a imagem", "err");
+      const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "spider-arts-" + $("#artType").value + ".png"; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast("Arte gerada ✅"); try { await logAct("Gerou arte: " + $("#artType").selectedOptions[0].text); } catch(e){}
+    }, "image/png");
+  } catch(e){ toast("A logo atual não permite exportar. Envie uma logo pelo campo Logo.", "err"); }
+});
+
+function renderExtra(){
+  try {
+    renderMaintenance(); renderBest();
+    const m = isMaster(); $("#tabMaint").hidden = !m; $("#tabArts").hidden = !m;
+    if (m){ renderMaintAdmin(); renderSelectionAdmin(); renderArtsControls(); }
+  } catch(e){ console.error(e); }
+}
+
+/* =====================================================
    INICIALIZAÇÃO
    ===================================================== */
 let pendingRender = false;
@@ -2477,58 +2760,6 @@ window.addEventListener("appinstalled",()=>{spiderInstallPrompt=null;const h=doc
 const spiderInstallButton=document.getElementById("installAppBtn");
 if(spiderInstallButton)spiderInstallButton.addEventListener("click",async()=>{if(spiderInstallPrompt){spiderInstallPrompt.prompt();await spiderInstallPrompt.userChoice;spiderInstallPrompt=null;}else{const h=document.getElementById("installAppHint");if(h)h.textContent=/iphone|ipad|ipod/i.test(navigator.userAgent)?"No Safari: toque em Compartilhar e depois Adicionar à Tela de Início.":"Abra o menu do navegador e escolha Instalar aplicativo ou Criar atalho quando essa opção estiver disponível.";}});
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
-
-/* ==================== SPIDER_FEATURES_V1 ====================
-   Implementações integradas ao DB, às permissões existentes e aos rankings da Season.
-   Horários de manutenção são armazenados como epoch UTC e apresentados em America/Sao_Paulo.
-*/
-(()=>{
-  const $id=id=>document.getElementById(id);
-  const escText=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const brFmt=ms=>new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Sao_Paulo',dateStyle:'short',timeStyle:'short'}).format(new Date(ms));
-  const toBrasiliaEpoch=v=>{if(!v)return 0;const x=Date.parse(v+':00-03:00');return Number.isFinite(x)?x:0;};
-  const localBrasiliaValue=ms=>{if(!ms)return '';const d=new Date(ms-3*3600000);return d.toISOString().slice(0,16);};
-  const maintCfg=()=>DB.get('settings/maintenance')||{};
-  const maintStatus=()=>{const c=maintCfg(),now=Date.now();if(c.override==='on')return true;if(c.override==='off')return false;return !!(c.startAt&&c.endAt&&now>=c.startAt&&now<c.endAt);};
-  const maintNotice=()=>{const c=maintCfg(),now=Date.now();return !!(c.startAt&&c.endAt&&c.noticeMinutes>0&&now>=c.startAt-c.noticeMinutes*60000&&now<c.startAt);};
-  const ensureAdminFeatures=()=>{
-    const tabs=$id('adminTabs'),panel=$id('adminPanel');if(!tabs||!panel)return;
-    if(!$id('tabMaintenance')){const b=document.createElement('button');b.id='tabMaintenance';b.dataset.tab='maintenance';b.textContent='MODO MANUTENÇÃO';tabs.appendChild(b);}
-    if(!$id('tabSpiderArts')){const b=document.createElement('button');b.id='tabSpiderArts';b.dataset.tab='spiderArts';b.textContent='SPIDER ARTS';tabs.appendChild(b);}
-    if(!$id('spiderMaintenanceAdmin')){const sec=document.createElement('div');sec.id='spiderMaintenanceAdmin';sec.className='atab';sec.dataset.atab='maintenance';sec.hidden=true;sec.innerHTML=`<div class="card"><h3>MODO MANUTENÇÃO</h3><p class="muted small-t">Controle exclusivo do Organizador Principal. O agendamento usa o horário de Brasília (UTC−3).</p><div class="spider-feature-note" id="spiderMaintenanceStatus">Carregando estado...</div><div class="actions mt"><button class="btn" type="button" id="spiderMaintOn">ATIVAR AGORA</button><button class="btn ghost" type="button" id="spiderMaintOff">DESATIVAR AGORA</button><button class="btn ghost" type="button" id="spiderMaintAuto">USAR AGENDAMENTO</button></div><hr><h4>Agendar manutenção</h4><form id="spiderMaintForm"><label>Início (Brasília)<input type="datetime-local" id="spiderMaintStart" required></label><label class="mt">Término (Brasília)<input type="datetime-local" id="spiderMaintEnd" required></label><label class="mt">Avisar com antecedência<input type="number" id="spiderMaintNotice" min="0" max="10080" step="5" value="30"> <small class="muted">Minutos antes do início (0 desativa o aviso).</small></label><div class="actions mt"><button class="btn" type="submit">SALVAR AGENDAMENTO</button><button class="btn danger" type="button" id="spiderMaintCancel">CANCELAR AGENDAMENTO</button></div></form><p class="muted small-t mt" id="spiderMaintFeedback">A manutenção é exibida automaticamente aos visitantes enquanto estiver ativa.</p></div>`;panel.appendChild(sec);}
-    if(!$id('spiderArtsAdmin')){const sec=document.createElement('div');sec.id='spiderArtsAdmin';sec.className='atab';sec.dataset.atab='spiderArts';sec.hidden=true;sec.innerHTML=`<div class="card"><h3>SPIDER ARTS — GERADOR DE ARTES</h3><p class="muted small-t">Artes montadas com os dados disponíveis na Season e nos resultados salvos no site. Prévia e exportação em PNG.</p><div class="spider-art-grid"><label>Modelo<select id="spiderArtType"><option value="teams">Top 3 de times</option><option value="players">Top 5 jogadores</option><option value="champion">Campeão da Season</option><option value="kills">Ranking de abates</option><option value="round">Resultado de uma queda</option><option value="mvp">MVP da Season</option><option value="selection">Seleção da Season</option></select></label><label>Season<select id="spiderArtSeason"></select></label><label>Título personalizado<input id="spiderArtTitle" maxlength="60" placeholder="SPIDER XTREINOS"></label><label>Texto adicional<input id="spiderArtSubtitle" maxlength="100" placeholder="Temporada em destaque"></label><label>Cor principal<input id="spiderArtColor" type="color" value="#e53945"></label><label>Cor secundária<input id="spiderArtColor2" type="color" value="#15264c"></label><label>Fundo<input id="spiderArtBg" type="color" value="#080d1b"></label><label>Imagem de fundo (opcional)<input id="spiderArtBackground" type="file" accept="image/*"></label><label>Logo (opcional)<input id="spiderArtLogo" type="file" accept="image/*"></label><label id="spiderArtRoundWrap" hidden>Queda<select id="spiderArtRound"></select></label></div><div class="actions mt"><button type="button" class="btn" id="spiderArtGenerate">GERAR PRÉVIA</button><button type="button" class="btn ghost" id="spiderArtSave">SALVAR PNG</button></div><canvas id="spiderArtCanvas" class="spider-art-preview" width="1080" height="1920"></canvas><p class="muted small-t" id="spiderArtStatus">Escolha um modelo e gere a prévia.</p></div>`;panel.appendChild(sec);}
-    if(!$id('spiderSeasonSelectionConfig')){const sec=document.createElement('div');sec.id='spiderSeasonSelectionConfig';sec.className='card mt';sec.innerHTML=`<h3>SELEÇÃO DA SEASON — EQUIPE DO MÊS</h3><p class="muted small-t">A seleção é calculada a partir do ranking individual da Season. O histórico mensal é reconstruído a partir dos registros salvos, sem criar cópias de abates.</p><label><input type="checkbox" id="spiderSelectionEnabled"> Ativar exibição da Seleção da Season</label><label class="mt">Quantidade de jogadores selecionados<select id="spiderSelectionCount"><option value="3">3 jogadores</option><option value="4">4 jogadores</option><option value="5">5 jogadores</option></select></label><label class="mt">Mês para consultar<select id="spiderSelectionMonth"></select></label><div id="spiderSelectionCurrent" class="mt"></div><h4 class="mt">Histórico de seleções</h4><div id="spiderSelectionHistory"></div><button type="button" class="btn mt" id="spiderSelectionSave">SALVAR CONFIGURAÇÃO</button><p class="muted small-t mt" id="spiderSelectionFeedback"></p>`;const seasonSec=panel.querySelector('[data-atab="seasonAdmin"]');if(seasonSec)seasonSec.appendChild(sec);}
-  };
-  const originalRenderAdmin=renderAdmin;
-  renderAdmin=function(){originalRenderAdmin();ensureAdminFeatures();const master=isMaster();['tabMaintenance','tabSpiderArts'].forEach(id=>{if($id(id))$id(id).hidden=!master;});if($id('spiderMaintenanceAdmin'))$id('spiderMaintenanceAdmin').hidden=state.adminTab!=='maintenance';if($id('spiderArtsAdmin'))$id('spiderArtsAdmin').hidden=state.adminTab!=='spiderArts';if(master&&state.adminTab==='maintenance')renderMaintenancePanel();if(master&&state.adminTab==='spiderArts')renderSpiderArtsPanel();if(master&&state.adminTab==='seasonAdmin')renderSeasonSelectionPanel();};
-  const originalRender=render;
-  render=function(){originalRender();ensureAdminFeatures();renderMaintenanceUI();renderBestSeasonPlayer();if(isMaster()&&state.adminTab==='seasonAdmin')renderSeasonSelectionPanel();};
-  const originalShow=show;
-  show=function(id){originalShow(id);renderMaintenanceUI();};
-  document.addEventListener('click',e=>{const b=e.target.closest('#adminTabs button[data-tab="maintenance"],#adminTabs button[data-tab="spiderArts"]');if(b&&!isMaster()){e.preventDefault();e.stopImmediatePropagation();toast('Área exclusiva do Organizador Principal','err');}},true);
-  function renderMaintenancePanel(){const c=maintCfg(),status=$id('spiderMaintenanceStatus');if(!status)return;status.innerHTML=`<b>Estado:</b> ${maintStatus()?'MANUTENÇÃO ATIVA':maintNotice()?'AVISO DE MANUTENÇÃO PROGRAMADA':'SITE EM OPERAÇÃO'}<br><b>Início:</b> ${c.startAt?brFmt(c.startAt):'Não agendado'}<br><b>Término:</b> ${c.endAt?brFmt(c.endAt):'Não agendado'}<br><b>Modo manual:</b> ${c.override==='on'?'Forçado ligado':c.override==='off'?'Forçado desligado':'Automático'}`;$id('spiderMaintStart').value=localBrasiliaValue(c.startAt);$id('spiderMaintEnd').value=localBrasiliaValue(c.endAt);$id('spiderMaintNotice').value=Number(c.noticeMinutes??30);}
-  async function saveMaintenance(next){if(!isMaster())return toast('Acesso exclusivo do Organizador Principal','err');await DB.set('settings/maintenance',next);await logAct('Atualizou o Modo Manutenção');renderMaintenancePanel();renderMaintenanceUI();toast('Configuração de manutenção salva.');}
-  function renderMaintenanceUI(){let o=$id('spiderMaintenanceOverlay');if(!o){o=document.createElement('div');o.id='spiderMaintenanceOverlay';o.innerHTML='<div class="sm-box"><div style="font-weight:800;letter-spacing:.22em;color:#9bdcff">SPIDER XTREINOS</div><h1 id="spiderMaintOverlayTitle">ESTAMOS EM MANUTENÇÃO</h1><p id="spiderMaintOverlayText">Estamos realizando melhorias. Voltaremos em breve.</p><div class="sm-clock" id="spiderMaintOverlayClock"></div><p style="color:#aebbd9;font-size:.82rem">Horário de Brasília (UTC−3)</p></div>';document.body.appendChild(o);}let banner=$id('spiderMaintenanceBanner');if(!banner){banner=document.createElement('div');banner.id='spiderMaintenanceBanner';document.body.appendChild(banner);}const c=maintCfg(),active=maintStatus(),notice=maintNotice(),bypass=isMaster();o.style.display=(!bypass&&active)?'flex':'none';banner.style.display=(!bypass&&!active&&notice)?'block':'none';if(banner)banner.textContent='AVISO: manutenção programada para '+brFmt(c.startAt)+' • início em '+countdown(Math.max(0,c.startAt-Date.now()))+' (horário de Brasília).';if(active){$id('spiderMaintOverlayTitle').textContent='ESTAMOS EM MANUTENÇÃO';$id('spiderMaintOverlayText').textContent='O site está temporariamente indisponível enquanto realizamos ajustes.';$id('spiderMaintOverlayClock').textContent=c.endAt?'Retorno previsto: '+brFmt(c.endAt):'Voltaremos em breve';}else if(notice){$id('spiderMaintOverlayTitle').textContent='MANUTENÇÃO PROGRAMADA';$id('spiderMaintOverlayText').textContent='O site entrará em manutenção em breve.';$id('spiderMaintOverlayClock').textContent=countdown(Math.max(0,c.startAt-Date.now()));}const status=$id('spiderMaintenanceStatus');if(status&&isMaster())status.innerHTML='<b>Estado:</b> '+(active?'MANUTENÇÃO ATIVA':notice?'AVISO DE MANUTENÇÃO PROGRAMADA':'SITE EM OPERAÇÃO')+'<br><b>Início:</b> '+(c.startAt?brFmt(c.startAt):'Não agendado')+'<br><b>Término:</b> '+(c.endAt?brFmt(c.endAt):'Não agendado')+'<br><b>Modo manual:</b> '+(c.override==='on'?'Forçado ligado':c.override==='off'?'Forçado desligado':'Automático');}
-  function countdown(ms){const s=Math.max(0,Math.floor(ms/1000)),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),x=s%60;return (d?d+'d ':'')+[h,m,x].map(n=>String(n).padStart(2,'0')).join(':');}
-  function getArtData(type,key,round){const D=stData(key),players=D.players||[],teams=D.teams||[];if(type==='teams')return {heading:'TOP 3 TIMES',rows:teams.slice(0,3).map((x,i)=>({rank:i+1,name:'['+x.tag+'] '+x.name,detail:`${x.kills} abates • ${x.booyah} Booyahs`,value:x.pts+' PTS'}))};if(type==='players'||type==='kills'||type==='mvp')return {heading:type==='mvp'?'MVP DA SEASON':type==='kills'?'RANKING DE ABATES':'TOP 5 JOGADORES',rows:players.slice(0,type==='mvp'?1:5).map((x,i)=>({rank:i+1,name:x.nick,detail:x.teamName||'Jogador',value:x.kills+' KILLS'}))};if(type==='champion')return {heading:'CAMPEÃO DA SEASON',rows:teams.slice(0,1).map(x=>({rank:1,name:'['+x.tag+'] '+x.name,detail:`${x.kills} abates • ${x.booyah} Booyahs`,value:x.pts+' PTS'}))};if(type==='selection'){const p=selectionForMonth(key,5);return {heading:'SELEÇÃO DA SEASON',rows:p.map((x,i)=>({rank:i+1,name:x.nick,detail:x.teamName||'Jogador',value:x.kills+' KILLS'}))};}const rows=(D.queda||[]).filter(x=>String(x.q)===String(round)).slice(0,12).map((x,i)=>({rank:i+1,name:'['+x.tag+'] '+x.name,detail:x.title+' • Queda '+x.q,value:x.kills+' ABATES'}));return {heading:'RESULTADO DA QUEDA '+round,rows};}
-  function loadImage(file){return new Promise((resolve,reject)=>{if(!file)return resolve(null);const url=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(url);resolve(im);};im.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Não foi possível abrir uma das imagens.'));};im.src=url;});}
-  function renderSpiderArtsPanel(){if(!isMaster())return;const {keys,def}=stSeasonKeys(),sel=$id('spiderArtSeason');if(!sel)return;const prior=sel.value;sel.innerHTML=keys.map(k=>`<option value="${escText(k)}">${escText(seasonName(k))}</option>`).join('');sel.value=keys.includes(prior)?prior:def;const rounds=$id('spiderArtRound'),D=stData(sel.value);const max=Math.max(1,...(D.queda||[]).map(x=>+x.q||1));rounds.innerHTML=Array.from({length:max},(_,i)=>`<option value="${i+1}">Queda ${i+1}</option>`).join('');$id('spiderArtRoundWrap').hidden=$id('spiderArtType').value!=='round';}
-  async function generateArt(){if(!isMaster())return;const canvas=$id('spiderArtCanvas'),ctx=canvas.getContext('2d'),key=$id('spiderArtSeason').value,type=$id('spiderArtType').value,round=$id('spiderArtRound').value,data=getArtData(type,key,round),title=$id('spiderArtTitle').value.trim()||'SPIDER XTREINOS',sub=$id('spiderArtSubtitle').value.trim()||seasonName(key),c1=$id('spiderArtColor').value,c2=$id('spiderArtColor2').value,bg=$id('spiderArtBg').value;try{const back=await loadImage($id('spiderArtBackground').files[0]),logo=await loadImage($id('spiderArtLogo').files[0]);canvas.height=1920;ctx.clearRect(0,0,1080,1920);ctx.fillStyle=bg;ctx.fillRect(0,0,1080,1920);if(back){ctx.save();ctx.globalAlpha=.35;const sc=Math.max(1080/back.width,1920/back.height);ctx.drawImage(back,(1080-back.width*sc)/2,(1920-back.height*sc)/2,back.width*sc,back.height*sc);ctx.restore();}const grad=ctx.createLinearGradient(0,0,1080,1350);grad.addColorStop(0,c2);grad.addColorStop(1,'#080d1b');ctx.globalAlpha=.88;ctx.fillStyle=grad;ctx.fillRect(0,0,1080,1920);ctx.globalAlpha=1;ctx.fillStyle=c1;ctx.fillRect(0,0,1080,18);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='800 48px Arial';ctx.fillText(title.toUpperCase(),540,110,960);ctx.fillStyle=c1;ctx.font='800 35px Arial';ctx.fillText(data.heading,540,205,960);ctx.fillStyle='#b9c8e8';ctx.font='28px Arial';ctx.fillText(sub,540,258,960);if(logo){const scale=Math.min(150/logo.width,150/logo.height);ctx.drawImage(logo,465,290,logo.width*scale,logo.height*scale);}const rows=data.rows||[];let y=logo?490:380;if(!rows.length){ctx.fillStyle='#fff';ctx.font='34px Arial';ctx.fillText('AINDA NÃO HÁ DADOS PARA ESTE MODELO',540,y+100,940);}rows.forEach((r,i)=>{const h=125;ctx.fillStyle=i===0?'rgba(229,57,69,.22)':'rgba(255,255,255,.07)';ctx.strokeStyle=i===0?c1:'rgba(180,200,240,.22)';ctx.lineWidth=3;roundRect(ctx,70,y,940,h,20);ctx.fill();ctx.stroke();ctx.textAlign='left';ctx.fillStyle=c1;ctx.font='800 34px Arial';ctx.fillText('#'+r.rank,100,y+48);ctx.fillStyle='#fff';ctx.font='800 33px Arial';ctx.fillText(String(r.name).slice(0,34),210,y+48,650);ctx.fillStyle='#b8c8e6';ctx.font='24px Arial';ctx.fillText(String(r.detail).slice(0,48),210,y+88,650);ctx.textAlign='right';ctx.fillStyle='#fff';ctx.font='800 28px Arial';ctx.fillText(r.value,970,y+70,240);y+=h+18;});ctx.textAlign='center';ctx.fillStyle='#8ea2cb';ctx.font='22px Arial';ctx.fillText('SPIDER XTREINOS • FREE FIRE',540,1870);$id('spiderArtStatus').textContent=`Prévia gerada com ${rows.length} registro(s) de ${seasonName(key)}.`;}catch(e){$id('spiderArtStatus').textContent=e.message;}}
-  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
-  function selectionForMonth(key,count){const players=seasonPlayerKills(key);return players.slice(0,count).map((p,i)=>({...p,position:i+1}));}
-  function monthKeys(){return [...new Set(arr(DB.get('scrims')).map(s=>String(s.date||'').slice(0,7)).filter(k=>/^\d{4}-\d{2}$/.test(k)))].sort().reverse();}
-  function renderSeasonSelectionPanel(){if(!isMaster())return;const cfg=DB.get('settings/seasonSelection')||{enabled:true,count:5},month=$id('spiderSelectionMonth');if(!month)return;const months=monthKeys(),now=new Date(),cur=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');if(!months.includes(cur))months.unshift(cur);const old=month.value;month.innerHTML=months.map(k=>`<option value="${k}">${k.slice(5,7)}/${k.slice(0,4)}</option>`).join('');month.value=months.includes(old)?old:cur;$id('spiderSelectionEnabled').checked=cfg.enabled!==false;$id('spiderSelectionCount').value=String(cfg.count||5);drawSelection(month.value,cfg.count||5);const hist=$id('spiderSelectionHistory');hist.innerHTML=months.filter(k=>k!==cur).map(k=>{const p=selectionForMonth(k,cfg.count||5);return `<div class="spider-feature-note mt"><b>${k.slice(5,7)}/${k.slice(0,4)}</b><br>${p.length?p.map(x=>`${escText(x.position)}º ${escText(x.nick)} — ${escText(x.kills)} kills`).join('<br>'):'Sem registros nesse mês'}</div>`;}).join('')||'<p class="muted small-t">O histórico aparecerá conforme os meses tiverem registros.</p>';}
-  function drawSelection(month,count){const p=selectionForMonth(month,+count||5),box=$id('spiderSelectionCurrent');if(!box)return;box.innerHTML=p.length?`<div class="spider-art-grid">${p.map(x=>`<div class="spider-feature-note"><b>${x.position}º — ${escText(x.nick)}</b><br>${escText(x.teamName||'Jogador')}<br>${x.kills} abates na Season</div>`).join('')}</div>`:'<p class="muted small-t">Ainda não há abates publicados para este mês.</p>';}
-  function renderBestSeasonPlayer(){const home=$id('homeStatsCard');if(!home)return;let box=$id('spiderBestSeason');if(!box){box=document.createElement('div');box.id='spiderBestSeason';home.insertAdjacentElement('afterend',box);}const {def}=stSeasonKeys(),key=state.stSeason||def,p=stData(key).players||[],best=p[0];if(!best){box.innerHTML=`<div class="sbs-kicker">MELHOR JOGADOR DA SEASON</div><div class="sbs-name">Aguardando registros</div><div class="sbs-meta">${escText(seasonName(key))} • O destaque será atualizado com o ranking individual.</div>`;return;}box.innerHTML=`<div class="sbs-kicker">MELHOR JOGADOR DA SEASON</div><div class="sbs-name">${escText(best.nick)}</div><div class="sbs-meta">${escText(best.teamName||'Jogador')} • ${best.kills} kills • 1º lugar • ${escText(seasonName(key))}</div>`;}
-  document.addEventListener('click',async e=>{const id=e.target.id;if(id==='spiderMaintOn')return saveMaintenance({...maintCfg(),override:'on'});if(id==='spiderMaintOff')return saveMaintenance({...maintCfg(),override:'off'});if(id==='spiderMaintAuto')return saveMaintenance({...maintCfg(),override:'auto'});if(id==='spiderMaintCancel')return saveMaintenance({...maintCfg(),startAt:0,endAt:0,override:'auto'});if(id==='spiderArtGenerate')return generateArt();if(id==='spiderArtSave'){if(!isMaster())return;const a=document.createElement('a');a.download='spider-arts-'+Date.now()+'.png';a.href=$id('spiderArtCanvas').toDataURL('image/png');a.click();return;}if(id==='spiderSelectionSave'){if(!isMaster())return;await DB.set('settings/seasonSelection',{enabled:$id('spiderSelectionEnabled').checked,count:+$id('spiderSelectionCount').value||5});await logAct('Atualizou a configuração da Seleção da Season');$id('spiderSelectionFeedback').textContent='Configuração salva.';renderSeasonSelectionPanel();return;}});
-  document.addEventListener('change',e=>{if(e.target.id==='spiderSelectionMonth')drawSelection(e.target.value,+$id('spiderSelectionCount').value);if(e.target.id==='spiderSelectionCount')drawSelection($id('spiderSelectionMonth').value,+e.target.value);if(e.target.id==='spiderArtType')$id('spiderArtRoundWrap').hidden=e.target.value!=='round';if(e.target.id==='spiderArtSeason')renderSpiderArtsPanel();});
-  $id('spiderMaintForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!isMaster())return;const start=toBrasiliaEpoch($id('spiderMaintStart').value),end=toBrasiliaEpoch($id('spiderMaintEnd').value);if(!start||!end||end<=start)return toast('Confira as datas: o término precisa ser depois do início.','err');await saveMaintenance({...maintCfg(),startAt:start,endAt:end,noticeMinutes:Math.max(0,Math.min(10080,+$id('spiderMaintNotice').value||0)),override:'auto'});});
-  window.setInterval(()=>{renderMaintenanceUI();},1000);
-  ensureAdminFeatures();
-  // Reaplica a interface para incluir o destaque e os controles no primeiro carregamento.
-  try{render();}catch(e){console.error('SPIDER features init',e);}
-})();
-
 </script>
 </body>
 </html>
