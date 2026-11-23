@@ -664,7 +664,7 @@ OutroNick - 5"></textarea></label>
     <div class="atab" data-atab="seasonAdmin" hidden>
       <div class="card">
         <h3>Criar nova Season</h3>
-        <p class="muted small-t">Defina as datas oficiais. O MVP aparece como provisório durante a temporada e só vira oficial depois da data de encerramento. Os resultados e o histórico ficam preservados.</p>
+        <p class="muted small-t">Defina o nome e o período. Os rankings de times e abates serão calculados com os resultados dos X-Treinos dentro dessas datas. Encerrar uma Season arquiva os resultados sem apagar o histórico.</p>
         <form id="seasonCreateForm" class="mt">
           <label>Nome da Season<input name="name" required maxlength="40" placeholder="SEASON 01 — COPA SPIDER"></label>
           <div class="row"><label>Data de início<input name="start" type="date" required></label><label>Data de encerramento<input name="end" type="date" required></label></div>
@@ -792,6 +792,7 @@ OutroNick - 5"></textarea></label>
         </div>
         <div class="card mt"><h3>Medalhas cadastradas</h3><div id="medalConfigList"></div></div>
         <div class="card mt"><h3>Atribuir medalha a jogador</h3><form id="medalAssignForm" class="mt"><label>Jogador<select name="player" required></select></label><label>Medalha<select name="medal" required></select></label><button class="btn" type="submit">ATRIBUIR MEDALHA</button></form><p class="muted small-t mt">As medalhas atribuídas ou desbloqueadas por conquista aparecem automaticamente no perfil público.</p></div>
+        <div class="card mt"><h3>Gerenciar medalhas de um jogador</h3><p class="muted small-t">Escolha um jogador para ver as medalhas e conquistas exibidas no perfil. Você pode remover somente a medalha selecionada.</p><label class="mt">Jogador<select id="medalManagePlayer"><option value="">Selecione um jogador</option></select></label><div id="medalPlayerList" class="mt"><p class="muted small-t">Selecione um jogador para listar as medalhas.</p></div></div>
       </div>
   </div>
 </section>
@@ -1240,21 +1241,10 @@ function playerStats(uidx,user){
   }
   return {team,kills:playerKillTotal(uidx,user),matches,booyahs,recent:played.sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,5)};
 }
-function medalTodayKey(){const n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");}
 function medalActiveSeasonKey(){
-  const today=medalTodayKey();
-  const active=arr(settings().seasons).find(x=>x.status==="active"&&x.start&&x.end&&today>=String(x.start).slice(0,10)&&today<=String(x.end).slice(0,10));
+  const active=arr(settings().seasons).find(x=>x.status==="active");
   if(active)return "custom:"+active.id;
   const n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0");
-}
-function medalCompletedSeasonAwards(){
-  const today=medalTodayKey(),out=[];
-  for(const season of arr(settings().seasons)){
-    if(!(season.end&&today>String(season.end).slice(0,10))&&!season.closedAt)continue;
-    const ranking=seasonPlayerKills("custom:"+season.id);if(!ranking.length)continue;
-    const best=ranking[0].kills;out.push({season,kills:best,winners:ranking.filter(p=>p.kills===best)});
-  }
-  return out;
 }
 function medalSeasonAwardName(key){const name=seasonName(key);return /season\s*1\b/i.test(name)?"MVP SEASON 1":"MVP DA SEASON";}
 function medalSeasonStart(key){
@@ -1290,9 +1280,8 @@ function automaticMedalsForPlayer(uidx,user){
   for(let n=1;n<=30;n++){
     const d=days[n];if(d?.winners.some(matches))out.push({id:"sys-mvp-day-"+String(n).padStart(2,"0"),name:"MVP DIA "+String(n).padStart(2,"0"),emoji:"🏅",description:"Maior número de abates no dia "+d.date+" da "+seasonName(key)+" ("+d.kills+" abates)."});
   }
-  for(const award of medalCompletedSeasonAwards()){
-    if(award.winners.some(matches))out.push({id:"sys-mvp-season-"+award.season.id,name:medalSeasonAwardName("custom:"+award.season.id),emoji:"👑",description:"MVP oficial da "+award.season.name+" • período: "+award.season.start+" até "+award.season.end+" • "+award.kills+" abates."});
-  }
+  const seasonTop=seasonPlayerKills(key),best=seasonTop[0];
+  if(best&&matches(best))out.push({id:"sys-mvp-season-"+key,name:medalSeasonAwardName(key),emoji:"👑",description:"Maior número de abates da "+seasonName(key)+" ("+best.kills+" abates)."});
   return out;
 }
 function playerMedals(uidx,stats){
@@ -1304,7 +1293,7 @@ function playerMedals(uidx,stats){
     ...[5,10,25,50].map((n,i)=>({id:"sys-matches-"+n,name:"VETERANO "+n,emoji:["🎮","🛡️","🏆","⭐"][i],description:"Participou de "+n+" partidas.",ok:stats.matches>=n})),
     ...[1,5,10].map((n,i)=>({id:"sys-booyah-"+n,name:"BOOYAH x"+n,emoji:["🥇","🏅","🏆"][i],description:"Conquistou "+n+" Booyah(s).",ok:stats.booyahs>=n}))
   ].filter(m=>m.ok);
-  const merged=[...configured,...auto,...milestones],seen=new Set();return merged.filter(m=>!seen.has(m.id)&&seen.add(m.id));
+  const merged=[...configured,...auto,...milestones],seen=new Set(),hidden=arr((settings().playerMedalRevocations||{})[uidx]).map(String);return merged.filter(m=>!hidden.includes(String(m.id))&&!seen.has(m.id)&&seen.add(m.id));
 }
 function renderPlayerProfile(uidx){
   const user=DB.get("users/"+uidx);if(!user)return '<div class="card empty">Jogador não encontrado.</div>';
@@ -1493,8 +1482,8 @@ function seasonEndDay(key,cs){
   return "";
 }
 function seasonIsFinished(key,cs){
-  const today=medalTodayKey(),end=seasonEndDay(key,cs);
-  if(cs&&cs.closedAt)return true;
+  const n=new Date(),today=n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0"),end=seasonEndDay(key,cs);
+  if(cs&&cs.status!=="active")return true;
   return !!end&&today>end;
 }
 function applySeasonView(){
@@ -1505,9 +1494,7 @@ function applySeasonView(){
 function renderSeasonSummary(key,teams,players,cs){
   const fin=seasonIsFinished(key,cs),end=seasonEndDay(key,cs),fmt=d=>d?d.slice(8,10)+"/"+d.slice(5,7):"";
   let status="";
-  const today=medalTodayKey(),start=cs?String(cs.start||""):"";
-  if(start&&today<start){status=`<div class="sv-live">SEASON AGENDADA • começa em ${fmt(start)}</div>`;}
-  else if(fin&&teams.length){
+  if(fin&&teams.length){
     const c=teams[0],tops=players.length?players.filter(p=>p.kills===players[0].kills).slice(0,3):[];
     status=`<div class="sv-champ"><span class="k">SEASON ENCERRADA</span><h3>🏆 [${esc(c.tag)}] ${esc(c.name)}</h3><p>Time campeão • ${c.pts} pts • ${c.kills} abate${c.kills===1?"":"s"} • ${c.booyah} Booyah${c.booyah===1?"":"s"}</p>${tops.length?`<p style="margin-top:10px">🎯 Mais abates: <b>${tops.map(p=>esc(p.nick)).join(" / ")}</b> • ${players[0].kills} abate${players[0].kills===1?"":"s"}</p>`:""}</div>`;
   }else if(fin){status='<div class="sv-live">Season encerrada sem resultados registrados.</div>';}
@@ -1547,15 +1534,9 @@ function renderAutomaticMedalDashboard(){
   const box=$("#medalAutomaticPanel");if(!box)return;
   const key=medalActiveSeasonKey(),start=medalSeasonStart(key),days=medalDailyMvpData(key),top=seasonPlayerKills(key)[0];
   const dateFor=n=>{const a=String(start||"").split("-").map(Number);if(a.length!==3||a.some(x=>!x))return "Data não configurada";const d=new Date(Date.UTC(a[0],a[1]-1,a[2]+n-1));return d.toLocaleDateString("pt-BR",{timeZone:"UTC"});};
-  const activeSeason=arr(settings().seasons).find(x=>"custom:"+x.id===key)||null;
-  const today=medalTodayKey(),isClosed=!!activeSeason&&(today>String(activeSeason.end||"").slice(0,10)||!!activeSeason.closedAt);
-  const official=isClosed?medalCompletedSeasonAwards().find(x=>x.season.id===activeSeason.id):null;
-  const officialNames=official?official.winners.map(x=>x.nick).join(" / "):"";
-  const seasonCard=`<div class="medal-auto-feature"><b>👑 ${esc(isClosed?"MVP OFICIAL — "+medalSeasonAwardName(key):"MVP PROVISÓRIO — "+medalSeasonAwardName(key))}</b><div class="medal-auto-winner">${isClosed?(officialNames||"Sem abates válidos registrados"):top?esc(top.nick):"Aguardando abates publicados"}</div><small>${isClosed?(official?official.kills+" abates • "+activeSeason.start+" até "+activeSeason.end:"Apuração encerrada • "+seasonName(key)):top?esc(String(top.kills)+" abates • liderança atual • "+seasonName(key)):esc(seasonName(key)+" • ainda sem classificação")}</small></div>`;
+  const seasonCard=`<div class="medal-auto-feature"><b>👑 ${esc(medalSeasonAwardName(key))}</b><div class="medal-auto-winner">${top?esc(top.nick):"Aguardando abates publicados"}</div><small>${top?esc(String(top.kills)+" abates • "+seasonName(key)):esc(seasonName(key)+" • ainda sem classificação")}</small></div>`;
   const dayCards=Array.from({length:30},(_,i)=>{const n=i+1,d=days[n],winner=d?.winners||[];return `<div class="medal-auto-day"><b>🏅 MVP DIA ${String(n).padStart(2,"0")}</b><small>${d?esc(new Date(d.date+"T00:00:00Z").toLocaleDateString("pt-BR",{timeZone:"UTC"})):esc(dateFor(n))}</small><div class="medal-auto-winner">${winner.length?winner.map(x=>esc(x.nick)).join(" / "):"Aguardando resultado"}</div><small>${d?d.kills+" abates"+(winner.length>1?" • empate":""):"Será concedida ao líder de abates do dia"}</small></div>`;}).join("");
-  const officialHistory=medalCompletedSeasonAwards();
-  const historyHtml=officialHistory.length?officialHistory.map(a=>`<div class="medal-auto-day"><b>👑 ${esc(a.season.name)}</b><div class="medal-auto-winner">${a.winners.map(x=>esc(x.nick)).join(" / ")}</div><small>${a.kills} abates • ${esc(a.season.start)} até ${esc(a.season.end)}</small></div>`).join(""):'<p class="muted small-t">Nenhuma Season encerrada com abates válidos até agora.</p>';
-  box.innerHTML=seasonCard+`<h3 class="sec">Histórico de MVPs oficiais</h3><div class="medal-auto-grid">${historyHtml}</div><h3 class="sec">MVPs diários da Season</h3><div class="medal-auto-grid">${dayCards}</div><p class="muted small-t mt">Durante a Season, o líder aparece como MVP provisório. O título oficial só é concedido depois da data final (ou quando o organizador encerra antecipadamente). Os abates são somados a partir do KILL.MANUAL ou AUTOMATIC.KILL publicados; empates recebem o MVP.</p><p class="muted small-t">Temporada considerada: <b>${esc(seasonName(key))}</b> • início: ${esc(start||"não definido")}</p>`;
+  box.innerHTML=seasonCard+`<h3 class="sec">MVPs diários da Season</h3><div class="medal-auto-grid">${dayCards}</div><p class="muted small-t mt">As medalhas são calculadas automaticamente a partir dos abates registrados no KILL.MANUAL ou AUTOMATIC.KILL. O MVP diário considera a soma dos abates de cada jogador na data do X-Treino; empates recebem a medalha. Os dias seguem o calendário a partir do início da Season.</p><p class="muted small-t">Temporada considerada: <b>${esc(seasonName(key))}</b> • início: ${esc(start||"não definido")}</p>`;
 }
 function renderMedalConfig(){
   if(!isMaster())return;
@@ -1563,6 +1544,15 @@ function renderMedalConfig(){
   const cfg=arr(settings().playerMedals),users=arr(DB.get("users"));
   const list=$("#medalConfigList");if(list)list.innerHTML=cfg.length?cfg.map(m=>`<div class="medal-row"><div><b>${esc(m.emoji||"🏅")} ${esc(m.name)}</b><p class="muted small-t">${esc(m.description||"")} • ${m.criterion==="manual"?"Atribuição manual":`Meta: ${m.target} ${({kills:"abates",matches:"partidas",booyahs:"Booyahs"})[m.criterion]||""}`}</p></div><span class="flex"><button class="btn small ghost" data-act="medaledit" data-id="${esc(m.id)}">Editar</button><button class="btn small danger" data-act="medaldelete" data-id="${esc(m.id)}">Excluir</button></span></div>`).join(""):'<p class="muted small-t">Nenhuma medalha cadastrada ainda.</p>';
   const pf=$("#medalAssignForm");if(pf){pf.elements.namedItem("player").innerHTML=users.map(u=>`<option value="${esc(u.id)}">${esc(u.nick)}</option>`).join("");pf.elements.namedItem("medal").innerHTML=cfg.map(m=>`<option value="${esc(m.id)}">${esc(m.emoji)} ${esc(m.name)}</option>`).join("");pf.querySelector('button[type="submit"]').disabled=!users.length||!cfg.length;}
+  const mp=$("#medalManagePlayer"),previous=mp?.value;if(mp){mp.innerHTML='<option value="">Selecione um jogador</option>'+users.map(u=>`<option value="${esc(u.id)}">${esc(u.nick||"Jogador")}</option>`).join("");if(users.some(u=>u.id===previous))mp.value=previous;}
+  renderPlayerMedalManager();
+}
+function renderPlayerMedalManager(){
+  const box=$("#medalPlayerList"),sel=$("#medalManagePlayer");if(!box||!sel)return;
+  const uidx=sel.value;if(!uidx){box.innerHTML='<p class="muted small-t">Selecione um jogador para listar as medalhas.</p>';return;}
+  const user=DB.get("users/"+uidx);if(!user){box.innerHTML='<p class="muted small-t">Jogador não encontrado.</p>';return;}
+  const medals=playerMedals(uidx,playerStats(uidx,user));
+  box.innerHTML=medals.length?`<p class="muted small-t">${medals.length} medalha(s) encontrada(s) para <b>${esc(user.nick||"Jogador")}</b>.</p>`+medals.map(m=>`<div class="medal-row"><div><b>${esc(m.emoji||"🏅")} ${esc(m.name)}</b><p class="muted small-t">${esc(m.description||"")}</p></div><button type="button" class="btn small danger" data-act="medalplayerremove" data-id="${esc(m.id)}" data-id2="${esc(uidx)}">Remover</button></div>`).join(""):'<p class="muted small-t">Este jogador ainda não tem medalhas ou conquistas.</p>';
 }
 function clearMedalForm(){const f=$("#medalForm");if(!f)return;f.reset();f.elements.namedItem("id").value="";f.elements.namedItem("emoji").value="🏅";f.elements.namedItem("target").value="1";$("#medalFormTitle").textContent="Criar medalha";state.editMedalId="";}
 function renderSeasonAdminPanel(){
@@ -1573,7 +1563,7 @@ function renderSeasonAdminPanel(){
   const selected=seasons.find(x=>x.id===target?.value),cfg=selected?.scoring||{placements:pointsTable().slice(0,12),killPts:killPts(),booyahBonus:0};
   const placementBox=$("#seasonPlacementPoints");if(placementBox)placementBox.innerHTML=Array.from({length:12},(_,i)=>`<label>${i+1}º lugar<input type="number" min="0" max="999" step="0.5" data-season-place="${i}" value="${Number((cfg.placements||CONFIG.points)[i]??0)}"></label>`).join("");
   if($("#seasonKillPoints"))$("#seasonKillPoints").value=Number(cfg.killPts??killPts());if($("#seasonBooyahBonus"))$("#seasonBooyahBonus").value=Number(cfg.booyahBonus||0);if($("#seasonPointsStatus"))$("#seasonPointsStatus").textContent=selected?`Editando pontuação de ${selected.name}.`:"Crie uma Season para configurar a pontuação.";
-  list.innerHTML=seasons.length?seasons.map(x=>{const today=medalTodayKey(),phase=x.closedAt||today>String(x.end||"")?"ENCERRADA":today<String(x.start||"")?"AGENDADA":x.status==="archived"?"ARQUIVADA":"EM ANDAMENTO",live=phase==="EM ANDAMENTO";return `<div class="card"><div class="flex between wrap"><b>${esc(x.name)}</b><span class="badge ${live?"ok":"off"}">${phase}</span></div><p class="muted small-t mt">Início: ${esc(x.start)} • Encerramento: ${esc(x.end)}</p><div class="row mt"><label>Início<input type="date" data-season-date-start="${esc(x.id)}" value="${esc(x.start||"")}"></label><label>Fim<input type="date" data-season-date-end="${esc(x.id)}" value="${esc(x.end||"")}"></label></div><button class="btn small ghost mt" type="button" data-act="seasonupdatedates" data-id="${esc(x.id)}">SALVAR DATAS</button><p class="muted small-t">${phase==="ENCERRADA"?"MVP oficial calculado após o encerramento.":phase==="AGENDADA"?"O MVP só começa a ser contabilizado na data de início.":"MVP provisório até a data final."}</p><div class="actions mt"><button class="btn small ghost" data-act="seasonview" data-id="${esc(x.id)}">Ver ranking</button>${live?`<button class="btn small danger" data-act="seasonclose" data-id="${esc(x.id)}">Encerrar e arquivar</button>`:`<button class="btn small" data-act="seasonactivate" data-id="${esc(x.id)}">Ativar novamente</button>`}</div></div>`;}).join(""):'<div class="card empty">Nenhuma Season criada ainda.</div>';
+  list.innerHTML=seasons.length?seasons.map(x=>`<div class="card"><div class="flex between wrap"><b>${esc(x.name)}</b><span class="badge ${x.status==="active"?"ok":"off"}">${x.status==="active"?"ATIVA":"ARQUIVADA"}</span></div><p class="muted small-t mt">${esc(x.start)} até ${esc(x.end)}</p><div class="actions mt"><button class="btn small ghost" data-act="seasonview" data-id="${esc(x.id)}">Ver ranking</button>${x.status==="active"?`<button class="btn small danger" data-act="seasonclose" data-id="${esc(x.id)}">Encerrar e arquivar</button>`:`<button class="btn small" data-act="seasonactivate" data-id="${esc(x.id)}">Ativar novamente</button>`}</div></div>`).join(""):'<div class="card empty">Nenhuma Season criada ainda.</div>';
 }
 
 function renderAdmin(){
@@ -1989,17 +1979,7 @@ document.addEventListener("click", async e => {
   const act = b.dataset.act, id = b.dataset.id || b.dataset.round, id2 = b.dataset.id2, u = me(), t = myTeam();
   if(act === "rankteam"){renderTeamRankDetail(id,$("#seasonFilter").value);return;}
   if(act === "seasonview"){const key="custom:"+id;go("ranking");$("#seasonFilter").value=key;renderRanking();return;}
-  if(act === "seasonupdatedates"){
-    if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
-    const start=document.querySelector(`[data-season-date-start="${CSS.escape(id)}"]`)?.value||"";
-    const end=document.querySelector(`[data-season-date-end="${CSS.escape(id)}"]`)?.value||"";
-    if(!start||!end||end<start)return toast("Confira as datas: o encerramento não pode ser anterior ao início.","err");
-    const seasons=arr(settings().seasons).map(x=>x.id===id?{...x,start,end}:x);
-    try{await DB.set("settings/seasons",seasons);await logAct("Atualizou as datas da "+(seasons.find(x=>x.id===id)?.name||"Season"));renderSeasonAdminPanel();renderRanking();renderMedalConfig();toast("Datas da Season atualizadas. O MVP será apurado pelo novo período.");}
-    catch(err){toast("Não foi possível salvar as datas: "+err.message,"err");}
-    return;
-  }
-  if(act === "seasonclose"||act === "seasonactivate"){if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const seasons=arr(settings().seasons).map(x=>x.id===id?(act==="seasonclose"?{...x,status:"archived",closedAt:Date.now()}:{...x,status:"active",closedAt:null}):({...x,status:act==="seasonactivate"?"archived":x.status}));try{await DB.set("settings/seasons",seasons);await logAct((act==="seasonclose"?"Arquivou ":"Reativou ")+(seasons.find(x=>x.id===id)?.name||"Season"));renderSeasonAdminPanel();renderRanking();toast(act==="seasonclose"?"Season arquivada; histórico preservado.":"Season ativada.");}catch(err){toast("Não foi possível atualizar a Season: "+err.message,"err");}return;}
+  if(act === "seasonclose"||act === "seasonactivate"){if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const seasons=arr(settings().seasons).map(x=>({...x,status:x.id===id?(act==="seasonclose"?"archived":"active"):(act==="seasonactivate"?"archived":x.status)}));try{await DB.set("settings/seasons",seasons);await logAct((act==="seasonclose"?"Arquivou ":"Reativou ")+(seasons.find(x=>x.id===id)?.name||"Season"));renderSeasonAdminPanel();renderRanking();toast(act==="seasonclose"?"Season arquivada; histórico preservado.":"Season ativada.");}catch(err){toast("Não foi possível atualizar a Season: "+err.message,"err");}return;}
   if(act === "rankdetailclose"){$("#teamRankDetail").hidden=true;return;}
   if (ADMIN_ACTS.has(act) && !isAdmin()){ render(); return toast("Sessão do organizador encerrada", "err"); }
   if (["admtoggle", "admdel", "logclear"].includes(act) && !isMaster()) return toast("Só o organizador principal pode fazer isso", "err");
@@ -2110,6 +2090,7 @@ $("#profilePhoto").addEventListener("change",async e=>{
   }catch(err){toast("Não foi possível salvar a foto: "+err.message,"err");}
 });
 $("#medalCancelEdit").addEventListener("click",clearMedalForm);
+$("#medalManagePlayer")?.addEventListener("change",renderPlayerMedalManager);
 $("#medalForm").addEventListener("submit",async e=>{
   e.preventDefault();if(!isMaster())return toast("Somente o organizador principal pode configurar medalhas","err");
   const f=new FormData(e.target),name=String(f.get("name")||"").trim(),emoji=String(f.get("emoji")||"🏅").trim(),criterion=String(f.get("criterion")||"manual"),target=Math.max(1,Math.min(999999,Number(f.get("target"))||1));
@@ -2231,7 +2212,7 @@ $("#interfaceForm").addEventListener("submit",async e=>{e.preventDefault();if(!i
 $("#interfaceReset").addEventListener("click",async()=>{if(!isMaster())return;if(!await ask("Restaurar cores, fundo e logo padrão?"))return;try{await DB.del("settings/interface");await DB.set("settings/brand","SPIDER XTREINOS");interfaceLogoData="";interfaceBackgroundData="";render();toast("Aparência padrão restaurada.");}catch(err){toast("Falha ao restaurar: "+err.message,"err");}});
 $("#seasonScoreTarget")?.addEventListener("change",()=>renderSeasonAdminPanel());
 $("#saveSeasonPoints")?.addEventListener("click",async()=>{if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const id=$("#seasonScoreTarget")?.value;if(!id)return toast("Crie uma Season primeiro.","err");const placements=Array.from(document.querySelectorAll("[data-season-place]")).map(el=>Math.max(0,Number(el.value)||0));const scoring={placements,killPts:Math.max(0,Number($("#seasonKillPoints").value)||0),booyahBonus:Math.max(0,Number($("#seasonBooyahBonus").value)||0)};const seasons=arr(settings().seasons).map(x=>x.id===id?{...x,scoring}:x);try{await DB.set("settings/seasons",seasons);await logAct("Atualizou pontuação da Season "+(seasons.find(x=>x.id===id)?.name||""));renderSeasonAdminPanel();renderRanking();toast("Pontuação da Season salva!");}catch(err){toast("Não foi possível salvar a pontuação: "+err.message,"err");}});
-$("#seasonCreateForm").addEventListener("submit",async e=>{e.preventDefault();if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const f=e.target,name=String(f.elements.name.value||"").trim(),start=f.elements.start.value,end=f.elements.end.value;if(!name||!start||!end||end<start)return toast("Confira o nome e as datas da Season.","err");const today=medalTodayKey();const status=today<start?"upcoming":today>end?"archived":"active";const seasons=arr(settings().seasons).map(x=>({...x,status:x.status==="active"?"archived":x.status}));const id="s"+Date.now().toString(36);seasons.push({id,name,start,end,status,created:Date.now(),scoring:{placements:pointsTable().slice(0,12),killPts:killPts(),booyahBonus:0}});try{await DB.set("settings/seasons",seasons);await logAct("Criou a Season "+name);f.reset();renderSeasonAdminPanel();renderRanking();toast("Season criada e ativada!");}catch(err){toast("Não foi possível criar a Season: "+err.message,"err");}});
+$("#seasonCreateForm").addEventListener("submit",async e=>{e.preventDefault();if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const f=e.target,name=String(f.elements.name.value||"").trim(),start=f.elements.start.value,end=f.elements.end.value;if(!name||!start||!end||end<start)return toast("Confira o nome e as datas da Season.","err");const seasons=arr(settings().seasons).map(x=>({...x,status:"archived"}));const id="s"+Date.now().toString(36);seasons.push({id,name,start,end,status:"active",created:Date.now(),scoring:{placements:pointsTable().slice(0,12),killPts:killPts(),booyahBonus:0}});try{await DB.set("settings/seasons",seasons);await logAct("Criou a Season "+name);f.reset();renderSeasonAdminPanel();renderRanking();toast("Season criada e ativada!");}catch(err){toast("Não foi possível criar a Season: "+err.message,"err");}});
 
 
 $("#roomCredentialsForm").addEventListener("submit", async e => {
@@ -2361,6 +2342,14 @@ async function extraActs(act, id, id2, u, t){
       if(!isMaster())return no("Somente o organizador principal pode configurar medalhas");
       const m=arr(settings().playerMedals).find(x=>x.id===id);if(!m)return true;
       const f=$("#medalForm"),el=n=>f.elements.namedItem(n);el("id").value=m.id;el("name").value=m.name||"";el("emoji").value=m.emoji||"🏅";el("description").value=m.description||"";el("criterion").value=m.criterion||"manual";el("target").value=m.target||1;state.editMedalId=m.id;$("#medalFormTitle").textContent="Editar medalha";f.scrollIntoView({behavior:"smooth",block:"center"});return true;
+    }
+    case "medalplayerremove": {
+      if(!isMaster())return no("Acesso exclusivo do organizador principal");
+      const uidPlayer=String(id2||""),player=DB.get("users/"+uidPlayer);if(!uidPlayer||!player)return no("Jogador não encontrado");
+      const current=playerMedals(uidPlayer,playerStats(uidPlayer,player)),medal=current.find(x=>String(x.id)===String(id));if(!medal)return no("Esta medalha não está mais no perfil do jogador");
+      if(!await ask(`Remover somente a medalha “${medal.name}” de ${player.nick||"este jogador"}?`))return true;
+      const all={...(settings().playerMedalRevocations||{})},list=arr(all[uidPlayer]).map(String);if(!list.includes(String(id)))list.push(String(id));all[uidPlayer]=list;
+      await DB.set("settings/playerMedalRevocations",all);await logAct("Removeu a medalha "+medal.name+" do jogador "+(player.nick||""));renderMedalConfig();renderProfile();toast("Medalha removida do perfil do jogador");return true;
     }
     case "medaldelete": {
       if(!isMaster())return no("Acesso exclusivo do organizador principal");
