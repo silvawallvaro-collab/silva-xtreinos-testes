@@ -777,7 +777,8 @@ OutroNick - 5"></textarea></label>
 
     <div class="atab" data-atab="medals" hidden>
         <div class="card">
-          <div class="flex between wrap"><div><h2>🏅 CENTRAL DE MEDALHAS</h2><p class="muted small-t">Premiações automáticas calculadas pelos abates e resultados publicados.</p></div><span class="badge ok">AUTOMÁTICO</span></div>
+          <div class="flex between wrap"><div><h2>🏅 CENTRAL DE MEDALHAS</h2><p class="muted small-t">Crie medalhas manuais ou automáticas e controle a distribuição pelo Organizador.</p></div><span id="medalAutoStatus" class="badge ok">AUTOMÁTICO ATIVO</span></div>
+          <div id="medalAutoControls" class="mt"></div>
           <div id="medalAutomaticPanel" class="mt"></div>
         </div>
         <div class="card mt">
@@ -786,7 +787,8 @@ OutroNick - 5"></textarea></label>
             <input type="hidden" name="id">
             <div class="row"><label>Nome da medalha<input name="name" required maxlength="28" placeholder="Lenda do X-Treino"></label><label>Emoji<input name="emoji" required maxlength="8" value="🏅" placeholder="🏅"></label></div>
             <label>Descrição<input name="description" maxlength="100" placeholder="Conquista especial do jogador"></label>
-            <div class="row"><label>Conquista para desbloquear<select name="criterion"><option value="manual">Somente atribuição manual</option><option value="kills">Abates acumulados</option><option value="matches">Partidas jogadas</option><option value="booyahs">Booyahs</option></select></label><label>Meta numérica<input name="target" type="number" min="1" max="999999" value="1"></label></div>
+            <div class="row"><label>Tipo de entrega<select name="criterion"><option value="manual">Manual — somente o organizador entrega</option><option value="kills">Automática — ao atingir abates</option><option value="matches">Automática — ao atingir partidas</option><option value="booyahs">Automática — ao atingir Booyahs</option></select></label><label>Meta numérica<input name="target" type="number" min="1" max="999999" value="1"></label></div>
+            <p class="muted small-t">Medalhas manuais só aparecem quando você as atribuir. Medalhas automáticas são liberadas quando o jogador atingir a meta, desde que a distribuição automática esteja ativada.</p>
             <div class="actions"><button class="btn" type="submit">Salvar medalha</button><button class="btn ghost" type="button" id="medalCancelEdit">Limpar</button></div>
           </form>
         </div>
@@ -1275,6 +1277,7 @@ function medalDailyMvpData(key){
   return days;
 }
 function automaticMedalsForPlayer(uidx,user){
+  if(settings().medalAutoEnabled===false)return [];
   const key=medalActiveSeasonKey(),days=medalDailyMvpData(key),out=[];
   const matches=(p)=>p.uid?String(p.uid)===String(uidx):normalizedNick(p.nick)===normalizedNick(user?.nick);
   for(let n=1;n<=30;n++){
@@ -1286,13 +1289,14 @@ function automaticMedalsForPlayer(uidx,user){
 }
 function playerMedals(uidx,stats){
   const cfg=arr(settings().playerMedals),awards=settings().playerMedalAwards||{},given=arr(awards[uidx]).map(x=>typeof x==="string"?x:x.id);
-  const configured=cfg.filter(m=>given.includes(m.id)||(m.criterion==="kills"&&stats.kills>=+m.target)||(m.criterion==="matches"&&stats.matches>=+m.target)||(m.criterion==="booyahs"&&stats.booyahs>=+m.target));
+  const autoEnabled=settings().medalAutoEnabled!==false;
+  const configured=cfg.filter(m=>given.includes(m.id)||(autoEnabled&&m.criterion==="kills"&&stats.kills>=+m.target)||(autoEnabled&&m.criterion==="matches"&&stats.matches>=+m.target)||(autoEnabled&&m.criterion==="booyahs"&&stats.booyahs>=+m.target));
   const user=DB.get("users/"+uidx),auto=automaticMedalsForPlayer(uidx,user);
-  const milestones=[
+  const milestones=autoEnabled?[
     ...[10,25,50,100,250,500,1000].map((n,i)=>({id:"sys-kills-"+n,name:"CAÇADOR "+n,emoji:["🎯","⚔️","🔥","💥","💎","👑","🐉"][i],description:"Alcançou "+n+" abates acumulados.",ok:stats.kills>=n})),
     ...[5,10,25,50].map((n,i)=>({id:"sys-matches-"+n,name:"VETERANO "+n,emoji:["🎮","🛡️","🏆","⭐"][i],description:"Participou de "+n+" partidas.",ok:stats.matches>=n})),
     ...[1,5,10].map((n,i)=>({id:"sys-booyah-"+n,name:"BOOYAH x"+n,emoji:["🥇","🏅","🏆"][i],description:"Conquistou "+n+" Booyah(s).",ok:stats.booyahs>=n}))
-  ].filter(m=>m.ok);
+  ].filter(m=>m.ok):[];
   const merged=[...configured,...auto,...milestones],seen=new Set(),hidden=arr((settings().playerMedalRevocations||{})[uidx]).map(String);return merged.filter(m=>!hidden.includes(String(m.id))&&!seen.has(m.id)&&seen.add(m.id));
 }
 function renderPlayerProfile(uidx){
@@ -1541,8 +1545,11 @@ function renderAutomaticMedalDashboard(){
 function renderMedalConfig(){
   if(!isMaster())return;
   renderAutomaticMedalDashboard();
+  const autoEnabled=settings().medalAutoEnabled!==false,control=$("#medalAutoControls"),status=$("#medalAutoStatus");
+  if(status){status.className="badge "+(autoEnabled?"ok":"off");status.textContent=autoEnabled?"AUTOMÁTICO ATIVO":"AUTOMÁTICO DESATIVADO";}
+  if(control)control.innerHTML=`<div class="flex between wrap"><div><b>Distribuição automática</b><p class="muted small-t">${autoEnabled?"As medalhas automáticas, incluindo MVPs diários e marcos, podem ser exibidas ao cumprir os critérios.":"As entregas automáticas estão pausadas. Medalhas entregues manualmente continuam funcionando."}</p></div><button type="button" class="btn ${autoEnabled?"danger":"ok"}" data-act="medaltoggleauto">${autoEnabled?"DESATIVAR AUTOMÁTICAS":"ATIVAR AUTOMÁTICAS"}</button></div>`;
   const cfg=arr(settings().playerMedals),users=arr(DB.get("users"));
-  const list=$("#medalConfigList");if(list)list.innerHTML=cfg.length?cfg.map(m=>`<div class="medal-row"><div><b>${esc(m.emoji||"🏅")} ${esc(m.name)}</b><p class="muted small-t">${esc(m.description||"")} • ${m.criterion==="manual"?"Atribuição manual":`Meta: ${m.target} ${({kills:"abates",matches:"partidas",booyahs:"Booyahs"})[m.criterion]||""}`}</p></div><span class="flex"><button class="btn small ghost" data-act="medaledit" data-id="${esc(m.id)}">Editar</button><button class="btn small danger" data-act="medaldelete" data-id="${esc(m.id)}">Excluir</button></span></div>`).join(""):'<p class="muted small-t">Nenhuma medalha cadastrada ainda.</p>';
+  const list=$("#medalConfigList");if(list)list.innerHTML=cfg.length?cfg.map(m=>`<div class="medal-row"><div><b>${esc(m.emoji||"🏅")} ${esc(m.name)}</b><p class="muted small-t">${esc(m.description||"")} • ${m.criterion==="manual"?"MANUAL":`AUTOMÁTICA • Meta: ${m.target} ${({kills:"abates",matches:"partidas",booyahs:"Booyahs"})[m.criterion]||""}`}</p></div><span class="flex"><button class="btn small ghost" data-act="medaledit" data-id="${esc(m.id)}">Editar</button><button class="btn small danger" data-act="medaldelete" data-id="${esc(m.id)}">Excluir</button></span></div>`).join(""):'<p class="muted small-t">Nenhuma medalha cadastrada ainda.</p>';
   const pf=$("#medalAssignForm");if(pf){pf.elements.namedItem("player").innerHTML=users.map(u=>`<option value="${esc(u.id)}">${esc(u.nick)}</option>`).join("");pf.elements.namedItem("medal").innerHTML=cfg.map(m=>`<option value="${esc(m.id)}">${esc(m.emoji)} ${esc(m.name)}</option>`).join("");pf.querySelector('button[type="submit"]').disabled=!users.length||!cfg.length;}
   const mp=$("#medalManagePlayer"),previous=mp?.value;if(mp){mp.innerHTML='<option value="">Selecione um jogador</option>'+users.map(u=>`<option value="${esc(u.id)}">${esc(u.nick||"Jogador")}</option>`).join("");if(users.some(u=>u.id===previous))mp.value=previous;}
   renderPlayerMedalManager();
@@ -2338,6 +2345,14 @@ async function extraActs(act, id, id2, u, t){
     case "rankteam": renderTeamRankDetail(id,$("#seasonFilter").value);return true;
     case "rankdetailclose": $("#teamRankDetail").hidden=true;return true;
     case "noop": return true;
+    case "medaltoggleauto": {
+      if(!isMaster())return no("Somente o organizador principal pode controlar a distribuição automática");
+      const enabled=settings().medalAutoEnabled!==false;
+      if(!await ask(enabled?"Desativar a distribuição automática? Medalhas manuais continuarão funcionando.":"Ativar novamente a distribuição automática de medalhas?"))return true;
+      await DB.set("settings/medalAutoEnabled",!enabled);
+      await logAct((enabled?"Desativou":"Ativou")+" a distribuição automática de medalhas");
+      renderMedalConfig();renderProfile();toast(enabled?"Distribuição automática desativada":"Distribuição automática ativada");return true;
+    }
     case "medaledit": {
       if(!isMaster())return no("Somente o organizador principal pode configurar medalhas");
       const m=arr(settings().playerMedals).find(x=>x.id===id);if(!m)return true;
