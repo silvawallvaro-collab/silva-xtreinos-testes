@@ -1286,15 +1286,17 @@ function automaticMedalsForPlayer(uidx,user){
 }
 function playerMedals(uidx,stats){
   const cfg=arr(settings().playerMedals),awards=settings().playerMedalAwards||{},given=arr(awards[uidx]).map(x=>typeof x==="string"?x:x.id);
-  const configured=cfg.filter(m=>given.includes(m.id)||(m.criterion==="kills"&&stats.kills>=+m.target)||(m.criterion==="matches"&&stats.matches>=+m.target)||(m.criterion==="booyahs"&&stats.booyahs>=+m.target));
-  const user=DB.get("users/"+uidx),auto=automaticMedalsForPlayer(uidx,user);
+  const autoEnabled=settings().playerMedalAutoEnabled!==false;
+  // Atribuições manuais continuam visíveis mesmo quando a distribuição automática é desligada.
+  const configured=cfg.filter(m=>given.includes(m.id)||(autoEnabled&&((m.criterion==="kills"&&stats.kills>=+m.target)||(m.criterion==="matches"&&stats.matches>=+m.target)||(m.criterion==="booyahs"&&stats.booyahs>=+m.target))));
+  const user=DB.get("users/"+uidx),auto=autoEnabled?automaticMedalsForPlayer(uidx,user):[];
   const overrides=arr((settings().playerMedalOverrides||{})[uidx]);
   const hidden=arr((settings().playerMedalHidden||{})[uidx]);
-  const milestones=[
+  const milestones=autoEnabled?[
     ...[10,25,50,100,250,500,1000].map((n,i)=>({id:"sys-kills-"+n,name:"CAÇADOR "+n,emoji:["🎯","⚔️","🔥","💥","💎","👑","🐉"][i],description:"Alcançou "+n+" abates acumulados.",ok:stats.kills>=n})),
     ...[5,10,25,50].map((n,i)=>({id:"sys-matches-"+n,name:"VETERANO "+n,emoji:["🎮","🛡️","🏆","⭐"][i],description:"Participou de "+n+" partidas.",ok:stats.matches>=n})),
     ...[1,5,10].map((n,i)=>({id:"sys-booyah-"+n,name:"BOOYAH x"+n,emoji:["🥇","🏅","🏆"][i],description:"Conquistou "+n+" Booyah(s).",ok:stats.booyahs>=n}))
-  ].filter(m=>m.ok);
+  ].filter(m=>m.ok):[];
   const merged=[...configured,...auto,...milestones,...overrides],seen=new Set();return merged.filter(m=>!hidden.includes(m.id)&&!seen.has(m.id)&&seen.add(m.id));
 }
 function renderPlayerProfile(uidx){
@@ -1538,7 +1540,8 @@ function renderAutomaticMedalDashboard(){
   const dateFor=n=>{const a=String(start||"").split("-").map(Number);if(a.length!==3||a.some(x=>!x))return "Data não configurada";const d=new Date(Date.UTC(a[0],a[1]-1,a[2]+n-1));return d.toLocaleDateString("pt-BR",{timeZone:"UTC"});};
   const seasonCard=`<div class="medal-auto-feature"><b>👑 ${esc(medalSeasonAwardName(key))}</b><div class="medal-auto-winner">${top?esc(top.nick):"Aguardando abates publicados"}</div><small>${top?esc(String(top.kills)+" abates • "+seasonName(key)):esc(seasonName(key)+" • ainda sem classificação")}</small></div>`;
   const dayCards=Array.from({length:30},(_,i)=>{const n=i+1,d=days[n],winner=d?.winners||[];return `<div class="medal-auto-day"><b>🏅 MVP DIA ${String(n).padStart(2,"0")}</b><small>${d?esc(new Date(d.date+"T00:00:00Z").toLocaleDateString("pt-BR",{timeZone:"UTC"})):esc(dateFor(n))}</small><div class="medal-auto-winner">${winner.length?winner.map(x=>esc(x.nick)).join(" / "):"Aguardando resultado"}</div><small>${d?d.kills+" abates"+(winner.length>1?" • empate":""):"Será concedida ao líder de abates do dia"}</small></div>`;}).join("");
-  box.innerHTML=seasonCard+`<h3 class="sec">MVPs diários da Season</h3><div class="medal-auto-grid">${dayCards}</div><p class="muted small-t mt">As medalhas são calculadas automaticamente a partir dos abates registrados no KILL.MANUAL ou AUTOMATIC.KILL. O MVP diário considera a soma dos abates de cada jogador na data do X-Treino; empates recebem a medalha. Os dias seguem o calendário a partir do início da Season.</p><p class="muted small-t">Temporada considerada: <b>${esc(seasonName(key))}</b> • início: ${esc(start||"não definido")}</p>`;
+  const autoEnabled=settings().playerMedalAutoEnabled!==false;
+  box.innerHTML=`<div class="medal-auto-feature"><div class="flex between wrap"><div><b>⚙️ DISTRIBUIÇÃO AUTOMÁTICA</b><p class="muted small-t">${autoEnabled?"Ativada: medalhas por metas e MVPs são calculados automaticamente.":"Desativada: nenhuma medalha automática será exibida ou liberada. As atribuições manuais continuam funcionando."}</p></div><button type="button" class="btn ${autoEnabled?"danger":"ok"}" data-act="medalAutoToggle">${autoEnabled?"DESATIVAR AUTOMÁTICO":"ATIVAR AUTOMÁTICO"}</button></div></div>`+seasonCard+`<h3 class="sec">MVPs diários da Season</h3><div class="medal-auto-grid">${dayCards}</div><p class="muted small-t mt">As medalhas são calculadas automaticamente a partir dos abates registrados no KILL.MANUAL ou AUTOMATIC.KILL. O MVP diário considera a soma dos abates de cada jogador na data do X-Treino; empates recebem a medalha. Os dias seguem o calendário a partir do início da Season.</p><p class="muted small-t">Temporada considerada: <b>${esc(seasonName(key))}</b> • início: ${esc(start||"não definido")}</p>`;
 }
 function renderMedalConfig(){
   if(!isMaster())return;
@@ -2354,6 +2357,14 @@ async function extraActs(act, id, id2, u, t){
   const canTeam = tid => { const tm = DB.get("teams/" + tid); return !!tm && (isAdmin() || (u && tm.captainId === u.id)); };
   const lg = txt => isAdmin() ? logAct(txt) : null;
   switch (act){
+    case "medalAutoToggle": {
+      if(!isMaster())return no("Somente o organizador principal pode alterar a distribuição automática");
+      const enabled=settings().playerMedalAutoEnabled!==false;
+      if(!await ask(enabled?"Desativar a distribuição automática de medalhas? As medalhas já atribuídas manualmente serão mantidas.":"Ativar novamente a distribuição automática de medalhas?"))return true;
+      await DB.set("settings/playerMedalAutoEnabled",!enabled);
+      await logAct((enabled?"Desativou":"Ativou")+" a distribuição automática de medalhas");
+      renderMedalConfig();renderProfile();toast(enabled?"Distribuição automática desativada":"Distribuição automática ativada");return true;
+    }
     case "playerprofile": state.viewPlayerUid=id;go("perfil");renderProfile();return true;
     case "rankteam": renderTeamRankDetail(id,$("#seasonFilter").value);return true;
     case "rankdetailclose": $("#teamRankDetail").hidden=true;return true;
