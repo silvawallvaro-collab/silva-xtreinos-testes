@@ -777,8 +777,7 @@ OutroNick - 5"></textarea></label>
 
     <div class="atab" data-atab="medals" hidden>
         <div class="card">
-          <div class="flex between wrap"><div><h2>🏅 CENTRAL DE MEDALHAS</h2><p class="muted small-t">Crie medalhas manuais ou automáticas e controle a distribuição pelo Organizador.</p></div><span id="medalAutoStatus" class="badge ok">AUTOMÁTICO ATIVO</span></div>
-          <div id="medalAutoControls" class="mt"></div>
+          <div class="flex between wrap"><div><h2>🏅 CENTRAL DE MEDALHAS</h2><p class="muted small-t">Premiações automáticas calculadas pelos abates e resultados publicados.</p></div><span class="badge ok">AUTOMÁTICO</span></div>
           <div id="medalAutomaticPanel" class="mt"></div>
         </div>
         <div class="card mt">
@@ -787,14 +786,13 @@ OutroNick - 5"></textarea></label>
             <input type="hidden" name="id">
             <div class="row"><label>Nome da medalha<input name="name" required maxlength="28" placeholder="Lenda do X-Treino"></label><label>Emoji<input name="emoji" required maxlength="8" value="🏅" placeholder="🏅"></label></div>
             <label>Descrição<input name="description" maxlength="100" placeholder="Conquista especial do jogador"></label>
-            <div class="row"><label>Tipo de entrega<select name="criterion"><option value="manual">Manual — somente o organizador entrega</option><option value="kills">Automática — ao atingir abates</option><option value="matches">Automática — ao atingir partidas</option><option value="booyahs">Automática — ao atingir Booyahs</option></select></label><label>Meta numérica<input name="target" type="number" min="1" max="999999" value="1"></label></div>
-            <p class="muted small-t">Medalhas manuais só aparecem quando você as atribuir. Medalhas automáticas são liberadas quando o jogador atingir a meta, desde que a distribuição automática esteja ativada.</p>
+            <div class="row"><label>Conquista para desbloquear<select name="criterion"><option value="manual">Somente atribuição manual</option><option value="kills">Abates acumulados</option><option value="matches">Partidas jogadas</option><option value="booyahs">Booyahs</option></select></label><label>Meta numérica<input name="target" type="number" min="1" max="999999" value="1"></label></div>
             <div class="actions"><button class="btn" type="submit">Salvar medalha</button><button class="btn ghost" type="button" id="medalCancelEdit">Limpar</button></div>
           </form>
         </div>
         <div class="card mt"><h3>Medalhas cadastradas</h3><div id="medalConfigList"></div></div>
         <div class="card mt"><h3>Atribuir medalha a jogador</h3><form id="medalAssignForm" class="mt"><label>Jogador<select name="player" required></select></label><label>Medalha<select name="medal" required></select></label><button class="btn" type="submit">ATRIBUIR MEDALHA</button></form><p class="muted small-t mt">As medalhas atribuídas ou desbloqueadas por conquista aparecem automaticamente no perfil público.</p></div>
-        <div class="card mt"><h3>Gerenciar medalhas de um jogador</h3><p class="muted small-t">Escolha um jogador para ver as medalhas e conquistas exibidas no perfil. Você pode remover somente a medalha selecionada.</p><label class="mt">Jogador<select id="medalManagePlayer"><option value="">Selecione um jogador</option></select></label><div id="medalPlayerList" class="mt"><p class="muted small-t">Selecione um jogador para listar as medalhas.</p></div></div>
+        <div class="card mt" id="medalProfileManager"><h3>🎖️ Gerenciar medalhas do perfil</h3><p class="muted small-t">Adicione uma medalha existente ao perfil ou remova uma medalha específica sem alterar o catálogo.</p><label>Escolher jogador<select id="medalProfilePlayer"></select></label><div id="medalProfileCurrent" class="mt"></div><form id="medalProfileAddForm" class="mt"><label>Adicionar medalha existente<select id="medalProfileAddSelect" required></select></label><button class="btn" type="submit">ADICIONAR AO PERFIL</button></form></div>
       </div>
   </div>
 </section>
@@ -1277,7 +1275,6 @@ function medalDailyMvpData(key){
   return days;
 }
 function automaticMedalsForPlayer(uidx,user){
-  if(settings().medalAutoEnabled===false)return [];
   const key=medalActiveSeasonKey(),days=medalDailyMvpData(key),out=[];
   const matches=(p)=>p.uid?String(p.uid)===String(uidx):normalizedNick(p.nick)===normalizedNick(user?.nick);
   for(let n=1;n<=30;n++){
@@ -1289,15 +1286,16 @@ function automaticMedalsForPlayer(uidx,user){
 }
 function playerMedals(uidx,stats){
   const cfg=arr(settings().playerMedals),awards=settings().playerMedalAwards||{},given=arr(awards[uidx]).map(x=>typeof x==="string"?x:x.id);
-  const autoEnabled=settings().medalAutoEnabled!==false;
-  const configured=cfg.filter(m=>given.includes(m.id)||(autoEnabled&&m.criterion==="kills"&&stats.kills>=+m.target)||(autoEnabled&&m.criterion==="matches"&&stats.matches>=+m.target)||(autoEnabled&&m.criterion==="booyahs"&&stats.booyahs>=+m.target));
+  const configured=cfg.filter(m=>given.includes(m.id)||(m.criterion==="kills"&&stats.kills>=+m.target)||(m.criterion==="matches"&&stats.matches>=+m.target)||(m.criterion==="booyahs"&&stats.booyahs>=+m.target));
   const user=DB.get("users/"+uidx),auto=automaticMedalsForPlayer(uidx,user);
-  const milestones=autoEnabled?[
+  const overrides=arr((settings().playerMedalOverrides||{})[uidx]);
+  const hidden=arr((settings().playerMedalHidden||{})[uidx]);
+  const milestones=[
     ...[10,25,50,100,250,500,1000].map((n,i)=>({id:"sys-kills-"+n,name:"CAÇADOR "+n,emoji:["🎯","⚔️","🔥","💥","💎","👑","🐉"][i],description:"Alcançou "+n+" abates acumulados.",ok:stats.kills>=n})),
     ...[5,10,25,50].map((n,i)=>({id:"sys-matches-"+n,name:"VETERANO "+n,emoji:["🎮","🛡️","🏆","⭐"][i],description:"Participou de "+n+" partidas.",ok:stats.matches>=n})),
     ...[1,5,10].map((n,i)=>({id:"sys-booyah-"+n,name:"BOOYAH x"+n,emoji:["🥇","🏅","🏆"][i],description:"Conquistou "+n+" Booyah(s).",ok:stats.booyahs>=n}))
-  ].filter(m=>m.ok):[];
-  const merged=[...configured,...auto,...milestones],seen=new Set(),hidden=arr((settings().playerMedalRevocations||{})[uidx]).map(String);return merged.filter(m=>!hidden.includes(String(m.id))&&!seen.has(m.id)&&seen.add(m.id));
+  ].filter(m=>m.ok);
+  const merged=[...configured,...auto,...milestones,...overrides],seen=new Set();return merged.filter(m=>!hidden.includes(m.id)&&!seen.has(m.id)&&seen.add(m.id));
 }
 function renderPlayerProfile(uidx){
   const user=DB.get("users/"+uidx);if(!user)return '<div class="card empty">Jogador não encontrado.</div>';
@@ -1545,22 +1543,38 @@ function renderAutomaticMedalDashboard(){
 function renderMedalConfig(){
   if(!isMaster())return;
   renderAutomaticMedalDashboard();
-  const autoEnabled=settings().medalAutoEnabled!==false,control=$("#medalAutoControls"),status=$("#medalAutoStatus");
-  if(status){status.className="badge "+(autoEnabled?"ok":"off");status.textContent=autoEnabled?"AUTOMÁTICO ATIVO":"AUTOMÁTICO DESATIVADO";}
-  if(control)control.innerHTML=`<div class="flex between wrap"><div><b>Distribuição automática</b><p class="muted small-t">${autoEnabled?"As medalhas automáticas, incluindo MVPs diários e marcos, podem ser exibidas ao cumprir os critérios.":"As entregas automáticas estão pausadas. Medalhas entregues manualmente continuam funcionando."}</p></div><button type="button" class="btn ${autoEnabled?"danger":"ok"}" data-act="medaltoggleauto">${autoEnabled?"DESATIVAR AUTOMÁTICAS":"ATIVAR AUTOMÁTICAS"}</button></div>`;
   const cfg=arr(settings().playerMedals),users=arr(DB.get("users"));
-  const list=$("#medalConfigList");if(list)list.innerHTML=cfg.length?cfg.map(m=>`<div class="medal-row"><div><b>${esc(m.emoji||"🏅")} ${esc(m.name)}</b><p class="muted small-t">${esc(m.description||"")} • ${m.criterion==="manual"?"MANUAL":`AUTOMÁTICA • Meta: ${m.target} ${({kills:"abates",matches:"partidas",booyahs:"Booyahs"})[m.criterion]||""}`}</p></div><span class="flex"><button class="btn small ghost" data-act="medaledit" data-id="${esc(m.id)}">Editar</button><button class="btn small danger" data-act="medaldelete" data-id="${esc(m.id)}">Excluir</button></span></div>`).join(""):'<p class="muted small-t">Nenhuma medalha cadastrada ainda.</p>';
+  const list=$("#medalConfigList");if(list)list.innerHTML=cfg.length?cfg.map(m=>`<div class="medal-row"><div><b>${esc(m.emoji||"🏅")} ${esc(m.name)}</b><p class="muted small-t">${esc(m.description||"")} • ${m.criterion==="manual"?"Atribuição manual":`Meta: ${m.target} ${({kills:"abates",matches:"partidas",booyahs:"Booyahs"})[m.criterion]||""}`}</p></div><span class="flex"><button class="btn small ghost" data-act="medaledit" data-id="${esc(m.id)}">Editar</button><button class="btn small danger" data-act="medaldelete" data-id="${esc(m.id)}">Excluir</button></span></div>`).join(""):'<p class="muted small-t">Nenhuma medalha cadastrada ainda.</p>';
   const pf=$("#medalAssignForm");if(pf){pf.elements.namedItem("player").innerHTML=users.map(u=>`<option value="${esc(u.id)}">${esc(u.nick)}</option>`).join("");pf.elements.namedItem("medal").innerHTML=cfg.map(m=>`<option value="${esc(m.id)}">${esc(m.emoji)} ${esc(m.name)}</option>`).join("");pf.querySelector('button[type="submit"]').disabled=!users.length||!cfg.length;}
-  const mp=$("#medalManagePlayer"),previous=mp?.value;if(mp){mp.innerHTML='<option value="">Selecione um jogador</option>'+users.map(u=>`<option value="${esc(u.id)}">${esc(u.nick||"Jogador")}</option>`).join("");if(users.some(u=>u.id===previous))mp.value=previous;}
-  renderPlayerMedalManager();
+  const mp=$("#medalProfilePlayer");if(mp){const prev=mp.value;mp.innerHTML=users.map(u=>`<option value="${esc(u.id)}">${esc(u.nick)}</option>`).join("");if(users.some(u=>u.id===prev))mp.value=prev;}
+  const known=new Map();cfg.forEach(m=>known.set(m.id,m));users.forEach(u=>{const st=playerStats(u.id,u);playerMedals(u.id,st).forEach(m=>known.set(m.id,m));});
+  for(let n=1;n<=30;n++){const id="sys-mvp-day-"+String(n).padStart(2,"0");known.set(id,{id,name:"MVP DIA "+String(n).padStart(2,"0"),emoji:"🏅",description:"MVP diário da Season"});}
+  const sk=medalActiveSeasonKey(),sid="sys-mvp-season-"+sk;known.set(sid,{id:sid,name:medalSeasonAwardName(sk),emoji:"👑",description:"MVP geral da Season"});
+  [["sys-kills-10","CAÇADOR 10","🎯"],["sys-kills-25","CAÇADOR 25","⚔️"],["sys-kills-50","CAÇADOR 50","🔥"],["sys-kills-100","CAÇADOR 100","💥"],["sys-kills-250","CAÇADOR 250","💎"],["sys-kills-500","CAÇADOR 500","👑"],["sys-kills-1000","CAÇADOR 1000","🐉"],["sys-matches-5","VETERANO 5","🎮"],["sys-matches-10","VETERANO 10","🛡️"],["sys-matches-25","VETERANO 25","🏆"],["sys-matches-50","VETERANO 50","⭐"],["sys-booyah-1","BOOYAH x1","🥇"],["sys-booyah-5","BOOYAH x5","🏅"],["sys-booyah-10","BOOYAH x10","🏆"]].forEach(([id,name,emoji])=>known.set(id,{id,name,emoji,description:"Conquista do sistema"}));
+  const addSel=$("#medalProfileAddSelect");if(addSel)addSel.innerHTML=[...known.values()].map(m=>`<option value="${esc(m.id)}">${esc(m.emoji||"🏅")} ${esc(m.name)}</option>`).join("");
+  renderMedalProfileManager();
 }
-function renderPlayerMedalManager(){
-  const box=$("#medalPlayerList"),sel=$("#medalManagePlayer");if(!box||!sel)return;
-  const uidx=sel.value;if(!uidx){box.innerHTML='<p class="muted small-t">Selecione um jogador para listar as medalhas.</p>';return;}
-  const user=DB.get("users/"+uidx);if(!user){box.innerHTML='<p class="muted small-t">Jogador não encontrado.</p>';return;}
-  const medals=playerMedals(uidx,playerStats(uidx,user));
-  box.innerHTML=medals.length?`<p class="muted small-t">${medals.length} medalha(s) encontrada(s) para <b>${esc(user.nick||"Jogador")}</b>.</p>`+medals.map(m=>`<div class="medal-row"><div><b>${esc(m.emoji||"🏅")} ${esc(m.name)}</b><p class="muted small-t">${esc(m.description||"")}</p></div><button type="button" class="btn small danger" data-act="medalplayerremove" data-id="${esc(m.id)}" data-id2="${esc(uidx)}">Remover</button></div>`).join(""):'<p class="muted small-t">Este jogador ainda não tem medalhas ou conquistas.</p>';
+function renderMedalProfileManager(){
+  const uidp=$("#medalProfilePlayer")?.value,box=$("#medalProfileCurrent");if(!box)return;
+  if(!uidp){box.innerHTML='<p class="muted small-t">Nenhum jogador cadastrado.</p>';return;}
+  const u=DB.get("users/"+uidp),st=playerStats(uidp,u),medals=playerMedals(uidp,st);
+  box.innerHTML=medals.length?medals.map(m=>`<div class="medal-row"><div><b>${esc(m.emoji||"🏅")} ${esc(m.name)}</b><p class="muted small-t">${esc(m.description||"Conquista do jogador")}</p></div><button class="btn small danger" data-act="medalprofileRemove" data-id="${esc(m.id)}" data-id2="${esc(uidp)}">REMOVER DO PERFIL</button></div>`).join(""):'<p class="muted small-t">Este jogador ainda não tem medalhas.</p>';
 }
+$("#medalProfilePlayer")?.addEventListener("change",renderMedalProfileManager);
+$("#medalProfileAddForm")?.addEventListener("submit",async e=>{
+  e.preventDefault();if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");
+  const uidp=$("#medalProfilePlayer")?.value,mid=$("#medalProfileAddSelect")?.value;if(!uidp||!mid)return toast("Escolha jogador e medalha","err");
+  const known=new Map(arr(settings().playerMedals).map(m=>[m.id,m]));
+  const u=DB.get("users/"+uidp),st=playerStats(uidp,u);playerMedals(uidp,st).forEach(m=>known.set(m.id,m));
+  for(let n=1;n<=30;n++){const id="sys-mvp-day-"+String(n).padStart(2,"0");known.set(id,{id,name:"MVP DIA "+String(n).padStart(2,"0"),emoji:"🏅",description:"MVP diário da Season"});}
+  const sk=medalActiveSeasonKey(),sid="sys-mvp-season-"+sk;known.set(sid,{id:sid,name:medalSeasonAwardName(sk),emoji:"👑",description:"MVP geral da Season"});
+  [["sys-kills-10","CAÇADOR 10","🎯"],["sys-kills-25","CAÇADOR 25","⚔️"],["sys-kills-50","CAÇADOR 50","🔥"],["sys-kills-100","CAÇADOR 100","💥"],["sys-kills-250","CAÇADOR 250","💎"],["sys-kills-500","CAÇADOR 500","👑"],["sys-kills-1000","CAÇADOR 1000","🐉"],["sys-matches-5","VETERANO 5","🎮"],["sys-matches-10","VETERANO 10","🛡️"],["sys-matches-25","VETERANO 25","🏆"],["sys-matches-50","VETERANO 50","⭐"],["sys-booyah-1","BOOYAH x1","🥇"],["sys-booyah-5","BOOYAH x5","🏅"],["sys-booyah-10","BOOYAH x10","🏆"]].forEach(([id,name,emoji])=>known.set(id,{id,name,emoji,description:"Conquista do sistema"}));
+  const medal=known.get(mid);if(!medal)return toast("Medalha não encontrada","err");
+  const hidden={...(settings().playerMedalHidden||{})};hidden[uidp]=arr(hidden[uidp]).filter(x=>x!==mid);await DB.set("settings/playerMedalHidden",hidden);
+  if(arr(settings().playerMedals).some(m=>m.id===mid)){const awards={...(settings().playerMedalAwards||{})};awards[uidp]=[...new Set([...arr(awards[uidp]).map(x=>typeof x==="string"?x:x.id),mid])];await DB.set("settings/playerMedalAwards",awards);}else{const overrides={...(settings().playerMedalOverrides||{})};overrides[uidp]=[...arr(overrides[uidp]).filter(m=>m.id!==mid),medal];await DB.set("settings/playerMedalOverrides",overrides);}
+  await logAct("Adicionou medalha "+medal.name+" ao perfil de "+(u?.nick||"jogador"));renderMedalConfig();renderProfile();toast("Medalha adicionada ao perfil!");
+});
+
 function clearMedalForm(){const f=$("#medalForm");if(!f)return;f.reset();f.elements.namedItem("id").value="";f.elements.namedItem("emoji").value="🏅";f.elements.namedItem("target").value="1";$("#medalFormTitle").textContent="Criar medalha";state.editMedalId="";}
 function renderSeasonAdminPanel(){
   if(!isMaster())return;
@@ -2097,7 +2111,6 @@ $("#profilePhoto").addEventListener("change",async e=>{
   }catch(err){toast("Não foi possível salvar a foto: "+err.message,"err");}
 });
 $("#medalCancelEdit").addEventListener("click",clearMedalForm);
-$("#medalManagePlayer")?.addEventListener("change",renderPlayerMedalManager);
 $("#medalForm").addEventListener("submit",async e=>{
   e.preventDefault();if(!isMaster())return toast("Somente o organizador principal pode configurar medalhas","err");
   const f=new FormData(e.target),name=String(f.get("name")||"").trim(),emoji=String(f.get("emoji")||"🏅").trim(),criterion=String(f.get("criterion")||"manual"),target=Math.max(1,Math.min(999999,Number(f.get("target"))||1));
@@ -2345,26 +2358,10 @@ async function extraActs(act, id, id2, u, t){
     case "rankteam": renderTeamRankDetail(id,$("#seasonFilter").value);return true;
     case "rankdetailclose": $("#teamRankDetail").hidden=true;return true;
     case "noop": return true;
-    case "medaltoggleauto": {
-      if(!isMaster())return no("Somente o organizador principal pode controlar a distribuição automática");
-      const enabled=settings().medalAutoEnabled!==false;
-      if(!await ask(enabled?"Desativar a distribuição automática? Medalhas manuais continuarão funcionando.":"Ativar novamente a distribuição automática de medalhas?"))return true;
-      await DB.set("settings/medalAutoEnabled",!enabled);
-      await logAct((enabled?"Desativou":"Ativou")+" a distribuição automática de medalhas");
-      renderMedalConfig();renderProfile();toast(enabled?"Distribuição automática desativada":"Distribuição automática ativada");return true;
-    }
     case "medaledit": {
       if(!isMaster())return no("Somente o organizador principal pode configurar medalhas");
       const m=arr(settings().playerMedals).find(x=>x.id===id);if(!m)return true;
       const f=$("#medalForm"),el=n=>f.elements.namedItem(n);el("id").value=m.id;el("name").value=m.name||"";el("emoji").value=m.emoji||"🏅";el("description").value=m.description||"";el("criterion").value=m.criterion||"manual";el("target").value=m.target||1;state.editMedalId=m.id;$("#medalFormTitle").textContent="Editar medalha";f.scrollIntoView({behavior:"smooth",block:"center"});return true;
-    }
-    case "medalplayerremove": {
-      if(!isMaster())return no("Acesso exclusivo do organizador principal");
-      const uidPlayer=String(id2||""),player=DB.get("users/"+uidPlayer);if(!uidPlayer||!player)return no("Jogador não encontrado");
-      const current=playerMedals(uidPlayer,playerStats(uidPlayer,player)),medal=current.find(x=>String(x.id)===String(id));if(!medal)return no("Esta medalha não está mais no perfil do jogador");
-      if(!await ask(`Remover somente a medalha “${medal.name}” de ${player.nick||"este jogador"}?`))return true;
-      const all={...(settings().playerMedalRevocations||{})},list=arr(all[uidPlayer]).map(String);if(!list.includes(String(id)))list.push(String(id));all[uidPlayer]=list;
-      await DB.set("settings/playerMedalRevocations",all);await logAct("Removeu a medalha "+medal.name+" do jogador "+(player.nick||""));renderMedalConfig();renderProfile();toast("Medalha removida do perfil do jogador");return true;
     }
     case "medaldelete": {
       if(!isMaster())return no("Acesso exclusivo do organizador principal");
@@ -2372,6 +2369,15 @@ async function extraActs(act, id, id2, u, t){
       const cfg=arr(settings().playerMedals).filter(m=>m.id!==id),awards={...(settings().playerMedalAwards||{})};
       Object.keys(awards).forEach(uid=>{awards[uid]=arr(awards[uid]).filter(x=>(typeof x==="string"?x:x.id)!==id);});
       await DB.set("settings/playerMedals",cfg);await DB.set("settings/playerMedalAwards",awards);await logAct("Excluiu uma medalha personalizada");clearMedalForm();renderMedalConfig();toast("Medalha excluída");return true;
+    }
+    case "medalprofileRemove": {
+      if(!isMaster())return no("Acesso exclusivo do organizador principal");
+      const medalId=String(id||""),playerId=String(id2||"");if(!playerId||!medalId)return true;
+      if(!await ask("Remover somente esta medalha do perfil do jogador?"))return true;
+      const awards={...(settings().playerMedalAwards||{})};awards[playerId]=arr(awards[playerId]).filter(x=>(typeof x==="string"?x:x.id)!==medalId);await DB.set("settings/playerMedalAwards",awards);
+      const overrides={...(settings().playerMedalOverrides||{})};overrides[playerId]=arr(overrides[playerId]).filter(x=>x.id!==medalId);await DB.set("settings/playerMedalOverrides",overrides);
+      const hidden={...(settings().playerMedalHidden||{})};hidden[playerId]=[...new Set([...arr(hidden[playerId]),medalId])];await DB.set("settings/playerMedalHidden",hidden);
+      const player=DB.get("users/"+playerId);await logAct("Removeu a medalha "+medalId+" do perfil de "+(player?.nick||"jogador"));renderMedalConfig();renderProfile();toast("Medalha removida do perfil!");return true;
     }
     case "copyRoomId":
     case "copyRoomPassword": {
