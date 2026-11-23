@@ -1014,7 +1014,7 @@ const DB = {
     if(!this.cloud||this.pending>0)return false;
     try{
       // Não lê a raiz inteira: cada coleção pública é consultada separadamente.
-      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings"];
+      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings","launches"];
       if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
       if(isAdmin()) branches.push("manualKills");
       let changed=false;
