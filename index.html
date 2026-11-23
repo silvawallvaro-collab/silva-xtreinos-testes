@@ -358,7 +358,7 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
 <!-- TREINOS -->
 <section class="page" id="treinos">
   <h2 class="title">Treinos</h2>
-  <p class="sub">Inscreva seu time, faça o check-in e acompanhe os resultados.</p>
+  <p class="sub">Inscreva seu time com um clique e acompanhe os resultados.</p>
   <div class="grid g2" id="scrimList"></div>
 </section>
 
@@ -547,6 +547,7 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
         <button data-tab="automaticKill" id="tabAutomaticKill" hidden>🤖 Automatic Kill</button>
         <button data-tab="manualKill">✍️ Kill Manual</button>
         <button data-tab="pessoas">👥 Times e jogadores</button>
+        <button data-tab="overview">🔎 Visão geral</button>
         <button data-tab="avisos">📢 Avisos</button>
         <button data-tab="logs">📜 Logs</button>
         <button data-tab="config">⚙️ Config e backup</button>
@@ -665,6 +666,14 @@ OutroNick - 5"></textarea></label>
         <div class="actions mt"><button class="btn" id="manualKillPublish" type="button">PUBLICAR RANKING DE ABATES</button><button class="btn danger small" id="manualKillUnpublish" type="button">APAGAR PUBLICAÇÃO</button></div>
         <p class="muted small-t mt" id="manualKillPublishStatus"></p>
       </div>
+    </div>
+
+    <div class="atab" data-atab="overview" hidden>
+      <div class="card"><h3>🔎 Visão geral de times e jogadores</h3><div class="player-stats" id="ovStats"></div>
+        <input class="el-search" id="ovSearch" type="search" placeholder="Buscar jogador, time ou tag" autocomplete="off" style="width:100%;margin-top:12px"></div>
+      <h3 class="sec">🚫 Jogadores sem time</h3><div class="card" id="ovNoTeam"></div>
+      <h3 class="sec">🛡️ Todos os times</h3><div id="ovTeams"></div>
+      <h3 class="sec">👤 Todos os jogadores</h3><div class="card"><div class="table-wrap" id="ovPlayers"></div></div>
     </div>
 
     <div class="atab" data-atab="pessoas" hidden>
@@ -1053,7 +1062,7 @@ document.addEventListener("pointerup", async e => {
 });
 document.addEventListener("pointercancel", () => { callPinDrag = null; });
 
-const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","artround","csvrank","clearRoomCredentials"]);
+const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","artround","csvrank","admaddto","clearRoomCredentials"]);
 function adminSess(){
   try {
     const s = JSON.parse(session.get("xt_admin") || "null");
@@ -1178,10 +1187,10 @@ function scrimCard(s){
     if (!u) actions = '<button class="btn small" data-go="perfil">Entrar para participar</button>';
     else if (!t) actions = '<button class="btn small" data-go="meutime">Criar / entrar em um time</button>';
     else if (t.captainId !== u.id) actions = '<span class="muted small-t">Só o capitão inscreve o time.</span>';
-    else if (mine) actions = `<button class="btn small ${mine.checkin ? "ok" : ""}" data-act="checkin" data-id="${s.id}">${mine.checkin ? "✔ Check-in feito" : "Fazer check-in"}</button>
+    else if (mine) actions = `<span class="badge ok">✔ Time inscrito</span>
       <button class="btn small danger" data-act="unreg" data-id="${s.id}">Cancelar</button>`;
-    else actions = `<button class="btn small" data-act="reg" data-id="${s.id}">${conf.length >= s.slots ? "Entrar na fila de espera" : "Inscrever meu time"}</button>`;
-  } else if (mine && currentStatus === "closed") actions = `<button class="btn small ${mine.checkin ? "ok" : ""}" data-act="checkin" data-id="${s.id}">${mine.checkin ? "✔ Check-in feito" : "Fazer check-in"}</button>`;
+    else actions = `<button class="btn small" data-act="reg" data-id="${s.id}">${conf.length >= s.slots ? "⏳ Entrar na fila de espera" : "✅ Inscrever meu time"}</button>`;
+  } else if (mine && currentStatus === "closed") actions = `<span class="badge ok">✔ Time inscrito</span>`;
   const teamsHtml = conf.map((r, i) => { const tm = DB.get("teams/" + r.tid); return tm ? `<span class="badge off" style="margin:2px">${i + 1}. [${esc(tm.tag)}] ${esc(tm.name)}${r.checkin ? " ✔" : ""}</span>` : ""; }).join("");
   const waitHtml = regs.length > s.slots ? `<p class="muted small-t mt">Fila de espera: ${regs.length - s.slots} time(s)</p>` : "";
   const myPos = mine ? `<p class="small-t mt" style="color:var(--cyan)">${pos < s.slots ? "Seu time está confirmado (vaga " + (pos + 1) + ")" : "Seu time está na fila de espera (posição " + (pos - s.slots + 1) + ")"}</p>` : "";
@@ -1200,7 +1209,7 @@ function renderHome(){
   const s = nextScrim(), users = arr(DB.get("users")), teams = arr(DB.get("teams"));
   $("#homeNext").innerHTML = s ? `<h3>${esc(s.title)}</h3><p class="muted">${esc(fmtDate(s))} • ${esc(s.mode)} • ${confirmedRegs(s).length}/${s.slots} vagas</p>
       <div class="countdown" id="countdown" data-t="${esc(s.date)}T${esc(s.time)}"></div>
-      <div class="actions center mt"><a class="btn small" data-go="treinos">🎮 Ver e inscrever-se</a></div>`
+      <div class="actions center mt">${homeSignupBtn(s)}</div>`
     : '<p class="empty">Nenhum treino marcado ainda. Fique de olho nos avisos!</p>';
   const room = DB.get("roomCredentials") || {};
   const roomBox = $("#homeRoomCredentials");
@@ -1254,6 +1263,7 @@ function renderMyTeam(){
   $("#teamBox").innerHTML = `<div class="card">
     <div class="flex between wrap"><h3>[${esc(t.tag)}] ${esc(t.name)}</h3><span class="badge ok">${isCap ? "Você é o capitão" : t.starters && t.starters[u.id] ? "Você é titular" : "Você é reserva"}</span></div>
     <p class="muted small-t mt">Código de convite</p><span class="code">${esc(t.code)}</span>
+    ${isCap ? `<div class="actions mt"><button class="btn small" data-act="copyinvite" data-id="${esc(t.id)}">🔗 Copiar link de convite</button><a class="btn ghost small" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent("Entre no meu time " + t.name + " no X-Treino: " + inviteLink(t))}">📲 Enviar no WhatsApp</a></div>` : ""}
     <h3 class="sec">Elenco (${ids.length}/5) • Titulares ${startersCount(t)}/4</h3>
     ${ids.map(id => `<div class="rrow"><span>${esc(t.members[id])} ${id === t.captainId ? '<span class="badge wait">👑 Capitão</span>' : ""} ${t.starters && t.starters[id] ? '<span class="badge ok">Titular</span>' : '<span class="badge off">Reserva</span>'}</span>
       ${isCap ? `<span class="flex"><button class="btn small ${t.starters && t.starters[id] ? "ghost" : ""}" data-act="tog" data-id="${esc(t.id)}" data-id2="${esc(id)}">${t.starters && t.starters[id] ? "Mandar p/ reserva" : "Tornar titular"}</button>${id !== u.id ? `<button class="btn small danger" data-act="kick" data-id="${esc(id)}">Expulsar</button>` : ""}</span>` : ""}</div>`).join("")}
@@ -2062,8 +2072,8 @@ document.addEventListener("click", async e => {
       const n = Object.keys(t.members).length, need = needPlayers(s.mode);
       if (CONFIG.enforceRoster && n < need) return toast(`Seu time precisa de pelo menos ${need} jogadores para o modo ${s.mode}`, "err");
       if (s.regs && s.regs[t.id]) return;
-      await DB.set(`scrims/${id}/regs/${t.id}`, { tid: t.id, at: Date.now(), checkin: false });
-      toast("Time inscrito! ✅");
+      await DB.set(`scrims/${id}/regs/${t.id}`, { tid: t.id, at: Date.now(), checkin: true });
+      toast("Time inscrito! ✅ Já está confirmado, não precisa de check-in.");
     }
     else if (act === "unreg"){ if (await ask("Cancelar a inscrição do seu time?")){ await DB.del(`scrims/${id}/regs/${t.id}`); toast("Inscrição cancelada"); } }
     else if (act === "checkin"){
@@ -2551,7 +2561,7 @@ async function extraActs(act, id, id2, u, t){
     }
     case "admreg": {
       const sel = $(`[data-regsel="${id}"]`); if (!sel || !sel.value) return no("Escolha um time");
-      await DB.set(`scrims/${id}/regs/${sel.value}`, { tid: sel.value, at: Date.now(), checkin: false });
+      await DB.set(`scrims/${id}/regs/${sel.value}`, { tid: sel.value, at: Date.now(), checkin: true });
       const tm = DB.get("teams/" + sel.value); await logAct("Inscreveu o time " + (tm ? tm.name : "") + " no treino"); return true;
     }
     case "saveround": {
@@ -2578,6 +2588,19 @@ async function extraActs(act, id, id2, u, t){
       const key = $("#elSeason").value || stSeasonKeys().def, rows = [["Posicao", "Equipe", "Quedas", "Booyah", "Abates", "Pontos"], ...seasonStandings(key).map((t, i) => [i + 1, t.name, t.games, t.booyah, t.kills, t.pts])];
       const csv = "\ufeff" + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(";")).join("\n"), a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = "ranking-" + selSnapId(key) + ".csv"; document.body.appendChild(a); a.click(); a.remove(); toast("Ranking exportado ✅"); return true;
+    }
+    case "admaddto": {
+      const sel = $(`[data-addsel="${id}"]`); if (!sel || !sel.value) return no("Escolha um time");
+      const tm = DB.get("teams/" + sel.value), usr = DB.get("users/" + id); if (!tm || !usr) return true;
+      if (teamOf(id)) return no("Esse jogador já está em um time");
+      if (Object.keys(tm.members || {}).length >= 5) return no("Esse time já está cheio");
+      await DB.set(`teams/${tm.id}/members/${id}`, usr.nick); if (!tm.captainId) await DB.set(`teams/${tm.id}/captainId`, id);
+      await logAct(`Colocou ${usr.nick} no time ${tm.name}`); toast(usr.nick + " entrou no time ✅"); return true;
+    }
+    case "copyinvite": {
+      const tm = DB.get("teams/" + id) || t; if (!tm) return true; const l = inviteLink(tm);
+      try { await navigator.clipboard.writeText(l); toast("Link de convite copiado ✅"); } catch(e){ await openModal({ title: "Link de convite", text: l, readonly: true, ok: "Fechar" }); }
+      return true;
     }
     case "logdel": await DB.del("logs/" + id); return true;
     case "logwipe": if (await ask("Apagar todos os logs?")){ await DB.del("logs"); toast("Logs apagados"); } return true;
@@ -2981,7 +3004,7 @@ function renderExtra(){
     renderMaintenance(); renderBest();
     const m = isMaster(); $("#tabMaint").hidden = !m; $("#tabArts").hidden = !isAdmin();
     if (m){ renderMaintAdmin(); renderSelectionAdmin(); hallAutoArchive(); }
-    if (isAdmin()) renderArtsControls();
+    if (isAdmin()){ renderArtsControls(); renderOverview(); }
     renderElite();
   } catch(e){ console.error(e); }
 }
@@ -3133,6 +3156,51 @@ document.addEventListener("click", async e => {
 });
 $("#elSearch").addEventListener("input", () => renderElite());
 $("#elSeason").addEventListener("change", renderElite); $("#elScrim").addEventListener("change", renderElite);
+
+/* =====================================================
+   CONVITE POR LINK • HOME • VISÃO GERAL DO ORGANIZADOR
+   ===================================================== */
+const inviteLink = t => location.origin + location.pathname + "?convite=" + encodeURIComponent(t.id) + "&c=" + encodeURIComponent(t.code);
+(function(){ try { const q = new URLSearchParams(location.search), tid = q.get("convite"); if (tid){ state.invite = { t: tid, c: q.get("c") || "" }; history.replaceState(null, "", location.pathname + location.hash); } } catch(e){} })();
+async function processInvite(){
+  const inv = state.invite; if (!inv || state.invBusy) return;
+  const t = DB.get("teams/" + inv.t);
+  if (!t){ inv.tries = (inv.tries || 0) + 1; if (inv.tries > 15){ state.invite = null; toast("Convite inválido ou o time não existe mais", "err"); } return; }
+  if (String(t.code) !== String(inv.c)){ state.invite = null; return toast("Convite inválido ou expirado", "err"); }
+  const u = me();
+  if (!u){ if (!inv.warned){ inv.warned = true; go("perfil"); toast("Entre ou crie sua conta para aceitar o convite do time " + t.name); } return; }
+  if (teamOf(u.id)){ state.invite = null; return toast("Você já está em um time", "err"); }
+  state.invBusy = true;
+  try {
+    const ok = await ask(`Você foi convidado para o time [${t.tag}] ${t.name}. Quer entrar agora?`); state.invite = null; if (!ok) return;
+    const fresh = DB.get("teams/" + t.id); if (!fresh || Object.keys(fresh.members || {}).length >= 5) return toast("Esse time já está cheio", "err");
+    await DB.set(`teams/${t.id}/members/${u.id}`, u.nick); toast("Você entrou no time ✅"); go("meutime"); render();
+  } finally { state.invBusy = false; }
+}
+setInterval(() => { processInvite().catch(() => {}); }, 1000);
+function homeSignupBtn(s){
+  const u = me(), t = u && myTeam(), go2 = '<a class="btn ghost small" data-go="treinos">Ver treino</a>';
+  if (t && t.captainId === u.id && scrimStatus(s) === "open"){
+    if (s.regs && s.regs[t.id]) return '<span class="badge ok">✔ Seu time está inscrito</span> ' + go2;
+    return `<button class="btn small" data-act="reg" data-id="${esc(s.id)}">✅ Inscrever meu time</button> ` + go2;
+  }
+  return '<a class="btn small" data-go="treinos">🎮 Ver treinos</a>';
+}
+function ovSet(el, html){ if (el.dataset.h !== html && !el.contains(document.activeElement)){ el.dataset.h = html; el.innerHTML = html; } }
+function renderOverview(){
+  if (!isAdmin() || !$("#ovStats")) return;
+  const q = normalizedNick($("#ovSearch").value), cmp = (a, b) => String(a).localeCompare(String(b), "pt-BR");
+  const users = arr(DB.get("users")).sort((a, b) => cmp(a.nick, b.nick)), teams = arr(DB.get("teams")).sort((a, b) => cmp(a.name, b.name));
+  const cnt = t => Object.keys(t.members || {}).length, without = users.filter(u => !teamOf(u.id)), open = teams.filter(t => cnt(t) < 5);
+  $("#ovStats").innerHTML = [["Jogadores", users.length], ["Com time", users.length - without.length], ["Sem time", without.length], ["Times", teams.length], ["Times incompletos", open.length]].map(x => `<div class="player-stat"><span class="muted small-t">${x[0].toUpperCase()}</span><b>${x[1]}</b></div>`).join("");
+  const hit = u => !q || normalizedNick(u.nick).includes(q) || normalizedNick(u.ffid).includes(q), list = without.filter(hit);
+  ovSet($("#ovNoTeam"), list.length ? list.map(u => `<div class="xr"><span><b>${esc(u.nick || "Jogador")}</b> <span class="muted small-t">ID FF: ${esc(u.ffid || "—")}</span></span><span class="flex">${open.length ? `<select data-addsel="${esc(u.id)}" style="width:auto">${open.map(t => `<option value="${esc(t.id)}">[${esc(t.tag)}] ${esc(t.name)} (${cnt(t)}/5)</option>`).join("")}</select><button class="btn small" data-act="admaddto" data-id="${esc(u.id)}">➕ Colocar no time</button>` : '<span class="muted small-t">Nenhum time com vaga</span>'}</span></div>`).join("") : '<p class="empty">Nenhum jogador sem time 🎉</p>');
+  const tl = teams.filter(t => !q || normalizedNick(t.name + " " + t.tag).includes(q) || Object.values(t.members || {}).some(n => normalizedNick(n).includes(q)));
+  ovSet($("#ovTeams"), tl.map(t => { const ids = Object.keys(t.members || {}), n = ids.length; return `<details class="card mt"><summary><b>[${esc(t.tag)}] ${esc(t.name)}</b> <span class="badge ${n >= 5 ? "ok" : "wait"}">${n}/5${n < 5 ? " • faltam " + (5 - n) : ""}</span> <span class="muted small-t">Capitão: ${esc((t.members && t.members[t.captainId]) || "—")}</span></summary>${ids.map(id => { const u = DB.get("users/" + id) || {}; return `<div class="xr"><span>${esc(t.members[id])} ${id === t.captainId ? '<span class="badge wait">👑 Capitão</span>' : ""} ${t.starters && t.starters[id] ? '<span class="badge ok">Titular</span>' : '<span class="badge off">Reserva</span>'}</span><span class="muted small-t">ID FF: ${esc(u.ffid || "—")}</span></div>`; }).join("") || '<p class="muted small-t">Sem jogadores.</p>'}</details>`; }).join("") || '<p class="empty">Nenhum time encontrado.</p>');
+  const pl = users.filter(hit);
+  ovSet($("#ovPlayers"), `<table><thead><tr><th>Jogador</th><th>ID Free Fire</th><th>Time</th><th>Função</th></tr></thead><tbody>${pl.map(u => { const t = teamOf(u.id); return `<tr><td>${esc(u.nick || "Jogador")}</td><td>${esc(u.ffid || "—")}</td><td>${t ? "[" + esc(t.tag) + "] " + esc(t.name) : '<span class="badge err">Sem time</span>'}</td><td>${t ? (t.captainId === u.id ? "Capitão" : t.starters && t.starters[u.id] ? "Titular" : "Reserva") : "—"}</td></tr>`; }).join("")}</tbody></table>`);
+}
+$("#ovSearch").addEventListener("input", () => renderOverview());
 
 /* =====================================================
    INICIALIZAÇÃO
