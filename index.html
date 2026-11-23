@@ -17,6 +17,13 @@
 .season-rank-row{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:12px 16px;border:1px solid #2a3a70;border-radius:13px;background:linear-gradient(110deg,rgba(10,18,50,.96),rgba(7,13,35,.94));cursor:pointer;text-align:left;width:100%;color:var(--text)}
 .season-rank-row:hover{border-color:#fbbf24;transform:translateY(-1px)}.season-rank-pos{font:700 1.6rem Rajdhani;color:#aebbe9;text-align:center}.season-rank-main b{display:block;font-weight:700}.season-rank-main small{display:block;color:#aab6dc}.season-rank-score{font:700 1.8rem Rajdhani;color:#ffb21c}.season-rank-row:nth-child(1) .season-rank-pos{color:#ffd166}.season-detail-table{width:100%;border-collapse:collapse;min-width:420px}.season-detail-table th,.season-detail-table td{text-align:center;padding:10px;border-bottom:1px solid var(--line)}.season-detail-table th{color:#aab6dc;background:transparent}
 @media(max-width:520px){.player-avatar{width:70px;height:70px}.season-rank-row{grid-template-columns:32px 1fr auto;padding:10px;gap:8px}.season-rank-score{font-size:1.45rem}}
+.medal-auto-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px;margin-top:12px}
+.medal-auto-day{border:1px solid var(--line);border-radius:11px;padding:10px;background:#0c1326;min-width:0}
+.medal-auto-day b{display:block;color:#fbbf24;font:700 1.05rem Rajdhani}
+.medal-auto-day small{display:block;color:var(--muted,#aab6dc);margin-top:4px;overflow-wrap:anywhere}
+.medal-auto-winner{color:var(--text);font-weight:700;margin-top:5px;overflow-wrap:anywhere}
+.medal-auto-feature{border:1px solid rgba(251,191,36,.35);border-radius:13px;padding:14px;background:linear-gradient(120deg,rgba(120,80,15,.2),#0c1326)}
+
 
 .sv-tabs{display:flex;gap:8px;max-width:720px;margin:14px auto 0}.sv-tabs button{flex:1;padding:11px 8px;border-radius:11px;border:1px solid #2a3a70;background:#0c1326;color:#aebbe9;font:700 .95rem Rajdhani,sans-serif;letter-spacing:.08em;cursor:pointer}.sv-tabs button.active{background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;border-color:#3b82f6}
 .sv-champ{max-width:720px;margin:14px auto 0;padding:18px;border:1px solid #fbbf24;border-radius:16px;background:linear-gradient(135deg,rgba(251,191,36,.16),rgba(8,15,40,.92));text-align:center}
@@ -770,6 +777,10 @@ OutroNick - 5"></textarea></label>
 
     <div class="atab" data-atab="medals" hidden>
         <div class="card">
+          <div class="flex between wrap"><div><h2>🏅 CENTRAL DE MEDALHAS</h2><p class="muted small-t">Premiações automáticas calculadas pelos abates e resultados publicados.</p></div><span class="badge ok">AUTOMÁTICO</span></div>
+          <div id="medalAutomaticPanel" class="mt"></div>
+        </div>
+        <div class="card mt">
           <h3 id="medalFormTitle">Criar medalha</h3>
           <form id="medalForm" class="mt">
             <input type="hidden" name="id">
@@ -1229,9 +1240,59 @@ function playerStats(uidx,user){
   }
   return {team,kills:playerKillTotal(uidx,user),matches,booyahs,recent:played.sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,5)};
 }
+function medalActiveSeasonKey(){
+  const active=arr(settings().seasons).find(x=>x.status==="active");
+  if(active)return "custom:"+active.id;
+  const n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0");
+}
+function medalSeasonAwardName(key){const name=seasonName(key);return /season\s*1\b/i.test(name)?"MVP SEASON 1":"MVP DA SEASON";}
+function medalSeasonStart(key){
+  if(String(key).startsWith("custom:")){const x=arr(settings().seasons).find(z=>z.id===String(key).slice(7));return String(x?.start||"").slice(0,10);}
+  return String(key)+"-01";
+}
+function medalDayNumber(date,start){
+  const a=String(start||"").slice(0,10).split("-").map(Number),b=String(date||"").slice(0,10).split("-").map(Number);
+  if(a.length!==3||b.length!==3||a.some(x=>!x)||b.some(x=>!x))return 0;
+  return Math.floor((Date.UTC(b[0],b[1]-1,b[2])-Date.UTC(a[0],a[1]-1,a[2]))/86400000)+1;
+}
+function medalDailyMvpData(key){
+  const byDate={};
+  for(const sc of seasonScrims(key)){
+    const date=String(sc.date||"").slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(date))continue;
+    for(const p of seasonKillRowsForScrim(sc)){
+      const kills=Math.max(0,+p.kills||0),identity=p.uid||normalizedNick(p.nick);if(!identity||kills<=0)continue;
+      const day=byDate[date]||(byDate[date]={players:{}}),old=day.players[identity]||(day.players[identity]={uid:p.uid||"",nick:p.nick||"Jogador",kills:0,teamName:p.teamName||""});
+      old.kills+=kills;if(p.teamName)old.teamName=p.teamName;
+    }
+  }
+  const start=medalSeasonStart(key),days={};
+  for(const [date,day] of Object.entries(byDate)){
+    const number=medalDayNumber(date,start);if(number<1||number>30)continue;
+    const rows=Object.values(day.players),top=Math.max(0,...rows.map(x=>x.kills));
+    days[number]={date,winners:rows.filter(x=>x.kills===top&&top>0).sort((a,b)=>a.nick.localeCompare(b.nick,"pt-BR")),kills:top};
+  }
+  return days;
+}
+function automaticMedalsForPlayer(uidx,user){
+  const key=medalActiveSeasonKey(),days=medalDailyMvpData(key),out=[];
+  const matches=(p)=>p.uid?String(p.uid)===String(uidx):normalizedNick(p.nick)===normalizedNick(user?.nick);
+  for(let n=1;n<=30;n++){
+    const d=days[n];if(d?.winners.some(matches))out.push({id:"sys-mvp-day-"+String(n).padStart(2,"0"),name:"MVP DIA "+String(n).padStart(2,"0"),emoji:"🏅",description:"Maior número de abates no dia "+d.date+" da "+seasonName(key)+" ("+d.kills+" abates)."});
+  }
+  const seasonTop=seasonPlayerKills(key),best=seasonTop[0];
+  if(best&&matches(best))out.push({id:"sys-mvp-season-"+key,name:medalSeasonAwardName(key),emoji:"👑",description:"Maior número de abates da "+seasonName(key)+" ("+best.kills+" abates)."});
+  return out;
+}
 function playerMedals(uidx,stats){
   const cfg=arr(settings().playerMedals),awards=settings().playerMedalAwards||{},given=arr(awards[uidx]).map(x=>typeof x==="string"?x:x.id);
-  return cfg.filter(m=>given.includes(m.id)||(m.criterion==="kills"&&stats.kills>=+m.target)||(m.criterion==="matches"&&stats.matches>=+m.target)||(m.criterion==="booyahs"&&stats.booyahs>=+m.target));
+  const configured=cfg.filter(m=>given.includes(m.id)||(m.criterion==="kills"&&stats.kills>=+m.target)||(m.criterion==="matches"&&stats.matches>=+m.target)||(m.criterion==="booyahs"&&stats.booyahs>=+m.target));
+  const user=DB.get("users/"+uidx),auto=automaticMedalsForPlayer(uidx,user);
+  const milestones=[
+    ...[10,25,50,100,250,500,1000].map((n,i)=>({id:"sys-kills-"+n,name:"CAÇADOR "+n,emoji:["🎯","⚔️","🔥","💥","💎","👑","🐉"][i],description:"Alcançou "+n+" abates acumulados.",ok:stats.kills>=n})),
+    ...[5,10,25,50].map((n,i)=>({id:"sys-matches-"+n,name:"VETERANO "+n,emoji:["🎮","🛡️","🏆","⭐"][i],description:"Participou de "+n+" partidas.",ok:stats.matches>=n})),
+    ...[1,5,10].map((n,i)=>({id:"sys-booyah-"+n,name:"BOOYAH x"+n,emoji:["🥇","🏅","🏆"][i],description:"Conquistou "+n+" Booyah(s).",ok:stats.booyahs>=n}))
+  ].filter(m=>m.ok);
+  const merged=[...configured,...auto,...milestones],seen=new Set();return merged.filter(m=>!seen.has(m.id)&&seen.add(m.id));
 }
 function renderPlayerProfile(uidx){
   const user=DB.get("users/"+uidx);if(!user)return '<div class="card empty">Jogador não encontrado.</div>';
@@ -1468,8 +1529,17 @@ function renderSocial(){
     : '<div class="card empty" style="grid-column:1/-1">Os links ainda não foram configurados pelo organizador.</div>';
 }
 
+function renderAutomaticMedalDashboard(){
+  const box=$("#medalAutomaticPanel");if(!box)return;
+  const key=medalActiveSeasonKey(),start=medalSeasonStart(key),days=medalDailyMvpData(key),top=seasonPlayerKills(key)[0];
+  const dateFor=n=>{const a=String(start||"").split("-").map(Number);if(a.length!==3||a.some(x=>!x))return "Data não configurada";const d=new Date(Date.UTC(a[0],a[1]-1,a[2]+n-1));return d.toLocaleDateString("pt-BR",{timeZone:"UTC"});};
+  const seasonCard=`<div class="medal-auto-feature"><b>👑 ${esc(medalSeasonAwardName(key))}</b><div class="medal-auto-winner">${top?esc(top.nick):"Aguardando abates publicados"}</div><small>${top?esc(String(top.kills)+" abates • "+seasonName(key)):esc(seasonName(key)+" • ainda sem classificação")}</small></div>`;
+  const dayCards=Array.from({length:30},(_,i)=>{const n=i+1,d=days[n],winner=d?.winners||[];return `<div class="medal-auto-day"><b>🏅 MVP DIA ${String(n).padStart(2,"0")}</b><small>${d?esc(new Date(d.date+"T00:00:00Z").toLocaleDateString("pt-BR",{timeZone:"UTC"})):esc(dateFor(n))}</small><div class="medal-auto-winner">${winner.length?winner.map(x=>esc(x.nick)).join(" / "):"Aguardando resultado"}</div><small>${d?d.kills+" abates"+(winner.length>1?" • empate":""):"Será concedida ao líder de abates do dia"}</small></div>`;}).join("");
+  box.innerHTML=seasonCard+`<h3 class="sec">MVPs diários da Season</h3><div class="medal-auto-grid">${dayCards}</div><p class="muted small-t mt">As medalhas são calculadas automaticamente a partir dos abates registrados no KILL.MANUAL ou AUTOMATIC.KILL. O MVP diário considera a soma dos abates de cada jogador na data do X-Treino; empates recebem a medalha. Os dias seguem o calendário a partir do início da Season.</p><p class="muted small-t">Temporada considerada: <b>${esc(seasonName(key))}</b> • início: ${esc(start||"não definido")}</p>`;
+}
 function renderMedalConfig(){
   if(!isMaster())return;
+  renderAutomaticMedalDashboard();
   const cfg=arr(settings().playerMedals),users=arr(DB.get("users"));
   const list=$("#medalConfigList");if(list)list.innerHTML=cfg.length?cfg.map(m=>`<div class="medal-row"><div><b>${esc(m.emoji||"🏅")} ${esc(m.name)}</b><p class="muted small-t">${esc(m.description||"")} • ${m.criterion==="manual"?"Atribuição manual":`Meta: ${m.target} ${({kills:"abates",matches:"partidas",booyahs:"Booyahs"})[m.criterion]||""}`}</p></div><span class="flex"><button class="btn small ghost" data-act="medaledit" data-id="${esc(m.id)}">Editar</button><button class="btn small danger" data-act="medaldelete" data-id="${esc(m.id)}">Excluir</button></span></div>`).join(""):'<p class="muted small-t">Nenhuma medalha cadastrada ainda.</p>';
   const pf=$("#medalAssignForm");if(pf){pf.elements.namedItem("player").innerHTML=users.map(u=>`<option value="${esc(u.id)}">${esc(u.nick)}</option>`).join("");pf.elements.namedItem("medal").innerHTML=cfg.map(m=>`<option value="${esc(m.id)}">${esc(m.emoji)} ${esc(m.name)}</option>`).join("");pf.querySelector('button[type="submit"]').disabled=!users.length||!cfg.length;}
