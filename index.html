@@ -92,6 +92,57 @@
 #elite .el-plist button{text-align:left;border:1px solid #1e3a8a;background:rgba(15,23,42,.9);color:#e8eeff;border-radius:12px;padding:10px;cursor:pointer;display:flex;flex-direction:column;transition:.2s}#elite .el-plist button:hover{border-color:var(--ec)}
 @keyframes elIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media(max-width:640px){#elite .el-two{grid-template-columns:1fr}#elite .el-hero h2{font-size:1.6rem}}
+
+/* CENTRALIZAÇÃO DOS BLOCOS DA PÁGINA INÍCIO — mantém textos e dados originais */
+#inicio #homeLaunchWrap{
+  width:min(100%,660px);
+  box-sizing:border-box;
+  margin:18px auto 0!important;
+  text-align:center;
+  padding:24px 20px;
+}
+#inicio #homeLaunchWrap .launch-kicker{display:block;text-align:center}
+#inicio #homeLaunchWrap h2,
+#inicio #homeLaunchWrap p,
+#inicio #homeLaunchWrap #launchCountdown{text-align:center}
+#inicio #homeLaunchWrap .countdown{justify-content:center;align-items:center}
+#inicio #homeRoomCredentials{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  box-sizing:border-box;
+}
+#inicio #homeRoomCredentials[hidden]{display:none!important}
+#inicio #homeRoomCredentials .room-publish{
+  width:min(100%,620px);
+  max-width:620px;
+  box-sizing:border-box;
+  margin:20px auto 24px;
+  text-align:center;
+}
+#inicio #homeRoomCredentials .room-value{
+  width:min(100%,440px);
+  box-sizing:border-box;
+  margin:14px auto 0;
+  text-align:center;
+}
+#inicio #homeRoomCredentials .room-copy{display:inline-flex;margin:0 auto}
+#inicio #homeNext{
+  width:min(100%,660px);
+  box-sizing:border-box;
+  margin:12px auto 0!important;
+  text-align:center;
+}
+#inicio #homeNext:before{display:none}
+#inicio #homeNext .countdown{justify-content:center}
+#inicio #homeNext .actions.center{justify-content:center}
+#inicio #homeNext .empty{text-align:center}
+@media(max-width:600px){
+  #inicio #homeLaunchWrap{padding:19px 14px}
+  #inicio #homeRoomCredentials .room-publish{padding:18px 13px}
+  #inicio #homeNext{padding:17px 14px}
+}
+
 </style>
 <title>SPIDER XTREINOS</title>
 <meta name="theme-color" content="#090a10">
@@ -520,16 +571,8 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
 <section class="page" id="calls">
   <h2 class="title">CALL — X-TREINO</h2>
   <p class="sub">Confira a call de cada equipe confirmada no treino selecionado.</p>
-  <div class="call-picker">
-    <div class="call-picker-head">
-      <span class="call-picker-icon" aria-hidden="true">🕸️</span>
-      <div>
-        <div class="call-picker-title">SELECIONE O X-TREINO</div>
-        <div class="call-picker-desc">Escolha uma edição para consultar as calls confirmadas</div>
-      </div>
-    </div>
-    <label for="publicCallScrim">X-Treino disponível</label>
-    <select id="publicCallScrim" aria-label="Selecionar X-Treino"></select>
+  <div class="card" style="margin-bottom:14px">
+    <label>Treino<select id="publicCallScrim"></select></label>
     <div id="publicCallInfo" class="muted small-t mt"></div>
   </div>
   <div id="publicCallsList" class="grid"></div>
