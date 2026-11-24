@@ -2246,7 +2246,8 @@ document.addEventListener("click", async e => {
     f.elements.namedItem("title").value=item.title||"";
     f.elements.namedItem("when").value=new Date(launchDateValue(item)-new Date(launchDateValue(item)).getTimezoneOffset()*60000).toISOString().slice(0,16);
     f.elements.namedItem("description").value=item.description||"";
-    for(const key of ["badge","bannerTitle","slogan","step1","step2","step3","cta1","cta2","cta1Target","cta2Target","dateLabel"]) if(f.elements.namedItem(key)) f.elements.namedItem(key).value=item[key]||"";
+    const bannerDefaults={badge:"🕷️ EVENTO OFICIAL DE ESTREIA",bannerTitle:"SPIDER OPENING DAY",slogan:"A teia está pronta. Agora é hora de dominar o lobby.",step1:"Monte seu time",step2:"Entre no X-Treino",step3:"Dispute o primeiro MVP",cta1:"Participar do evento",cta2:"Ver X-Treinos",cta1Target:"meutime",cta2Target:"treinos",dateLabel:"DATA OFICIAL"};
+    for(const key of Object.keys(bannerDefaults)) if(f.elements.namedItem(key)) f.elements.namedItem(key).value=item[key]||bannerDefaults[key];
     $("#launchSaveBtn").textContent="Salvar evento";$("#launchCancelEdit").hidden=false;
     f.scrollIntoView({behavior:"smooth",block:"center"});return;
   }
