@@ -93,56 +93,11 @@
 @keyframes elIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media(max-width:640px){#elite .el-two{grid-template-columns:1fr}#elite .el-hero h2{font-size:1.6rem}}
 
-/* CENTRALIZAÇÃO DOS BLOCOS DA PÁGINA INÍCIO — mantém textos e dados originais */
-#inicio #homeLaunchWrap{
-  width:min(100%,660px);
-  box-sizing:border-box;
-  margin:18px auto 0!important;
-  text-align:center;
-  padding:24px 20px;
-}
-#inicio #homeLaunchWrap .launch-kicker{display:block;text-align:center}
-#inicio #homeLaunchWrap h2,
-#inicio #homeLaunchWrap p,
-#inicio #homeLaunchWrap #launchCountdown{text-align:center}
-#inicio #homeLaunchWrap .countdown{justify-content:center;align-items:center}
-#inicio #homeRoomCredentials{
-  width:100%;
-  display:flex;
-  justify-content:center;
-  box-sizing:border-box;
-}
-#inicio #homeRoomCredentials[hidden]{display:none!important}
-#inicio #homeRoomCredentials .room-publish{
-  width:min(100%,620px);
-  max-width:620px;
-  box-sizing:border-box;
-  margin:20px auto 24px;
-  text-align:center;
-}
-#inicio #homeRoomCredentials .room-value{
-  width:min(100%,440px);
-  box-sizing:border-box;
-  margin:14px auto 0;
-  text-align:center;
-}
-#inicio #homeRoomCredentials .room-copy{display:inline-flex;margin:0 auto}
-#inicio #homeNext{
-  width:min(100%,660px);
-  box-sizing:border-box;
-  margin:12px auto 0!important;
-  text-align:center;
-}
-#inicio #homeNext:before{display:none}
-#inicio #homeNext .countdown{justify-content:center}
-#inicio #homeNext .actions.center{justify-content:center}
-#inicio #homeNext .empty{text-align:center}
-@media(max-width:600px){
-  #inicio #homeLaunchWrap{padding:19px 14px}
-  #inicio #homeRoomCredentials .room-publish{padding:18px 13px}
-  #inicio #homeNext{padding:17px 14px}
-}
-
+/* Histórico público de X-Treinos */
+#historico .table-wrap{overflow-x:auto}
+#historico table{min-width:620px}
+#historico #scrimHistoryList .card{border:1px solid rgba(239,68,68,.22);background:linear-gradient(145deg,rgba(17,25,49,.96),rgba(8,13,29,.96))}
+#historico #scrimHistoryDetail{border:1px solid rgba(239,68,68,.28)}
 </style>
 <title>SPIDER XTREINOS</title>
 <meta name="theme-color" content="#090a10">
@@ -354,6 +309,7 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
     <a data-go="meutime">🛡️ Meu time</a>
     <a data-go="ranking">🏆 Ranking</a>
     <a data-go="abates">🎯 Abates</a>
+    <a data-go="historico">📚 Histórico</a>
     <a data-go="calls">📍 Call</a>
     <a data-go="redes">🌐 Redes</a>
     <a data-go="perfil">👤 Perfil</a>
@@ -583,6 +539,14 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
   <h2 class="title">Redes</h2>
   <p class="sub">Acompanhe e fale com a gente.</p>
   <div class="grid g2" id="socialList"></div>
+</section>
+
+<!-- HISTÓRICO DE X-TREINOS -->
+<section class="page" id="historico">
+  <h2 class="title">📚 HISTÓRICO DE X-TREINOS</h2>
+  <p class="sub">Abra uma edição para ver os times, colocações, abates e pontos. Resultados salvos ficam guardados mesmo após novos treinos.</p>
+  <div id="scrimHistoryList" class="grid g2"></div>
+  <div id="scrimHistoryDetail" class="card mt" hidden></div>
 </section>
 
 <!-- ORGANIZADOR -->
@@ -1053,7 +1017,7 @@ const DB = {
   },
   del(p){return this.set(p,undefined);},
   async replaceAll(obj){
-    const branches=["users","teams","scrims","results","settings","news","launches","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings"];
+    const branches=["users","teams","scrims","results","settings","news","launches","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings","scrimHistory"];
     if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
     if(isAdmin()) branches.push("manualKills");
     this.data=obj||{};this.persist();if(!this.cloud)return;
@@ -1065,7 +1029,7 @@ const DB = {
     if(!this.cloud||this.pending>0)return false;
     try{
       // Não lê a raiz inteira: cada coleção pública é consultada separadamente.
-      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings","launches"];
+      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings","launches","scrimHistory"];
       if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
       if(isAdmin()) branches.push("manualKills");
       let changed=false;
@@ -1088,7 +1052,7 @@ function updatePill(){
 /* =====================================================
    REGRAS DE NEGÓCIO
    ===================================================== */
-const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", callRound: 1, callPending: null, autoKillScrim: "", autoKillRound: 1, autoKillRows: [], manualKillScrim: "", manualKillRound: 1, viewPlayerUid: "", editMedalId: "" };
+const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", callRound: 1, callPending: null, autoKillScrim: "", autoKillRound: 1, autoKillRows: [], manualKillScrim: "", manualKillRound: 1, viewPlayerUid: "", editMedalId: "", historyScrim: "" };
 
 // Posicionamento por arrastar das etiquetas no painel ADM.CALL.
 let callPinDrag = null;
@@ -1139,7 +1103,7 @@ document.addEventListener("pointerup", async e => {
 });
 document.addEventListener("pointercancel", () => { callPinDrag = null; });
 
-const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","artround","csvrank","admaddto","clearRoomCredentials"]);
+const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","artround","csvrank","admaddto","clearRoomCredentials","saveScrimHistory"]);
 function adminSess(){
   try {
     const s = JSON.parse(session.get("xt_admin") || "null");
@@ -1250,7 +1214,7 @@ function render(){
   const st = settings(), brand = st.brand || "SPIDER XTREINOS";
   applyInterface();
   $("#brandName").textContent = brand; $("#footBrand").textContent = brand; document.title = brand + " • Free Fire";
-  renderHome(); renderScrims(); renderTeams(); renderMyTeam(); renderProfile(); renderRanking(); renderStats(); renderSocial(); renderCallsPublic(); renderAbatesPublic(); renderAdmin(); renderAdmin2(); renderCallAdmin(); renderExtra();
+  renderHome(); renderScrims(); renderScrimHistory(); renderTeams(); renderMyTeam(); renderProfile(); renderRanking(); renderStats(); renderSocial(); renderCallsPublic(); renderAbatesPublic(); renderAdmin(); renderAdmin2(); renderCallAdmin(); renderExtra();
 }
 
 function scrimCard(s){
@@ -1810,6 +1774,37 @@ function renderAdmin(){
   $("#adminNews").innerHTML = news.map(n => `<div class="card flex between" style="margin-bottom:10px"><span>${n.cat ? `<span class="badge off">${esc(n.cat)}</span> ` : ""}${esc(n.text)}</span><button class="btn small danger" data-act="delnews" data-id="${n.id}">Excluir</button></div>`).join("");
 }
 
+function scrimHistoryList(){ return arr(DB.get("scrimHistory")).sort((a,b)=>(+b.savedAt||0)-(+a.savedAt||0)); }
+function buildScrimHistorySnapshot(sid){
+  const sc=DB.get("scrims/"+sid); if(!sc) return null;
+  const rounds=DB.get("results/"+sid)||{}, tids=new Set();
+  confirmedRegs(sc).forEach(r=>tids.add(r.tid));
+  Object.values(rounds).forEach(round=>Object.keys(round||{}).forEach(tid=>tids.add(tid)));
+  const teams=[];
+  for(const tid of tids){
+    const team=DB.get("teams/"+tid); if(!team) continue;
+    const roundRows=[]; let kills=0, placementPts=0, totalPts=0, booyahs=0, played=0;
+    Object.entries(rounds).sort((a,b)=>(+a[0].slice(1))-(+b[0].slice(1))).forEach(([rk,round])=>{
+      const r=round?.[tid]; if(!r||!(+r.place>0))return;
+      const place=+r.place||0, k=+r.kills||0, pp=pointsTable()[place-1]||0, pts=ptsOf(r);
+      kills+=k; placementPts+=pp; totalPts+=pts; if(place===1)booyahs++; played++;
+      roundRows.push({round:+rk.slice(1)||1,place,kills:k,placementPts:pp,points:pts});
+    });
+    teams.push({tid,name:team.name||"Time",tag:team.tag||"",members:Object.values(team.members||{}),place:0,kills,placementPts,totalPts,booyahs,played,rounds:roundRows});
+  }
+  teams.sort((a,b)=>b.totalPts-a.totalPts||b.kills-a.kills||a.name.localeCompare(b.name,"pt-BR"));
+  teams.forEach((t,i)=>t.place=i+1);
+  return {id:sid,title:sc.title||"X-Treino",date:sc.date||"",time:sc.time||"",mode:sc.mode||"",savedAt:Date.now(),roundCount:Math.max(+sc.rounds||1,...Object.keys(rounds).map(k=>+k.slice(1)||1)),teams,scoring:{placements:pointsTable().slice(),killPts:killPts()}};
+}
+function renderScrimHistory(){
+  const list=scrimHistoryList(), box=$("#scrimHistoryList"), detail=$("#scrimHistoryDetail");
+  if(!box||!detail)return;
+  box.innerHTML=list.length?list.map(h=>`<button class="card" type="button" data-act="historyOpen" data-id="${esc(h.id)}" style="text-align:left;cursor:pointer"><div class="flex between wrap"><b>${esc(h.title)}</b><span class="badge ok">Salvo</span></div><p class="muted small-t mt">${esc(h.date)} • ${esc(h.time)}${h.mode?" • "+esc(h.mode):""}</p><p class="muted small-t">${(h.teams||[]).length} times • ${h.roundCount||0} quedas registradas</p><span class="btn small ghost">Ver resultados →</span></button>`).join(""):'<div class="card empty" style="grid-column:1/-1">Nenhum X-Treino salvo no histórico ainda.</div>';
+  const h=list.find(x=>x.id===state.historyScrim);
+  detail.hidden=!h;
+  if(!h){detail.innerHTML="";return;}
+  detail.innerHTML=`<div class="flex between wrap"><div><h3>${esc(h.title)}</h3><p class="muted small-t">${esc(h.date)} • ${esc(h.time)} • ${esc(h.mode||"")}</p></div><button class="btn ghost small" data-act="historyClose">Fechar</button></div><p class="muted small-t mt">Snapshot salvo em ${new Date(h.savedAt).toLocaleString("pt-BR")}. Pontuação calculada conforme as regras vigentes quando foi salvo.</p><div class="table-wrap mt"><table><thead><tr><th>#</th><th>Time</th><th>Abates</th><th>Booyah</th><th>Quedas</th><th>Pontos</th></tr></thead><tbody>${(h.teams||[]).map(t=>`<tr><td><b>${t.place}</b></td><td>[${esc(t.tag)}] ${esc(t.name)}<div class="muted small-t">${(t.members||[]).map(esc).join(", ")}</div></td><td>${t.kills||0}</td><td>${t.booyahs||0}</td><td>${t.played||0}</td><td><b>${t.totalPts||0}</b></td></tr>`).join("")||'<tr><td colspan="6">Ainda não há resultados lançados.</td></tr>'}</tbody></table></div><h4 class="mt">Detalhes por queda</h4>${(h.teams||[]).map(t=>`<div class="card mt"><b>[${esc(t.tag)}] ${esc(t.name)}</b><div class="muted small-t mt">${(t.rounds||[]).map(r=>`Queda ${r.round}: ${r.place}º • ${r.kills} abates • ${r.points} pts`).join(" | ")||"Sem resultados"}</div></div>`).join("")}`;
+}
 function renderResults(){
   const scrims = scrimsSorted().reverse(), sel = $("#resScrim");
   if (sel.contains(document.activeElement) === false) sel.innerHTML = scrims.length ? scrims.map(s => `<option value="${s.id}">${esc(s.title)} — ${esc(s.date)}</option>`).join("") : '<option value="">Nenhum treino</option>';
@@ -1830,7 +1825,7 @@ function renderResults(){
       <td><input type="number" min="1" max="12" class="res-in" data-f="place" value="${+v.place || ""}"></td>
       <td><input type="number" min="0" class="res-in" data-f="kills" value="${v.kills ?? ""}"></td>
       <td><b data-pts>${+v.place > 0 ? ptsOf(v) : "—"}</b></td></tr>`;
-  }).join("") + `</tbody></table><div class="actions" style="padding:13px"><button class="btn" data-act="saveround">💾 Salvar queda ${state.resRound}</button><button class="btn ghost small" data-act="artround">🎨 Gerar arte desta queda</button><button class="btn danger small" data-act="clearround">🧹 Limpar queda</button></div>`;
+  }).join("") + `</tbody></table><div class="actions" style="padding:13px"><button class="btn" data-act="saveround">💾 Salvar queda ${state.resRound}</button><button class="btn ghost small" data-act="saveScrimHistory" data-id="${s.id}">📚 Salvar X-Treino no histórico</button><button class="btn ghost small" data-act="artround">🎨 Gerar arte desta queda</button><button class="btn danger small" data-act="clearround">🧹 Limpar queda</button></div>`;
 }
 
 /* =====================================================
@@ -2171,6 +2166,9 @@ document.addEventListener("click", async e => {
 
   const b = e.target.closest("[data-act]"); if (!b) return;
   const act = b.dataset.act, id = b.dataset.id || b.dataset.round, id2 = b.dataset.id2, u = me(), t = myTeam();
+  if(act==="historyOpen"){state.historyScrim=id;renderScrimHistory();$("#scrimHistoryDetail").scrollIntoView({behavior:"smooth",block:"start"});return;}
+  if(act==="historyClose"){state.historyScrim="";renderScrimHistory();return;}
+
   if(act === "rankteam"){renderTeamRankDetail(id,$("#seasonFilter").value);return;}
   if(act === "seasonview"){const key="custom:"+id;go("ranking");$("#seasonFilter").value=key;renderRanking();return;}
   if(act === "seasonclose"||act === "seasonactivate"){if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const seasons=arr(settings().seasons).map(x=>({...x,status:x.id===id?(act==="seasonclose"?"archived":"active"):(act==="seasonactivate"?"archived":x.status)}));try{await DB.set("settings/seasons",seasons);await logAct((act==="seasonclose"?"Arquivou ":"Reativou ")+(seasons.find(x=>x.id===id)?.name||"Season"));renderSeasonAdminPanel();renderRanking();toast(act==="seasonclose"?"Season arquivada; histórico preservado.":"Season ativada.");}catch(err){toast("Não foi possível atualizar a Season: "+err.message,"err");}return;}
@@ -2244,7 +2242,12 @@ document.addEventListener("click", async e => {
 
 document.addEventListener("change", async e => {
   const st = e.target.closest("[data-status]");
-  if (st){ if (!isAdmin()) return render(); const sc = DB.get("scrims/" + st.dataset.status); if (st.value === "scheduled" && !(Number(sc?.registrationOpensAt) > 0)) { toast("Para agendar, crie o treino preenchendo a data e hora de abertura.", "err"); render(); return; } await DB.set(`scrims/${st.dataset.status}/status`, st.value); await logAct(`Mudou o treino ${sc ? sc.title : ""} para ${({ scheduled: "agendado", open: "aberto", closed: "fechado", done: "finalizado" })[st.value]}`); render(); return; }
+  if (st){ if (!isAdmin()) return render(); const sc = DB.get("scrims/" + st.dataset.status); if (st.value === "scheduled" && !(Number(sc?.registrationOpensAt) > 0)) { toast("Para agendar, crie o treino preenchendo a data e hora de abertura.", "err"); render(); return; } await DB.set(`scrims/${st.dataset.status}/status`, st.value);
+    if(st.value==="done" && Object.keys(DB.get("results/"+st.dataset.status)||{}).length){
+      const snap=buildScrimHistorySnapshot(st.dataset.status);
+      if(snap){await DB.set("scrimHistory/"+st.dataset.status,snap);toast("X-Treino finalizado e salvo no histórico 📚");}
+    }
+    await logAct(`Mudou o treino ${sc ? sc.title : ""} para ${({ scheduled: "agendado", open: "aberto", closed: "fechado", done: "finalizado" })[st.value]}`); render(); return; }
   if (e.target.id === "resScrim"){ state.resScrim = e.target.value; state.resRound = 1; renderResults(); return; }
   if (e.target.id === "manualKillScrim"){ state.manualKillScrim=e.target.value; state.manualKillRound=1; renderManualKillAdmin(); return; }
   if (e.target.id === "manualKillRound"){ state.manualKillRound=Math.min(5,Math.max(1,+e.target.value||1)); renderManualKillAdmin(); return; }
@@ -2707,6 +2710,14 @@ async function extraActs(act, id, id2, u, t){
       const sel = $(`[data-regsel="${id}"]`); if (!sel || !sel.value) return no("Escolha um time");
       await DB.set(`scrims/${id}/regs/${sel.value}`, { tid: sel.value, at: Date.now(), checkin: true });
       const tm = DB.get("teams/" + sel.value); await logAct("Inscreveu o time " + (tm ? tm.name : "") + " no treino"); return true;
+    }
+    case "saveScrimHistory": {
+      if(!isAdmin())return no("Somente organizadores podem salvar no histórico");
+      const sid=id||state.resScrim, snap=buildScrimHistorySnapshot(sid); if(!snap)return no("X-Treino não encontrado");
+      if(!Object.keys(DB.get("results/"+sid)||{}).length)return no("Lance e salve os resultados antes de arquivar");
+      const existing=DB.get("scrimHistory/"+sid);
+      if(existing&&!await ask("Este X-Treino já está no histórico. Atualizar o snapshot com os resultados atuais?"))return true;
+      await DB.set("scrimHistory/"+sid,snap); await logAct("Salvou no histórico o X-Treino "+snap.title); renderScrimHistory(); toast("X-Treino salvo no histórico permanente ✅"); return true;
     }
     case "saveround": {
       const sid = state.resScrim, rn = state.resRound, o = {}, used = {};
