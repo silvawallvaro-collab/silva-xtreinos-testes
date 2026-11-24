@@ -357,24 +357,24 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
   <section class="opening-day-card mt" id="spiderOpeningDay" aria-label="Evento de lançamento SPIDER OPENING DAY">
     <div class="opening-day-inner">
       <span class="opening-day-kicker">🕷️ EVENTO OFICIAL DE ESTREIA</span>
-      <h2>SPIDER <span>OPENING DAY</span></h2>
-      <p class="opening-day-slogan">A teia está pronta. Agora é hora de dominar o lobby.</p>
-      <p class="opening-day-copy">Faça parte do começo da SPIDER XTREINOS: monte seu time, entre nos primeiros X-Treinos e comece sua caminhada no ranking.</p>
+      <h2 id="eventBannerTitle">SPIDER <span>OPENING DAY</span></h2>
+      <p class="opening-day-slogan" id="eventBannerSlogan">A teia está pronta. Agora é hora de dominar o lobby.</p>
+      <p class="opening-day-copy" id="eventBannerDescription">Faça parte do começo da SPIDER XTREINOS: monte seu time, entre nos primeiros X-Treinos e comece sua caminhada no ranking.</p>
       <div class="opening-day-points">
-        <div><b>01</b><span>Monte seu time</span></div>
-        <div><b>02</b><span>Entre no X-Treino</span></div>
-        <div><b>03</b><span>Dispute o primeiro MVP</span></div>
+        <div><b>01</b><span id="eventBannerStep1">Monte seu time</span></div>
+        <div><b>02</b><span id="eventBannerStep2">Entre no X-Treino</span></div>
+        <div><b>03</b><span id="eventBannerStep3">Dispute o primeiro MVP</span></div>
       </div>
       <div class="actions center opening-day-actions">
-        <a class="btn" data-go="meutime">Participar do lançamento</a>
-        <a class="btn ghost" data-go="treinos">Ver X-Treinos</a>
+        <a class="btn" data-go="meutime" id="eventBannerCta1">Participar do evento</a>
+        <a class="btn ghost" data-go="treinos" id="eventBannerCta2">Ver X-Treinos</a>
       </div>
-      <div class="opening-day-date">📅 DATA OFICIAL: EM BREVE</div>
+      <div class="opening-day-date" id="eventBannerDate">📅 DATA OFICIAL: EM BREVE</div>
     </div>
   </section>
 
   <section id="homeLaunchWrap" class="card launch-card mt" hidden aria-live="polite">
-    <span class="launch-kicker">🕷️ SPIDER OPENING DAY • CONTAGEM OFICIAL</span>
+    <span class="launch-kicker" id="homeLaunchKicker">🕷️ EVENTO • CONTAGEM OFICIAL</span>
     <h2 id="homeLaunchTitle"></h2>
     <p class="muted" id="homeLaunchDescription"></p>
     <p class="muted small-t mt" id="homeLaunchDate"></p>
@@ -600,7 +600,7 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
     <div class="flex between wrap">
       <div class="tabs" id="adminTabs">
         <button data-tab="treinos" class="active">🗓️ Treinos</button>
-        <button data-tab="launches" id="tabLaunches" hidden>🚀 Lançamentos ATT</button>
+        <button data-tab="launches" id="tabLaunches" hidden>🕷️ Eventos</button>
         <button data-tab="resultados">💥 Queda</button>
         <button data-tab="admCall" id="tabAdmCall" hidden>📍 Adm Call</button>
         <button data-tab="sala">🔑 ID / Senha</button>
@@ -660,17 +660,26 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
 
     <div class="atab" data-atab="launches" hidden>
       <div class="card">
-        <h3>🚀 Lançamentos ATT</h3>
-        <p class="muted small-t">Cadastre o nome, a data e a hora. O destaque aparece na página inicial com contagem regressiva e muda para JÁ ESTÁ NO AR automaticamente.</p>
+        <h3>🕷️ Criar / editar evento</h3>
+        <p class="muted small-t">Crie eventos como o Opening Day. Personalize o título, textos, etapas, botões e data. Ao publicar, o evento aparece no banner da página inicial e na contagem regressiva.</p>
         <form id="launchForm" class="mt">
           <input type="hidden" name="id" value="">
           <label>Nome do lançamento<input name="title" required maxlength="70" placeholder="Ex.: Nova atualização Spider" /></label>
           <label>Data e hora do lançamento<input name="when" type="datetime-local" required /></label>
-          <label>Descrição<textarea name="description" rows="3" maxlength="350" placeholder="Conte o que vai chegar nesta atualização..."></textarea></label>
-          <div class="actions"><button class="btn" type="submit" id="launchSaveBtn">Publicar lançamento</button><button class="btn ghost" type="button" id="launchCancelEdit" hidden>Cancelar edição</button></div>
+          <label>Descrição do evento<textarea name="description" rows="3" maxlength="350" placeholder="Descrição que aparece no banner e no evento..."></textarea></label>
+          <details class="mt"><summary><b>🎨 Personalizar banner da página inicial</b></summary>
+            <div class="grid mt">
+              <label>Título grande do banner<input name="bannerTitle" maxlength="70" placeholder="Ex.: SPIDER OPENING DAY"></label>
+              <label>Frase de destaque<input name="slogan" maxlength="140" placeholder="Ex.: A teia está pronta..."></label>
+              <div class="row"><label>Etapa 1<input name="step1" maxlength="50" placeholder="Monte seu time"></label><label>Etapa 2<input name="step2" maxlength="50" placeholder="Entre no X-Treino"></label></div>
+              <label>Etapa 3<input name="step3" maxlength="50" placeholder="Dispute o primeiro MVP"></label>
+              <div class="row"><label>Texto do botão 1<input name="cta1" maxlength="35" placeholder="Participar do evento"></label><label>Texto do botão 2<input name="cta2" maxlength="35" placeholder="Ver X-Treinos"></label></div>
+            </div>
+          </details>
+          <div class="actions mt"><button class="btn" type="submit" id="launchSaveBtn">Publicar evento</button><button class="btn ghost" type="button" id="launchCancelEdit" hidden>Cancelar edição</button></div>
         </form>
       </div>
-      <h3 class="sec">Lançamentos cadastrados</h3>
+      <h3 class="sec">Eventos cadastrados</h3>
       <div id="adminLaunchList" class="grid mt"></div>
     </div>
 
@@ -1286,12 +1295,27 @@ function launchDateValue(item){
   if (item?.date) return new Date(item.date + "T" + (item.time || "00:00")).getTime();
   return 0;
 }
+function renderEventBanner(item){
+  const set=(id,value,fallback)=>{const el=$("#"+id);if(el)el.textContent=value||fallback;};
+  const defaults={bannerTitle:"SPIDER OPENING DAY",slogan:"A teia está pronta. Agora é hora de dominar o lobby.",description:"Faça parte do começo da SPIDER XTREINOS: monte seu time, entre nos primeiros X-Treinos e comece sua caminhada no ranking.",step1:"Monte seu time",step2:"Entre no X-Treino",step3:"Dispute o primeiro MVP",cta1:"Participar do evento",cta2:"Ver X-Treinos"};
+  const v=item||{};
+  const title=(v.bannerTitle||defaults.bannerTitle).trim();
+  const titleEl=$("#eventBannerTitle");
+  if(titleEl){const parts=title.split(/\s+/);const last=parts.pop()||"";titleEl.replaceChildren(document.createTextNode(parts.join(" ")+" "));const span=document.createElement("span");span.textContent=last;titleEl.appendChild(span);}
+  set("eventBannerSlogan",v.slogan,defaults.slogan);set("eventBannerDescription",v.description,defaults.description);
+  set("eventBannerStep1",v.step1,defaults.step1);set("eventBannerStep2",v.step2,defaults.step2);set("eventBannerStep3",v.step3,defaults.step3);
+  set("eventBannerCta1",v.cta1,defaults.cta1);set("eventBannerCta2",v.cta2,defaults.cta2);
+  const when=item?launchDateValue(item):0;
+  set("eventBannerDate",when>0?"📅 DATA OFICIAL: "+new Date(when).toLocaleString("pt-BR",{dateStyle:"full",timeStyle:"short"}):"📅 DATA OFICIAL: EM BREVE","📅 DATA OFICIAL: EM BREVE");
+}
 function renderHomeLaunch(){
   const wrap=$("#homeLaunchWrap"); if(!wrap)return;
   const items=arr(DB.get("launches")).filter(x=>x && x.title && launchDateValue(x)>0).sort((a,b)=>launchDateValue(a)-launchDateValue(b));
   const now=Date.now(), upcoming=items.find(x=>launchDateValue(x)>now), item=upcoming || items[items.length-1];
+  renderEventBanner(item||null);
   if(!item){wrap.hidden=true;return;}
   wrap.hidden=false;
+  $("#homeLaunchKicker").textContent="🕷️ "+(item.bannerTitle||item.title)+" • CONTAGEM OFICIAL";
   $("#homeLaunchTitle").textContent=item.title;
   $("#homeLaunchDescription").textContent=item.description||"";
   $("#homeLaunchDate").textContent=new Date(launchDateValue(item)).toLocaleString("pt-BR",{dateStyle:"full",timeStyle:"short"});
@@ -1306,12 +1330,12 @@ function tickLaunch(){
   const d=Math.floor(diff/864e5),h=Math.floor(diff/36e5)%24,m=Math.floor(diff/6e4)%60,sec=Math.floor(diff/1e3)%60;
   el.innerHTML=[[d,"dias"],[h,"horas"],[m,"min"],[sec,"seg"]].map(([v,l])=>`<div><b>${String(v).padStart(2,"0")}</b><small>${l}</small></div>`).join("");
 }
-function resetLaunchForm(){const f=$("#launchForm");if(!f)return;f.reset();f.elements.namedItem("id").value="";$("#launchSaveBtn").textContent="Publicar lançamento";$("#launchCancelEdit").hidden=true;}
+function resetLaunchForm(){const f=$("#launchForm");if(!f)return;f.reset();f.elements.namedItem("id").value="";$("#launchSaveBtn").textContent="Publicar evento";$("#launchCancelEdit").hidden=true;}
 function renderLaunchAdmin(){
   if(!isMaster())return;
   const list=$("#adminLaunchList");if(!list)return;
   const items=arr(DB.get("launches")).sort((a,b)=>launchDateValue(b)-launchDateValue(a));
-  list.innerHTML=items.length?items.map(x=>{const when=launchDateValue(x);return `<div class="card"><div class="flex between wrap"><b>🚀 ${esc(x.title)}</b><span class="badge ${when>Date.now()?"wait":"ok"}">${when>Date.now()?"Agendado":"Já está no ar"}</span></div><p class="muted small-t mt">${when?new Date(when).toLocaleString("pt-BR"):"Data não definida"}</p><p class="small-t">${esc(x.description||"")}</p><div class="actions mt"><button class="btn small ghost" data-act="launchEdit" data-id="${esc(x.id)}">Editar</button><button class="btn small danger" data-act="launchDel" data-id="${esc(x.id)}">Excluir</button></div></div>`;}).join(""):'<div class="card empty">Nenhum lançamento cadastrado ainda.</div>';
+  list.innerHTML=items.length?items.map(x=>{const when=launchDateValue(x);return `<div class="card"><div class="flex between wrap"><b>🕷️ ${esc(x.title)}</b><span class="badge ${when>Date.now()?"wait":"ok"}">${when>Date.now()?"Agendado":"Já está no ar"}</span></div><p class="muted small-t mt">${when?new Date(when).toLocaleString("pt-BR"):"Data não definida"}</p><p class="small-t">${esc(x.description||"")}</p><div class="actions mt"><button class="btn small ghost" data-act="launchEdit" data-id="${esc(x.id)}">Editar</button><button class="btn small danger" data-act="launchDel" data-id="${esc(x.id)}">Excluir</button></div></div>`;}).join(""):'<div class="card empty">Nenhum lançamento cadastrado ainda.</div>';
 }
 
 function renderHome(){
@@ -2209,21 +2233,22 @@ document.addEventListener("click", async e => {
   if(act === "seasonclose"||act === "seasonactivate"){if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const seasons=arr(settings().seasons).map(x=>({...x,status:x.id===id?(act==="seasonclose"?"archived":"active"):(act==="seasonactivate"?"archived":x.status)}));try{await DB.set("settings/seasons",seasons);await logAct((act==="seasonclose"?"Arquivou ":"Reativou ")+(seasons.find(x=>x.id===id)?.name||"Season"));renderSeasonAdminPanel();renderRanking();toast(act==="seasonclose"?"Season arquivada; histórico preservado.":"Season ativada.");}catch(err){toast("Não foi possível atualizar a Season: "+err.message,"err");}return;}
   if(act === "rankdetailclose"){$("#teamRankDetail").hidden=true;return;}
   if (ADMIN_ACTS.has(act) && !isAdmin()){ render(); return toast("Sessão do organizador encerrada", "err"); }
-  if (["launchEdit","launchDel"].includes(act) && !isMaster()) return toast("Somente o organizador principal pode gerenciar lançamentos.","err");
+  if (["launchEdit","launchDel"].includes(act) && !isMaster()) return toast("Somente o organizador principal pode gerenciar eventos.","err");
   if(act==="launchEdit"){
-    const item=DB.get("launches/"+id);if(!item)return toast("Lançamento não encontrado.","err");
+    const item=DB.get("launches/"+id);if(!item)return toast("Evento não encontrado.","err");
     state.adminTab="launches";renderAdmin();
     const f=$("#launchForm");f.elements.namedItem("id").value=item.id;
     f.elements.namedItem("title").value=item.title||"";
     f.elements.namedItem("when").value=new Date(launchDateValue(item)-new Date(launchDateValue(item)).getTimezoneOffset()*60000).toISOString().slice(0,16);
     f.elements.namedItem("description").value=item.description||"";
-    $("#launchSaveBtn").textContent="Salvar alterações";$("#launchCancelEdit").hidden=false;
+    for(const key of ["bannerTitle","slogan","step1","step2","step3","cta1","cta2"]) if(f.elements.namedItem(key)) f.elements.namedItem(key).value=item[key]||"";
+    $("#launchSaveBtn").textContent="Salvar evento";$("#launchCancelEdit").hidden=false;
     f.scrollIntoView({behavior:"smooth",block:"center"});return;
   }
   if(act==="launchDel"){
     const item=DB.get("launches/"+id);if(!item)return;
     if(!await ask("Excluir o lançamento “"+(item.title||"")+"”?"))return;
-    await DB.del("launches/"+id);await logAct("Excluiu o lançamento "+(item.title||id));render();state.adminTab="launches";renderAdmin();toast("Lançamento excluído.");return;
+    await DB.del("launches/"+id);await logAct("Excluiu o evento "+(item.title||id));render();state.adminTab="launches";renderAdmin();toast("Evento excluído.");return;
   }
   if (["admtoggle", "admdel", "logclear"].includes(act) && !isMaster()) return toast("Só o organizador principal pode fazer isso", "err");
   try {
@@ -2509,16 +2534,16 @@ $("#scheduledScrimForm").addEventListener("submit", async e => {
 });
 $("#launchForm").addEventListener("submit", async e => {
   e.preventDefault();
-  if(!isMaster())return toast("Somente o organizador principal pode publicar lançamentos.","err");
+  if(!isMaster())return toast("Somente o organizador principal pode publicar eventos.","err");
   const f=Object.fromEntries(new FormData(e.target)),when=new Date(f.when).getTime();
-  if(!f.title.trim()||!Number.isFinite(when))return toast("Confira o nome, a data e a hora.","err");
+  if(!f.title.trim()||!Number.isFinite(when))return toast("Confira o nome, a data e a hora do evento.","err");
   const id=f.id||uid(),old=DB.get("launches/"+id)||{};
   try{
-    await DB.set("launches/"+id,{...old,id,title:f.title.trim(),when,description:(f.description||"").trim(),created:old.created||Date.now(),updatedAt:Date.now()});
+    await DB.set("launches/"+id,{...old,id,title:f.title.trim(),when,description:(f.description||"").trim(),bannerTitle:(f.bannerTitle||"").trim(),slogan:(f.slogan||"").trim(),step1:(f.step1||"").trim(),step2:(f.step2||"").trim(),step3:(f.step3||"").trim(),cta1:(f.cta1||"").trim(),cta2:(f.cta2||"").trim(),created:old.created||Date.now(),updatedAt:Date.now()});
     if(DB.status==="error")throw new Error("Não foi possível salvar no banco online.");
-    await logAct((f.id?"Editou":"Publicou")+" o lançamento "+f.title.trim());
-    resetLaunchForm();render();state.adminTab="launches";renderAdmin();toast(f.id?"Lançamento atualizado!":"Lançamento publicado!");
-  }catch(err){toast(err.message||"Não foi possível salvar o lançamento.","err");}
+    await logAct((f.id?"Editou":"Publicou")+" o evento "+f.title.trim());
+    resetLaunchForm();render();state.adminTab="launches";renderAdmin();toast(f.id?"Evento atualizado!":"Evento publicado!");
+  }catch(err){toast(err.message||"Não foi possível salvar o evento.","err");}
 });
 $("#launchCancelEdit").addEventListener("click",resetLaunchForm);
 $("#newsForm").addEventListener("submit", async e => {
