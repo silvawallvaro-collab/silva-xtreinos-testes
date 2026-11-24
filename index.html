@@ -520,8 +520,16 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
 <section class="page" id="calls">
   <h2 class="title">CALL — X-TREINO</h2>
   <p class="sub">Confira a call de cada equipe confirmada no treino selecionado.</p>
-  <div class="card" style="margin-bottom:14px">
-    <label>Treino<select id="publicCallScrim"></select></label>
+  <div class="call-picker">
+    <div class="call-picker-head">
+      <span class="call-picker-icon" aria-hidden="true">🕸️</span>
+      <div>
+        <div class="call-picker-title">SELECIONE O X-TREINO</div>
+        <div class="call-picker-desc">Escolha uma edição para consultar as calls confirmadas</div>
+      </div>
+    </div>
+    <label for="publicCallScrim">X-Treino disponível</label>
+    <select id="publicCallScrim" aria-label="Selecionar X-Treino"></select>
     <div id="publicCallInfo" class="muted small-t mt"></div>
   </div>
   <div id="publicCallsList" class="grid"></div>
