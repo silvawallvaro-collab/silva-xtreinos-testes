@@ -356,7 +356,7 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
 
   <section class="opening-day-card mt" id="spiderOpeningDay" aria-label="Evento de lançamento SPIDER OPENING DAY">
     <div class="opening-day-inner">
-      <span class="opening-day-kicker">🕷️ EVENTO OFICIAL DE ESTREIA</span>
+      <span class="opening-day-kicker" id="eventBannerBadge">🕷️ EVENTO OFICIAL DE ESTREIA</span>
       <h2 id="eventBannerTitle">SPIDER <span>OPENING DAY</span></h2>
       <p class="opening-day-slogan" id="eventBannerSlogan">A teia está pronta. Agora é hora de dominar o lobby.</p>
       <p class="opening-day-copy" id="eventBannerDescription">Faça parte do começo da SPIDER XTREINOS: monte seu time, entre nos primeiros X-Treinos e comece sua caminhada no ranking.</p>
@@ -669,11 +669,14 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
           <label>Descrição do evento<textarea name="description" rows="3" maxlength="350" placeholder="Descrição que aparece no banner e no evento..."></textarea></label>
           <details class="mt"><summary><b>🎨 Personalizar banner da página inicial</b></summary>
             <div class="grid mt">
+              <label>Texto pequeno no topo<input name="badge" maxlength="70" placeholder="🕷️ EVENTO OFICIAL DE ESTREIA"></label>
               <label>Título grande do banner<input name="bannerTitle" maxlength="70" placeholder="Ex.: SPIDER OPENING DAY"></label>
               <label>Frase de destaque<input name="slogan" maxlength="140" placeholder="Ex.: A teia está pronta..."></label>
               <div class="row"><label>Etapa 1<input name="step1" maxlength="50" placeholder="Monte seu time"></label><label>Etapa 2<input name="step2" maxlength="50" placeholder="Entre no X-Treino"></label></div>
               <label>Etapa 3<input name="step3" maxlength="50" placeholder="Dispute o primeiro MVP"></label>
               <div class="row"><label>Texto do botão 1<input name="cta1" maxlength="35" placeholder="Participar do evento"></label><label>Texto do botão 2<input name="cta2" maxlength="35" placeholder="Ver X-Treinos"></label></div>
+              <div class="row"><label>Ação do botão 1<select name="cta1Target"><option value="meutime">Meu time</option><option value="treinos">X-Treinos</option><option value="ranking">Ranking</option><option value="times">Times</option><option value="historico">Histórico</option><option value="redes">Redes</option></select></label><label>Ação do botão 2<select name="cta2Target"><option value="treinos">X-Treinos</option><option value="meutime">Meu time</option><option value="ranking">Ranking</option><option value="times">Times</option><option value="historico">Histórico</option><option value="redes">Redes</option></select></label></div>
+              <label>Texto antes da data<input name="dateLabel" maxlength="35" placeholder="DATA OFICIAL"></label>
             </div>
           </details>
           <div class="actions mt"><button class="btn" type="submit" id="launchSaveBtn">Publicar evento</button><button class="btn ghost" type="button" id="launchCancelEdit" hidden>Cancelar edição</button></div>
@@ -1297,16 +1300,18 @@ function launchDateValue(item){
 }
 function renderEventBanner(item){
   const set=(id,value,fallback)=>{const el=$("#"+id);if(el)el.textContent=value||fallback;};
-  const defaults={bannerTitle:"SPIDER OPENING DAY",slogan:"A teia está pronta. Agora é hora de dominar o lobby.",description:"Faça parte do começo da SPIDER XTREINOS: monte seu time, entre nos primeiros X-Treinos e comece sua caminhada no ranking.",step1:"Monte seu time",step2:"Entre no X-Treino",step3:"Dispute o primeiro MVP",cta1:"Participar do evento",cta2:"Ver X-Treinos"};
+  const defaults={badge:"🕷️ EVENTO OFICIAL DE ESTREIA",bannerTitle:"SPIDER OPENING DAY",slogan:"A teia está pronta. Agora é hora de dominar o lobby.",description:"Faça parte do começo da SPIDER XTREINOS: monte seu time, entre nos primeiros X-Treinos e comece sua caminhada no ranking.",step1:"Monte seu time",step2:"Entre no X-Treino",step3:"Dispute o primeiro MVP",cta1:"Participar do evento",cta2:"Ver X-Treinos",cta1Target:"meutime",cta2Target:"treinos",dateLabel:"DATA OFICIAL"};
   const v=item||{};
+  set("eventBannerBadge",v.badge,defaults.badge);
   const title=(v.bannerTitle||defaults.bannerTitle).trim();
   const titleEl=$("#eventBannerTitle");
   if(titleEl){const parts=title.split(/\s+/);const last=parts.pop()||"";titleEl.replaceChildren(document.createTextNode(parts.join(" ")+" "));const span=document.createElement("span");span.textContent=last;titleEl.appendChild(span);}
   set("eventBannerSlogan",v.slogan,defaults.slogan);set("eventBannerDescription",v.description,defaults.description);
   set("eventBannerStep1",v.step1,defaults.step1);set("eventBannerStep2",v.step2,defaults.step2);set("eventBannerStep3",v.step3,defaults.step3);
   set("eventBannerCta1",v.cta1,defaults.cta1);set("eventBannerCta2",v.cta2,defaults.cta2);
-  const when=item?launchDateValue(item):0;
-  set("eventBannerDate",when>0?"📅 DATA OFICIAL: "+new Date(when).toLocaleString("pt-BR",{dateStyle:"full",timeStyle:"short"}):"📅 DATA OFICIAL: EM BREVE","📅 DATA OFICIAL: EM BREVE");
+  const cta1=$("#eventBannerCta1"),cta2=$("#eventBannerCta2");if(cta1)cta1.dataset.go=v.cta1Target||defaults.cta1Target;if(cta2)cta2.dataset.go=v.cta2Target||defaults.cta2Target;
+  const when=item?launchDateValue(item):0,label=(v.dateLabel||defaults.dateLabel).trim();
+  set("eventBannerDate",when>0?"📅 "+(label?label+": ":"")+new Date(when).toLocaleString("pt-BR",{dateStyle:"full",timeStyle:"short"}):"📅 "+(label?label+": ":"")+"EM BREVE","📅 DATA OFICIAL: EM BREVE");
 }
 function renderHomeLaunch(){
   const wrap=$("#homeLaunchWrap"); if(!wrap)return;
@@ -2241,7 +2246,7 @@ document.addEventListener("click", async e => {
     f.elements.namedItem("title").value=item.title||"";
     f.elements.namedItem("when").value=new Date(launchDateValue(item)-new Date(launchDateValue(item)).getTimezoneOffset()*60000).toISOString().slice(0,16);
     f.elements.namedItem("description").value=item.description||"";
-    for(const key of ["bannerTitle","slogan","step1","step2","step3","cta1","cta2"]) if(f.elements.namedItem(key)) f.elements.namedItem(key).value=item[key]||"";
+    for(const key of ["badge","bannerTitle","slogan","step1","step2","step3","cta1","cta2","cta1Target","cta2Target","dateLabel"]) if(f.elements.namedItem(key)) f.elements.namedItem(key).value=item[key]||"";
     $("#launchSaveBtn").textContent="Salvar evento";$("#launchCancelEdit").hidden=false;
     f.scrollIntoView({behavior:"smooth",block:"center"});return;
   }
@@ -2539,7 +2544,7 @@ $("#launchForm").addEventListener("submit", async e => {
   if(!f.title.trim()||!Number.isFinite(when))return toast("Confira o nome, a data e a hora do evento.","err");
   const id=f.id||uid(),old=DB.get("launches/"+id)||{};
   try{
-    await DB.set("launches/"+id,{...old,id,title:f.title.trim(),when,description:(f.description||"").trim(),bannerTitle:(f.bannerTitle||"").trim(),slogan:(f.slogan||"").trim(),step1:(f.step1||"").trim(),step2:(f.step2||"").trim(),step3:(f.step3||"").trim(),cta1:(f.cta1||"").trim(),cta2:(f.cta2||"").trim(),created:old.created||Date.now(),updatedAt:Date.now()});
+    await DB.set("launches/"+id,{...old,id,title:f.title.trim(),when,description:(f.description||"").trim(),badge:(f.badge||"").trim(),bannerTitle:(f.bannerTitle||"").trim(),slogan:(f.slogan||"").trim(),step1:(f.step1||"").trim(),step2:(f.step2||"").trim(),step3:(f.step3||"").trim(),cta1:(f.cta1||"").trim(),cta2:(f.cta2||"").trim(),cta1Target:f.cta1Target||"meutime",cta2Target:f.cta2Target||"treinos",dateLabel:(f.dateLabel||"").trim(),created:old.created||Date.now(),updatedAt:Date.now()});
     if(DB.status==="error")throw new Error("Não foi possível salvar no banco online.");
     await logAct((f.id?"Editou":"Publicou")+" o evento "+f.title.trim());
     resetLaunchForm();render();state.adminTab="launches";renderAdmin();toast(f.id?"Evento atualizado!":"Evento publicado!");
