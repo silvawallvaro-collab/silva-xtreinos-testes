@@ -192,6 +192,22 @@ h3.sec{font-size:1.35rem;margin:22px 0 10px}
 .countdown div{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:64px}
 .countdown b{font-family:Rajdhani;font-size:1.8rem;display:block;line-height:1}
 .countdown small{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em}
+/* SPIDER OPENING DAY — bloco especial de estreia */
+.opening-day-card{position:relative;isolation:isolate;overflow:hidden;text-align:center;border:1px solid rgba(239,68,68,.52);border-radius:20px;padding:clamp(20px,4vw,34px);background:radial-gradient(ellipse at 50% 0%,rgba(225,29,46,.24),transparent 58%),linear-gradient(145deg,#17101a,#0b1020 60%,#080b14);box-shadow:0 14px 40px rgba(0,0,0,.25)}
+.opening-day-card:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.14;background:repeating-linear-gradient(135deg,transparent 0 26px,rgba(239,68,68,.45) 26px 27px)}
+.opening-day-inner{max-width:760px;margin:0 auto}
+.opening-day-kicker{display:inline-block;color:#fca5a5;font-size:.72rem;font-weight:900;letter-spacing:.18em;border:1px solid rgba(239,68,68,.45);border-radius:999px;padding:6px 13px;background:rgba(127,29,29,.2)}
+.opening-day-card h2{font:800 clamp(2rem,7vw,3.8rem)/.98 Rajdhani,sans-serif;color:#fff;margin:14px 0 8px;letter-spacing:.04em}
+.opening-day-card h2 span{display:block;color:#ef4444;text-shadow:0 0 22px rgba(239,68,68,.2)}
+.opening-day-slogan{font-weight:800;color:#fff;font-size:clamp(1rem,3vw,1.2rem);margin:12px 0}
+.opening-day-copy{max-width:600px;color:var(--muted);margin:0 auto}
+.opening-day-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:22px auto;max-width:650px}
+.opening-day-points div{display:flex;flex-direction:column;gap:5px;padding:12px 8px;border:1px solid rgba(239,68,68,.2);border-radius:12px;background:rgba(6,10,22,.55);min-width:0}
+.opening-day-points b{font:700 1.35rem Rajdhani,sans-serif;color:#ef4444}
+.opening-day-points span{font-size:.82rem;font-weight:700;color:#e8eeff}
+.opening-day-actions{margin-top:16px}
+.opening-day-date{margin-top:18px;color:#fca5a5;font-size:.78rem;font-weight:800;letter-spacing:.12em}
+@media(max-width:520px){.opening-day-points{gap:6px}.opening-day-points div{padding:10px 5px}.opening-day-points span{font-size:.72rem}.opening-day-card{padding:20px 14px}}
 /* Lançamentos ATT */
 .launch-card{position:relative;overflow:hidden;border:1px solid rgba(239,68,68,.38);background:linear-gradient(120deg,rgba(225,29,46,.18),transparent 65%),var(--card)}
 .launch-card .launch-kicker{font-size:.76rem;font-weight:800;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase}
@@ -338,8 +354,27 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
     <p id="installAppHint" class="muted small-t" style="margin:12px auto 0">Instale o SPIDER XTREINOS no seu celular ou computador.</p>
   </div>
 
+  <section class="opening-day-card mt" id="spiderOpeningDay" aria-label="Evento de lançamento SPIDER OPENING DAY">
+    <div class="opening-day-inner">
+      <span class="opening-day-kicker">🕷️ EVENTO OFICIAL DE ESTREIA</span>
+      <h2>SPIDER <span>OPENING DAY</span></h2>
+      <p class="opening-day-slogan">A teia está pronta. Agora é hora de dominar o lobby.</p>
+      <p class="opening-day-copy">Faça parte do começo da SPIDER XTREINOS: monte seu time, entre nos primeiros X-Treinos e comece sua caminhada no ranking.</p>
+      <div class="opening-day-points">
+        <div><b>01</b><span>Monte seu time</span></div>
+        <div><b>02</b><span>Entre no X-Treino</span></div>
+        <div><b>03</b><span>Dispute o primeiro MVP</span></div>
+      </div>
+      <div class="actions center opening-day-actions">
+        <a class="btn" data-go="meutime">Participar do lançamento</a>
+        <a class="btn ghost" data-go="treinos">Ver X-Treinos</a>
+      </div>
+      <div class="opening-day-date">📅 DATA OFICIAL: EM BREVE</div>
+    </div>
+  </section>
+
   <section id="homeLaunchWrap" class="card launch-card mt" hidden aria-live="polite">
-    <span class="launch-kicker">🚀 LANÇAMENTO ATT</span>
+    <span class="launch-kicker">🕷️ SPIDER OPENING DAY • CONTAGEM OFICIAL</span>
     <h2 id="homeLaunchTitle"></h2>
     <p class="muted" id="homeLaunchDescription"></p>
     <p class="muted small-t mt" id="homeLaunchDate"></p>
