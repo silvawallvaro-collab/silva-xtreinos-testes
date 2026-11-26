@@ -92,12 +92,6 @@
 #elite .el-plist button{text-align:left;border:1px solid #1e3a8a;background:rgba(15,23,42,.9);color:#e8eeff;border-radius:12px;padding:10px;cursor:pointer;display:flex;flex-direction:column;transition:.2s}#elite .el-plist button:hover{border-color:var(--ec)}
 @keyframes elIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media(max-width:640px){#elite .el-two{grid-template-columns:1fr}#elite .el-hero h2{font-size:1.6rem}}
-
-/* Histórico público de X-Treinos */
-#historico .table-wrap{overflow-x:auto}
-#historico table{min-width:620px}
-#historico #scrimHistoryList .card{border:1px solid rgba(239,68,68,.22);background:linear-gradient(145deg,rgba(17,25,49,.96),rgba(8,13,29,.96))}
-#historico #scrimHistoryDetail{border:1px solid rgba(239,68,68,.28)}
 </style>
 <title>SPIDER XTREINOS</title>
 <meta name="theme-color" content="#090a10">
@@ -192,22 +186,6 @@ h3.sec{font-size:1.35rem;margin:22px 0 10px}
 .countdown div{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:64px}
 .countdown b{font-family:Rajdhani;font-size:1.8rem;display:block;line-height:1}
 .countdown small{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em}
-/* SPIDER OPENING DAY — bloco especial de estreia */
-.opening-day-card{position:relative;isolation:isolate;overflow:hidden;text-align:center;border:1px solid rgba(239,68,68,.52);border-radius:20px;padding:clamp(20px,4vw,34px);background:radial-gradient(ellipse at 50% 0%,rgba(225,29,46,.24),transparent 58%),linear-gradient(145deg,#17101a,#0b1020 60%,#080b14);box-shadow:0 14px 40px rgba(0,0,0,.25)}
-.opening-day-card:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.14;background:repeating-linear-gradient(135deg,transparent 0 26px,rgba(239,68,68,.45) 26px 27px)}
-.opening-day-inner{max-width:760px;margin:0 auto}
-.opening-day-kicker{display:inline-block;color:#fca5a5;font-size:.72rem;font-weight:900;letter-spacing:.18em;border:1px solid rgba(239,68,68,.45);border-radius:999px;padding:6px 13px;background:rgba(127,29,29,.2)}
-.opening-day-card h2{font:800 clamp(2rem,7vw,3.8rem)/.98 Rajdhani,sans-serif;color:#fff;margin:14px 0 8px;letter-spacing:.04em}
-.opening-day-card h2 span{display:block;color:#ef4444;text-shadow:0 0 22px rgba(239,68,68,.2)}
-.opening-day-slogan{font-weight:800;color:#fff;font-size:clamp(1rem,3vw,1.2rem);margin:12px 0}
-.opening-day-copy{max-width:600px;color:var(--muted);margin:0 auto}
-.opening-day-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:22px auto;max-width:650px}
-.opening-day-points div{display:flex;flex-direction:column;gap:5px;padding:12px 8px;border:1px solid rgba(239,68,68,.2);border-radius:12px;background:rgba(6,10,22,.55);min-width:0}
-.opening-day-points b{font:700 1.35rem Rajdhani,sans-serif;color:#ef4444}
-.opening-day-points span{font-size:.82rem;font-weight:700;color:#e8eeff}
-.opening-day-actions{margin-top:16px}
-.opening-day-date{margin-top:18px;color:#fca5a5;font-size:.78rem;font-weight:800;letter-spacing:.12em}
-@media(max-width:520px){.opening-day-points{gap:6px}.opening-day-points div{padding:10px 5px}.opening-day-points span{font-size:.72rem}.opening-day-card{padding:20px 14px}}
 /* Lançamentos ATT */
 .launch-card{position:relative;overflow:hidden;border:1px solid rgba(239,68,68,.38);background:linear-gradient(120deg,rgba(225,29,46,.18),transparent 65%),var(--card)}
 .launch-card .launch-kicker{font-size:.76rem;font-weight:800;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase}
@@ -322,10 +300,10 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
     <a data-go="inicio">🏠 Início</a>
     <a data-go="treinos">🎮 Treinos</a>
     <a data-go="times">👥 Times</a>
+    <a data-go="spiderdrift">🕷️ SPIDER DRIFT</a>
     <a data-go="meutime">🛡️ Meu time</a>
     <a data-go="ranking">🏆 Ranking</a>
     <a data-go="abates">🎯 Abates</a>
-    <a data-go="historico">📚 Histórico</a>
     <a data-go="calls">📍 Call</a>
     <a data-go="redes">🌐 Redes</a>
     <a data-go="perfil">👤 Perfil</a>
@@ -354,27 +332,8 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
     <p id="installAppHint" class="muted small-t" style="margin:12px auto 0">Instale o SPIDER XTREINOS no seu celular ou computador.</p>
   </div>
 
-  <section class="opening-day-card mt" id="spiderOpeningDay" aria-label="Evento de lançamento SPIDER OPENING DAY">
-    <div class="opening-day-inner">
-      <span class="opening-day-kicker" id="eventBannerBadge">🕷️ EVENTO OFICIAL DE ESTREIA</span>
-      <h2 id="eventBannerTitle">SPIDER <span>OPENING DAY</span></h2>
-      <p class="opening-day-slogan" id="eventBannerSlogan">A teia está pronta. Agora é hora de dominar o lobby.</p>
-      <p class="opening-day-copy" id="eventBannerDescription">Faça parte do começo da SPIDER XTREINOS: monte seu time, entre nos primeiros X-Treinos e comece sua caminhada no ranking.</p>
-      <div class="opening-day-points">
-        <div><b>01</b><span id="eventBannerStep1">Monte seu time</span></div>
-        <div><b>02</b><span id="eventBannerStep2">Entre no X-Treino</span></div>
-        <div><b>03</b><span id="eventBannerStep3">Dispute o primeiro MVP</span></div>
-      </div>
-      <div class="actions center opening-day-actions">
-        <a class="btn" data-go="meutime" id="eventBannerCta1">Participar do evento</a>
-        <a class="btn ghost" data-go="treinos" id="eventBannerCta2">Ver X-Treinos</a>
-      </div>
-      <div class="opening-day-date" id="eventBannerDate">📅 DATA OFICIAL: EM BREVE</div>
-    </div>
-  </section>
-
   <section id="homeLaunchWrap" class="card launch-card mt" hidden aria-live="polite">
-    <span class="launch-kicker" id="homeLaunchKicker">🕷️ EVENTO • CONTAGEM OFICIAL</span>
+    <span class="launch-kicker">🚀 LANÇAMENTO ATT</span>
     <h2 id="homeLaunchTitle"></h2>
     <p class="muted" id="homeLaunchDescription"></p>
     <p class="muted small-t mt" id="homeLaunchDate"></p>
@@ -389,7 +348,7 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
   <button type="button" class="st-home mt" data-go="estatisticas" id="homeStatsCard" hidden><span><b>Estatísticas</b><small>Rankings, recordes, times e jogadores</small></span><i>›</i></button>
   <div id="homeBestPlayer" class="mt" hidden></div>
 
-  <div class="grid g3 mt">
+  <div class="grid g3 mt" hidden>
     <div class="card"><div class="stat" id="sTeams">0</div><p class="muted">Times cadastrados</p></div>
     <div class="card"><div class="stat" id="sPlayers">0</div><p class="muted">Jogadores</p></div>
     <div class="card"><div class="stat" id="sScrims">0</div><p class="muted">Treinos realizados</p></div>
@@ -449,7 +408,13 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
   <div id="teamBox" hidden></div>
 </section>
 
-<!-- PERFIL -->
+<!-- SPIDER DRIFT -->
+<section class="page" id="spiderdrift">
+  <div class="card"><div class="flex between wrap"><div><span class="tag">🕷️ MERCADO DE JOGADORES</span><h2 class="title" style="margin-top:8px">SPIDER DRIFT</h2><p class="sub">Jogadores disponíveis para encontrar um novo time.</p></div><button class="btn ghost small" type="button" data-go="perfil">Meu perfil / anunciar</button></div></div>
+  <div class="card mt"><label>Buscar jogador<input id="driftSearch" type="search" placeholder="Digite o nick ou função" autocomplete="off"></label><p class="muted small-t mt">A função aparece ao lado do nick. Toque no jogador para abrir o perfil e chamar no WhatsApp.</p></div>
+  <div class="grid g2 mt" id="driftList"></div><div id="driftProfile" class="mt"></div>
+</section>
+
 <section class="page" id="perfil">
   <h2 class="title">Perfil</h2>
   <div id="authBox" class="grid g2">
@@ -485,6 +450,7 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
           <label>Função<select name="role"><option>Rush</option><option>Suporte</option><option>Sniper</option><option>Granadeiro</option><option>Capitão</option></select></label>
         </div>
         <label>Servidor<select name="server"><option>Brasil</option><option>América Latina</option></select></label>
+        <div class="card mt" style="border-color:rgba(239,68,68,.35)"><h3>🕷️ SPIDER DRIFT</h3><label>WhatsApp com DDD<input name="driftPhone" type="tel" inputmode="tel" maxlength="20" placeholder="Ex: 82999999999"></label><label class="flex" style="align-items:center;gap:10px"><input name="driftActive" type="checkbox" style="width:auto"> Quero aparecer no SPIDER DRIFT e aceito receber contatos de recrutamento pelo WhatsApp.</label><p class="muted small-t">Ao ativar, seu nick, função e contato de WhatsApp ficam disponíveis para quem abrir o SPIDER DRIFT. Você pode desativar quando quiser.</p></div>
         <label>Foto do perfil<input type="file" id="profilePhoto" accept="image/*"></label>
         <p class="muted small-t">A foto será reduzida antes de salvar.</p>
         <button class="btn" type="submit">Salvar perfil</button>
@@ -562,8 +528,16 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
 <section class="page" id="calls">
   <h2 class="title">CALL — X-TREINO</h2>
   <p class="sub">Confira a call de cada equipe confirmada no treino selecionado.</p>
-  <div class="card" style="margin-bottom:14px">
-    <label>Treino<select id="publicCallScrim"></select></label>
+  <div class="call-picker">
+    <div class="call-picker-head">
+      <span class="call-picker-icon" aria-hidden="true">🕸️</span>
+      <div>
+        <div class="call-picker-title">SELECIONE O X-TREINO</div>
+        <div class="call-picker-desc">Escolha uma edição para consultar as calls confirmadas</div>
+      </div>
+    </div>
+    <label for="publicCallScrim">X-Treino disponível</label>
+    <select id="publicCallScrim" aria-label="Selecionar X-Treino"></select>
     <div id="publicCallInfo" class="muted small-t mt"></div>
   </div>
   <div id="publicCallsList" class="grid"></div>
@@ -574,14 +548,6 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
   <h2 class="title">Redes</h2>
   <p class="sub">Acompanhe e fale com a gente.</p>
   <div class="grid g2" id="socialList"></div>
-</section>
-
-<!-- HISTÓRICO DE X-TREINOS -->
-<section class="page" id="historico">
-  <h2 class="title">📚 HISTÓRICO DE X-TREINOS</h2>
-  <p class="sub">Abra uma edição para ver os times, colocações, abates e pontos. Resultados salvos ficam guardados mesmo após novos treinos.</p>
-  <div id="scrimHistoryList" class="grid g2"></div>
-  <div id="scrimHistoryDetail" class="card mt" hidden></div>
 </section>
 
 <!-- ORGANIZADOR -->
@@ -600,7 +566,7 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
     <div class="flex between wrap">
       <div class="tabs" id="adminTabs">
         <button data-tab="treinos" class="active">🗓️ Treinos</button>
-        <button data-tab="launches" id="tabLaunches" hidden>🕷️ Eventos</button>
+        <button data-tab="launches" id="tabLaunches" hidden>🚀 Lançamentos ATT</button>
         <button data-tab="resultados">💥 Queda</button>
         <button data-tab="admCall" id="tabAdmCall" hidden>📍 Adm Call</button>
         <button data-tab="sala">🔑 ID / Senha</button>
@@ -660,29 +626,17 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(255,255,255,.
 
     <div class="atab" data-atab="launches" hidden>
       <div class="card">
-        <h3>🕷️ Criar / editar evento</h3>
-        <p class="muted small-t">Crie eventos como o Opening Day. Personalize o título, textos, etapas, botões e data. Ao publicar, o evento aparece no banner da página inicial e na contagem regressiva.</p>
+        <h3>🚀 Lançamentos ATT</h3>
+        <p class="muted small-t">Cadastre o nome, a data e a hora. O destaque aparece na página inicial com contagem regressiva e muda para JÁ ESTÁ NO AR automaticamente.</p>
         <form id="launchForm" class="mt">
           <input type="hidden" name="id" value="">
           <label>Nome do lançamento<input name="title" required maxlength="70" placeholder="Ex.: Nova atualização Spider" /></label>
           <label>Data e hora do lançamento<input name="when" type="datetime-local" required /></label>
-          <label>Descrição do evento<textarea name="description" rows="3" maxlength="350" placeholder="Descrição que aparece no banner e no evento..."></textarea></label>
-          <details class="mt"><summary><b>🎨 Personalizar banner da página inicial</b></summary>
-            <div class="grid mt">
-              <label>Texto pequeno no topo<input name="badge" maxlength="70" placeholder="🕷️ EVENTO OFICIAL DE ESTREIA"></label>
-              <label>Título grande do banner<input name="bannerTitle" maxlength="70" placeholder="Ex.: SPIDER OPENING DAY"></label>
-              <label>Frase de destaque<input name="slogan" maxlength="140" placeholder="Ex.: A teia está pronta..."></label>
-              <div class="row"><label>Etapa 1<input name="step1" maxlength="50" placeholder="Monte seu time"></label><label>Etapa 2<input name="step2" maxlength="50" placeholder="Entre no X-Treino"></label></div>
-              <label>Etapa 3<input name="step3" maxlength="50" placeholder="Dispute o primeiro MVP"></label>
-              <div class="row"><label>Texto do botão 1<input name="cta1" maxlength="35" placeholder="Participar do evento"></label><label>Texto do botão 2<input name="cta2" maxlength="35" placeholder="Ver X-Treinos"></label></div>
-              <div class="row"><label>Ação do botão 1<select name="cta1Target"><option value="meutime">Meu time</option><option value="treinos">X-Treinos</option><option value="ranking">Ranking</option><option value="times">Times</option><option value="historico">Histórico</option><option value="redes">Redes</option></select></label><label>Ação do botão 2<select name="cta2Target"><option value="treinos">X-Treinos</option><option value="meutime">Meu time</option><option value="ranking">Ranking</option><option value="times">Times</option><option value="historico">Histórico</option><option value="redes">Redes</option></select></label></div>
-              <label>Texto antes da data<input name="dateLabel" maxlength="35" placeholder="DATA OFICIAL"></label>
-            </div>
-          </details>
-          <div class="actions mt"><button class="btn" type="submit" id="launchSaveBtn">Publicar evento</button><button class="btn ghost" type="button" id="launchCancelEdit" hidden>Cancelar edição</button></div>
+          <label>Descrição<textarea name="description" rows="3" maxlength="350" placeholder="Conte o que vai chegar nesta atualização..."></textarea></label>
+          <div class="actions"><button class="btn" type="submit" id="launchSaveBtn">Publicar lançamento</button><button class="btn ghost" type="button" id="launchCancelEdit" hidden>Cancelar edição</button></div>
         </form>
       </div>
-      <h3 class="sec">Eventos cadastrados</h3>
+      <h3 class="sec">Lançamentos cadastrados</h3>
       <div id="adminLaunchList" class="grid mt"></div>
     </div>
 
@@ -1064,7 +1018,7 @@ const DB = {
   },
   del(p){return this.set(p,undefined);},
   async replaceAll(obj){
-    const branches=["users","teams","scrims","results","settings","news","launches","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings","scrimHistory"];
+    const branches=["users","teams","scrims","results","settings","news","launches","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings"];
     if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
     if(isAdmin()) branches.push("manualKills");
     this.data=obj||{};this.persist();if(!this.cloud)return;
@@ -1076,7 +1030,7 @@ const DB = {
     if(!this.cloud||this.pending>0)return false;
     try{
       // Não lê a raiz inteira: cada coleção pública é consultada separadamente.
-      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings","launches","scrimHistory"];
+      const branches=["users","teams","scrims","results","settings","news","admins","logs","callPools","callResults","callConfigs","callChoices","callLocks","automaticKills","manualKillRankings","launches"];
       if(AUTH.user?.uid===CONFIG.masterUid) branches.push("automaticKillDrafts");
       if(isAdmin()) branches.push("manualKills");
       let changed=false;
@@ -1099,7 +1053,7 @@ function updatePill(){
 /* =====================================================
    REGRAS DE NEGÓCIO
    ===================================================== */
-const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", callRound: 1, callPending: null, autoKillScrim: "", autoKillRound: 1, autoKillRows: [], manualKillScrim: "", manualKillRound: 1, viewPlayerUid: "", editMedalId: "", historyScrim: "" };
+const state = { adminTab: "treinos", resScrim: "", resRound: 1, viewTeam: "", callScrim: "", publicCallScrim: "", callRound: 1, callPending: null, autoKillScrim: "", autoKillRound: 1, autoKillRows: [], manualKillScrim: "", manualKillRound: 1, viewPlayerUid: "", editMedalId: "" };
 
 // Posicionamento por arrastar das etiquetas no painel ADM.CALL.
 let callPinDrag = null;
@@ -1150,7 +1104,7 @@ document.addEventListener("pointerup", async e => {
 });
 document.addEventListener("pointercancel", () => { callPinDrag = null; });
 
-const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","artround","csvrank","admaddto","clearRoomCredentials","saveScrimHistory"]);
+const ADMIN_ACTS = new Set(["addround","delscrim","delreg","delteam","deluser","delnews","admtoggle","admdel","logclear","admkick","admcap","admteamedit","admuseredit","scrimedit","admreg","saveround","clearround","logdel","logwipe","artround","csvrank","admaddto","clearRoomCredentials"]);
 function adminSess(){
   try {
     const s = JSON.parse(session.get("xt_admin") || "null");
@@ -1261,7 +1215,7 @@ function render(){
   const st = settings(), brand = st.brand || "SPIDER XTREINOS";
   applyInterface();
   $("#brandName").textContent = brand; $("#footBrand").textContent = brand; document.title = brand + " • Free Fire";
-  renderHome(); renderScrims(); renderScrimHistory(); renderTeams(); renderMyTeam(); renderProfile(); renderRanking(); renderStats(); renderSocial(); renderCallsPublic(); renderAbatesPublic(); renderAdmin(); renderAdmin2(); renderCallAdmin(); renderExtra();
+  renderHome(); renderScrims(); renderTeams(); renderMyTeam(); renderProfile(); renderSpiderDrift(); renderRanking(); renderStats(); renderSocial(); renderCallsPublic(); renderAbatesPublic(); renderAdmin(); renderAdmin2(); renderCallAdmin(); renderExtra();
 }
 
 function scrimCard(s){
@@ -1298,29 +1252,12 @@ function launchDateValue(item){
   if (item?.date) return new Date(item.date + "T" + (item.time || "00:00")).getTime();
   return 0;
 }
-function renderEventBanner(item){
-  const set=(id,value,fallback)=>{const el=$("#"+id);if(el)el.textContent=value||fallback;};
-  const defaults={badge:"🕷️ EVENTO OFICIAL DE ESTREIA",bannerTitle:"SPIDER OPENING DAY",slogan:"A teia está pronta. Agora é hora de dominar o lobby.",description:"Faça parte do começo da SPIDER XTREINOS: monte seu time, entre nos primeiros X-Treinos e comece sua caminhada no ranking.",step1:"Monte seu time",step2:"Entre no X-Treino",step3:"Dispute o primeiro MVP",cta1:"Participar do evento",cta2:"Ver X-Treinos",cta1Target:"meutime",cta2Target:"treinos",dateLabel:"DATA OFICIAL"};
-  const v=item||{};
-  set("eventBannerBadge",v.badge,defaults.badge);
-  const title=(v.bannerTitle||defaults.bannerTitle).trim();
-  const titleEl=$("#eventBannerTitle");
-  if(titleEl){const parts=title.split(/\s+/);const last=parts.pop()||"";titleEl.replaceChildren(document.createTextNode(parts.join(" ")+" "));const span=document.createElement("span");span.textContent=last;titleEl.appendChild(span);}
-  set("eventBannerSlogan",v.slogan,defaults.slogan);set("eventBannerDescription",v.description,defaults.description);
-  set("eventBannerStep1",v.step1,defaults.step1);set("eventBannerStep2",v.step2,defaults.step2);set("eventBannerStep3",v.step3,defaults.step3);
-  set("eventBannerCta1",v.cta1,defaults.cta1);set("eventBannerCta2",v.cta2,defaults.cta2);
-  const cta1=$("#eventBannerCta1"),cta2=$("#eventBannerCta2");if(cta1)cta1.dataset.go=v.cta1Target||defaults.cta1Target;if(cta2)cta2.dataset.go=v.cta2Target||defaults.cta2Target;
-  const when=item?launchDateValue(item):0,label=(v.dateLabel||defaults.dateLabel).trim();
-  set("eventBannerDate",when>0?"📅 "+(label?label+": ":"")+new Date(when).toLocaleString("pt-BR",{dateStyle:"full",timeStyle:"short"}):"📅 "+(label?label+": ":"")+"EM BREVE","📅 DATA OFICIAL: EM BREVE");
-}
 function renderHomeLaunch(){
   const wrap=$("#homeLaunchWrap"); if(!wrap)return;
   const items=arr(DB.get("launches")).filter(x=>x && x.title && launchDateValue(x)>0).sort((a,b)=>launchDateValue(a)-launchDateValue(b));
   const now=Date.now(), upcoming=items.find(x=>launchDateValue(x)>now), item=upcoming || items[items.length-1];
-  renderEventBanner(item||null);
   if(!item){wrap.hidden=true;return;}
   wrap.hidden=false;
-  $("#homeLaunchKicker").textContent="🕷️ "+(item.bannerTitle||item.title)+" • CONTAGEM OFICIAL";
   $("#homeLaunchTitle").textContent=item.title;
   $("#homeLaunchDescription").textContent=item.description||"";
   $("#homeLaunchDate").textContent=new Date(launchDateValue(item)).toLocaleString("pt-BR",{dateStyle:"full",timeStyle:"short"});
@@ -1335,12 +1272,12 @@ function tickLaunch(){
   const d=Math.floor(diff/864e5),h=Math.floor(diff/36e5)%24,m=Math.floor(diff/6e4)%60,sec=Math.floor(diff/1e3)%60;
   el.innerHTML=[[d,"dias"],[h,"horas"],[m,"min"],[sec,"seg"]].map(([v,l])=>`<div><b>${String(v).padStart(2,"0")}</b><small>${l}</small></div>`).join("");
 }
-function resetLaunchForm(){const f=$("#launchForm");if(!f)return;f.reset();f.elements.namedItem("id").value="";$("#launchSaveBtn").textContent="Publicar evento";$("#launchCancelEdit").hidden=true;}
+function resetLaunchForm(){const f=$("#launchForm");if(!f)return;f.reset();f.elements.namedItem("id").value="";$("#launchSaveBtn").textContent="Publicar lançamento";$("#launchCancelEdit").hidden=true;}
 function renderLaunchAdmin(){
   if(!isMaster())return;
   const list=$("#adminLaunchList");if(!list)return;
   const items=arr(DB.get("launches")).sort((a,b)=>launchDateValue(b)-launchDateValue(a));
-  list.innerHTML=items.length?items.map(x=>{const when=launchDateValue(x);return `<div class="card"><div class="flex between wrap"><b>🕷️ ${esc(x.title)}</b><span class="badge ${when>Date.now()?"wait":"ok"}">${when>Date.now()?"Agendado":"Já está no ar"}</span></div><p class="muted small-t mt">${when?new Date(when).toLocaleString("pt-BR"):"Data não definida"}</p><p class="small-t">${esc(x.description||"")}</p><div class="actions mt"><button class="btn small ghost" data-act="launchEdit" data-id="${esc(x.id)}">Editar</button><button class="btn small danger" data-act="launchDel" data-id="${esc(x.id)}">Excluir</button></div></div>`;}).join(""):'<div class="card empty">Nenhum lançamento cadastrado ainda.</div>';
+  list.innerHTML=items.length?items.map(x=>{const when=launchDateValue(x);return `<div class="card"><div class="flex between wrap"><b>🚀 ${esc(x.title)}</b><span class="badge ${when>Date.now()?"wait":"ok"}">${when>Date.now()?"Agendado":"Já está no ar"}</span></div><p class="muted small-t mt">${when?new Date(when).toLocaleString("pt-BR"):"Data não definida"}</p><p class="small-t">${esc(x.description||"")}</p><div class="actions mt"><button class="btn small ghost" data-act="launchEdit" data-id="${esc(x.id)}">Editar</button><button class="btn small danger" data-act="launchDel" data-id="${esc(x.id)}">Excluir</button></div></div>`;}).join(""):'<div class="card empty">Nenhum lançamento cadastrado ainda.</div>';
 }
 
 function renderHome(){
@@ -1509,13 +1446,26 @@ function renderPlayerDirectory(){
   const users=arr(DB.get("users")).sort((a,b)=>String(a.nick||"").localeCompare(String(b.nick||""),"pt-BR"));
   box.innerHTML=users.length?users.map(u=>`<button type="button" class="card" data-act="playerprofile" data-id="${esc(u.id)}"><b>${esc(u.nick||"Jogador")}</b><span class="muted small-t">${esc((teamOf(u.id)||{}).name||"Sem time")}</span></button>`).join(""):'<p class="muted small-t">Ainda não há jogadores cadastrados.</p>';
 }
+function renderSpiderDrift(){
+  const listBox=$("#driftList"),profileBox=$("#driftProfile");if(!listBox||!profileBox)return;
+  const q=normalizedNick($("#driftSearch")?.value||"");
+  const players=arr(DB.get("users")).filter(u=>u.driftActive&&String(u.driftPhone||"").replace(/\D/g,"").length>=10&&!teamOf(u.id)&&(!q||normalizedNick(u.nick+" "+(u.role||"")).includes(q))).sort((a,b)=>String(a.nick||"").localeCompare(String(b.nick||""),"pt-BR"));
+  listBox.innerHTML=players.length?players.map(u=>`<button type="button" class="card" style="text-align:left;cursor:pointer" data-drift-open="${esc(u.id)}"><div class="flex between wrap"><b>${esc(u.nick||"Jogador")}</b><span class="badge wait">${esc(u.role||"Função não informada")}</span></div><p class="muted small-t mt">Disponível para novo time</p></button>`).join(""):'<div class="card empty" style="grid-column:1/-1">Nenhum jogador disponível no SPIDER DRIFT agora.</div>';
+  const uid=state.driftPlayer||"",u=players.find(x=>x.id===uid);
+  if(!u){profileBox.innerHTML="";return;}
+  const digits=String(u.driftPhone||"").replace(/\D/g,"");const full=digits.startsWith("55")?digits:"55"+digits;
+  const valid=full.length===12||full.length===13;
+  const msg=`Fala, ${u.nick||"jogador"}! 🕷️\nVi seu perfil no SPIDER DRIFT do SPIDER XTREINOS. Sua função de ${u.role||"jogador"} chamou minha atenção. Você está procurando um time? Bora conversar sobre entrar no nosso elenco!`;
+  profileBox.innerHTML=`<div class="card player-hero"><div><span class="tag">JOGADOR DISPONÍVEL</span><h2>${esc(u.nick||"Jogador")}</h2><p class="muted">Função: <b>${esc(u.role||"Não informada")}</b></p><p class="muted small-t">ID Free Fire: ${esc(u.ffid||"Não informado")}</p></div><div class="actions"><a class="btn" ${valid?`href="https://wa.me/${full}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener noreferrer"`:'aria-disabled="true"'}>💬 Chamar no WhatsApp</a><button class="btn ghost small" type="button" id="driftCloseProfile">Fechar perfil</button></div></div>`;
+  $("#driftCloseProfile")?.addEventListener("click",()=>{state.driftPlayer="";renderSpiderDrift();});
+}
 function renderProfile(){
   const u=me();
   $("#authBox").hidden=!!u;$("#profileBox").hidden=!u;
   if(u){
     $("#profNick").textContent=u.nick;
     const t=myTeam();$("#profTeam").textContent=t?`Time: [${t.tag}] ${t.name}`:"Você ainda não está em um time.";
-    const f=$("#profileForm");if(!f.contains(document.activeElement)){f.ffid.value=u.ffid||"";f.role.value=u.role||"Rush";f.server.value=u.server||"Brasil";}
+    const f=$("#profileForm");if(!f.contains(document.activeElement)){f.ffid.value=u.ffid||"";f.role.value=u.role||"Rush";f.server.value=u.server||"Brasil";f.driftPhone.value=u.driftPhone||"";f.driftActive.checked=!!u.driftActive;}
   }
   const target=state.viewPlayerUid&&DB.get("users/"+state.viewPlayerUid)?state.viewPlayerUid:(u?u.id:"");
   $("#publicPlayerProfile").innerHTML=target?renderPlayerProfile(target):'<div class="card empty">Escolha um jogador na lista para ver o perfil completo.</div>';
@@ -1838,37 +1788,6 @@ function renderAdmin(){
   $("#adminNews").innerHTML = news.map(n => `<div class="card flex between" style="margin-bottom:10px"><span>${n.cat ? `<span class="badge off">${esc(n.cat)}</span> ` : ""}${esc(n.text)}</span><button class="btn small danger" data-act="delnews" data-id="${n.id}">Excluir</button></div>`).join("");
 }
 
-function scrimHistoryList(){ return arr(DB.get("scrimHistory")).sort((a,b)=>(+b.savedAt||0)-(+a.savedAt||0)); }
-function buildScrimHistorySnapshot(sid){
-  const sc=DB.get("scrims/"+sid); if(!sc) return null;
-  const rounds=DB.get("results/"+sid)||{}, tids=new Set();
-  confirmedRegs(sc).forEach(r=>tids.add(r.tid));
-  Object.values(rounds).forEach(round=>Object.keys(round||{}).forEach(tid=>tids.add(tid)));
-  const teams=[];
-  for(const tid of tids){
-    const team=DB.get("teams/"+tid); if(!team) continue;
-    const roundRows=[]; let kills=0, placementPts=0, totalPts=0, booyahs=0, played=0;
-    Object.entries(rounds).sort((a,b)=>(+a[0].slice(1))-(+b[0].slice(1))).forEach(([rk,round])=>{
-      const r=round?.[tid]; if(!r||!(+r.place>0))return;
-      const place=+r.place||0, k=+r.kills||0, pp=pointsTable()[place-1]||0, pts=ptsOf(r);
-      kills+=k; placementPts+=pp; totalPts+=pts; if(place===1)booyahs++; played++;
-      roundRows.push({round:+rk.slice(1)||1,place,kills:k,placementPts:pp,points:pts});
-    });
-    teams.push({tid,name:team.name||"Time",tag:team.tag||"",members:Object.values(team.members||{}),place:0,kills,placementPts,totalPts,booyahs,played,rounds:roundRows});
-  }
-  teams.sort((a,b)=>b.totalPts-a.totalPts||b.kills-a.kills||a.name.localeCompare(b.name,"pt-BR"));
-  teams.forEach((t,i)=>t.place=i+1);
-  return {id:sid,title:sc.title||"X-Treino",date:sc.date||"",time:sc.time||"",mode:sc.mode||"",savedAt:Date.now(),roundCount:Math.max(+sc.rounds||1,...Object.keys(rounds).map(k=>+k.slice(1)||1)),teams,scoring:{placements:pointsTable().slice(),killPts:killPts()}};
-}
-function renderScrimHistory(){
-  const list=scrimHistoryList(), box=$("#scrimHistoryList"), detail=$("#scrimHistoryDetail");
-  if(!box||!detail)return;
-  box.innerHTML=list.length?list.map(h=>`<button class="card" type="button" data-act="historyOpen" data-id="${esc(h.id)}" style="text-align:left;cursor:pointer"><div class="flex between wrap"><b>${esc(h.title)}</b><span class="badge ok">Salvo</span></div><p class="muted small-t mt">${esc(h.date)} • ${esc(h.time)}${h.mode?" • "+esc(h.mode):""}</p><p class="muted small-t">${(h.teams||[]).length} times • ${h.roundCount||0} quedas registradas</p><span class="btn small ghost">Ver resultados →</span></button>`).join(""):'<div class="card empty" style="grid-column:1/-1">Nenhum X-Treino salvo no histórico ainda.</div>';
-  const h=list.find(x=>x.id===state.historyScrim);
-  detail.hidden=!h;
-  if(!h){detail.innerHTML="";return;}
-  detail.innerHTML=`<div class="flex between wrap"><div><h3>${esc(h.title)}</h3><p class="muted small-t">${esc(h.date)} • ${esc(h.time)} • ${esc(h.mode||"")}</p></div><button class="btn ghost small" data-act="historyClose">Fechar</button></div><p class="muted small-t mt">Snapshot salvo em ${new Date(h.savedAt).toLocaleString("pt-BR")}. Pontuação calculada conforme as regras vigentes quando foi salvo.</p><div class="table-wrap mt"><table><thead><tr><th>#</th><th>Time</th><th>Abates</th><th>Booyah</th><th>Quedas</th><th>Pontos</th></tr></thead><tbody>${(h.teams||[]).map(t=>`<tr><td><b>${t.place}</b></td><td>[${esc(t.tag)}] ${esc(t.name)}<div class="muted small-t">${(t.members||[]).map(esc).join(", ")}</div></td><td>${t.kills||0}</td><td>${t.booyahs||0}</td><td>${t.played||0}</td><td><b>${t.totalPts||0}</b></td></tr>`).join("")||'<tr><td colspan="6">Ainda não há resultados lançados.</td></tr>'}</tbody></table></div><h4 class="mt">Detalhes por queda</h4>${(h.teams||[]).map(t=>`<div class="card mt"><b>[${esc(t.tag)}] ${esc(t.name)}</b><div class="muted small-t mt">${(t.rounds||[]).map(r=>`Queda ${r.round}: ${r.place}º • ${r.kills} abates • ${r.points} pts`).join(" | ")||"Sem resultados"}</div></div>`).join("")}`;
-}
 function renderResults(){
   const scrims = scrimsSorted().reverse(), sel = $("#resScrim");
   if (sel.contains(document.activeElement) === false) sel.innerHTML = scrims.length ? scrims.map(s => `<option value="${s.id}">${esc(s.title)} — ${esc(s.date)}</option>`).join("") : '<option value="">Nenhum treino</option>';
@@ -1889,7 +1808,7 @@ function renderResults(){
       <td><input type="number" min="1" max="12" class="res-in" data-f="place" value="${+v.place || ""}"></td>
       <td><input type="number" min="0" class="res-in" data-f="kills" value="${v.kills ?? ""}"></td>
       <td><b data-pts>${+v.place > 0 ? ptsOf(v) : "—"}</b></td></tr>`;
-  }).join("") + `</tbody></table><div class="actions" style="padding:13px"><button class="btn" data-act="saveround">💾 Salvar queda ${state.resRound}</button><button class="btn ghost small" data-act="saveScrimHistory" data-id="${s.id}">📚 Salvar X-Treino no histórico</button><button class="btn ghost small" data-act="artround">🎨 Gerar arte desta queda</button><button class="btn danger small" data-act="clearround">🧹 Limpar queda</button></div>`;
+  }).join("") + `</tbody></table><div class="actions" style="padding:13px"><button class="btn" data-act="saveround">💾 Salvar queda ${state.resRound}</button><button class="btn ghost small" data-act="artround">🎨 Gerar arte desta queda</button><button class="btn danger small" data-act="clearround">🧹 Limpar queda</button></div>`;
 }
 
 /* =====================================================
@@ -2230,31 +2149,26 @@ document.addEventListener("click", async e => {
 
   const b = e.target.closest("[data-act]"); if (!b) return;
   const act = b.dataset.act, id = b.dataset.id || b.dataset.round, id2 = b.dataset.id2, u = me(), t = myTeam();
-  if(act==="historyOpen"){state.historyScrim=id;renderScrimHistory();$("#scrimHistoryDetail").scrollIntoView({behavior:"smooth",block:"start"});return;}
-  if(act==="historyClose"){state.historyScrim="";renderScrimHistory();return;}
-
   if(act === "rankteam"){renderTeamRankDetail(id,$("#seasonFilter").value);return;}
   if(act === "seasonview"){const key="custom:"+id;go("ranking");$("#seasonFilter").value=key;renderRanking();return;}
   if(act === "seasonclose"||act === "seasonactivate"){if(!isMaster())return toast("Acesso exclusivo do organizador principal","err");const seasons=arr(settings().seasons).map(x=>({...x,status:x.id===id?(act==="seasonclose"?"archived":"active"):(act==="seasonactivate"?"archived":x.status)}));try{await DB.set("settings/seasons",seasons);await logAct((act==="seasonclose"?"Arquivou ":"Reativou ")+(seasons.find(x=>x.id===id)?.name||"Season"));renderSeasonAdminPanel();renderRanking();toast(act==="seasonclose"?"Season arquivada; histórico preservado.":"Season ativada.");}catch(err){toast("Não foi possível atualizar a Season: "+err.message,"err");}return;}
   if(act === "rankdetailclose"){$("#teamRankDetail").hidden=true;return;}
   if (ADMIN_ACTS.has(act) && !isAdmin()){ render(); return toast("Sessão do organizador encerrada", "err"); }
-  if (["launchEdit","launchDel"].includes(act) && !isMaster()) return toast("Somente o organizador principal pode gerenciar eventos.","err");
+  if (["launchEdit","launchDel"].includes(act) && !isMaster()) return toast("Somente o organizador principal pode gerenciar lançamentos.","err");
   if(act==="launchEdit"){
-    const item=DB.get("launches/"+id);if(!item)return toast("Evento não encontrado.","err");
+    const item=DB.get("launches/"+id);if(!item)return toast("Lançamento não encontrado.","err");
     state.adminTab="launches";renderAdmin();
     const f=$("#launchForm");f.elements.namedItem("id").value=item.id;
     f.elements.namedItem("title").value=item.title||"";
     f.elements.namedItem("when").value=new Date(launchDateValue(item)-new Date(launchDateValue(item)).getTimezoneOffset()*60000).toISOString().slice(0,16);
     f.elements.namedItem("description").value=item.description||"";
-    const bannerDefaults={badge:"🕷️ EVENTO OFICIAL DE ESTREIA",bannerTitle:"SPIDER OPENING DAY",slogan:"A teia está pronta. Agora é hora de dominar o lobby.",step1:"Monte seu time",step2:"Entre no X-Treino",step3:"Dispute o primeiro MVP",cta1:"Participar do evento",cta2:"Ver X-Treinos",cta1Target:"meutime",cta2Target:"treinos",dateLabel:"DATA OFICIAL"};
-    for(const key of Object.keys(bannerDefaults)) if(f.elements.namedItem(key)) f.elements.namedItem(key).value=item[key]||bannerDefaults[key];
-    $("#launchSaveBtn").textContent="Salvar evento";$("#launchCancelEdit").hidden=false;
+    $("#launchSaveBtn").textContent="Salvar alterações";$("#launchCancelEdit").hidden=false;
     f.scrollIntoView({behavior:"smooth",block:"center"});return;
   }
   if(act==="launchDel"){
     const item=DB.get("launches/"+id);if(!item)return;
     if(!await ask("Excluir o lançamento “"+(item.title||"")+"”?"))return;
-    await DB.del("launches/"+id);await logAct("Excluiu o evento "+(item.title||id));render();state.adminTab="launches";renderAdmin();toast("Evento excluído.");return;
+    await DB.del("launches/"+id);await logAct("Excluiu o lançamento "+(item.title||id));render();state.adminTab="launches";renderAdmin();toast("Lançamento excluído.");return;
   }
   if (["admtoggle", "admdel", "logclear"].includes(act) && !isMaster()) return toast("Só o organizador principal pode fazer isso", "err");
   try {
@@ -2308,12 +2222,7 @@ document.addEventListener("click", async e => {
 
 document.addEventListener("change", async e => {
   const st = e.target.closest("[data-status]");
-  if (st){ if (!isAdmin()) return render(); const sc = DB.get("scrims/" + st.dataset.status); if (st.value === "scheduled" && !(Number(sc?.registrationOpensAt) > 0)) { toast("Para agendar, crie o treino preenchendo a data e hora de abertura.", "err"); render(); return; } await DB.set(`scrims/${st.dataset.status}/status`, st.value);
-    if(st.value==="done" && Object.keys(DB.get("results/"+st.dataset.status)||{}).length){
-      const snap=buildScrimHistorySnapshot(st.dataset.status);
-      if(snap){await DB.set("scrimHistory/"+st.dataset.status,snap);toast("X-Treino finalizado e salvo no histórico 📚");}
-    }
-    await logAct(`Mudou o treino ${sc ? sc.title : ""} para ${({ scheduled: "agendado", open: "aberto", closed: "fechado", done: "finalizado" })[st.value]}`); render(); return; }
+  if (st){ if (!isAdmin()) return render(); const sc = DB.get("scrims/" + st.dataset.status); if (st.value === "scheduled" && !(Number(sc?.registrationOpensAt) > 0)) { toast("Para agendar, crie o treino preenchendo a data e hora de abertura.", "err"); render(); return; } await DB.set(`scrims/${st.dataset.status}/status`, st.value); await logAct(`Mudou o treino ${sc ? sc.title : ""} para ${({ scheduled: "agendado", open: "aberto", closed: "fechado", done: "finalizado" })[st.value]}`); render(); return; }
   if (e.target.id === "resScrim"){ state.resScrim = e.target.value; state.resRound = 1; renderResults(); return; }
   if (e.target.id === "manualKillScrim"){ state.manualKillScrim=e.target.value; state.manualKillRound=1; renderManualKillAdmin(); return; }
   if (e.target.id === "manualKillRound"){ state.manualKillRound=Math.min(5,Math.max(1,+e.target.value||1)); renderManualKillAdmin(); return; }
@@ -2360,9 +2269,14 @@ $("#logoutUser").addEventListener("click",()=>{AUTH.signOut();toast("Você saiu 
 $("#profileForm").addEventListener("submit", async e => {
   e.preventDefault(); const u = me(); if (!u) return;
   const f = new FormData(e.target);
-  await DB.set("users/" + u.id, Object.assign({}, u, { ffid: (f.get("ffid") || "").trim(), role: f.get("role"), server: f.get("server") }));
-  toast("Perfil salvo ✅"); render();
+  const driftPhone=String(f.get("driftPhone")||"").replace(/\D/g,"");const driftActive=f.get("driftActive")==="on";
+  if(driftActive&&!(driftPhone.length===10||driftPhone.length===11||driftPhone.length===12||driftPhone.length===13))return toast("Informe um WhatsApp válido com DDD para aparecer no SPIDER DRIFT.","err");
+  const updated=Object.assign({},u,{ffid:(f.get("ffid")||"").trim(),role:f.get("role"),server:f.get("server"),driftPhone:driftActive?driftPhone:"",driftActive});
+  await DB.set("users/"+u.id,updated);
+  toast(driftActive?"Perfil salvo e você está no SPIDER DRIFT! 🕷️":"Perfil salvo ✅"); render();
 });
+$("#driftSearch")?.addEventListener("input",()=>{state.driftPlayer="";renderSpiderDrift();});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-drift-open]");if(!b)return;state.driftPlayer=b.dataset.driftOpen;renderSpiderDrift();});
 
 $("#profilePhoto").addEventListener("change",async e=>{
   const u=me(),file=e.target.files?.[0];if(!u||!file)return;
@@ -2540,16 +2454,16 @@ $("#scheduledScrimForm").addEventListener("submit", async e => {
 });
 $("#launchForm").addEventListener("submit", async e => {
   e.preventDefault();
-  if(!isMaster())return toast("Somente o organizador principal pode publicar eventos.","err");
+  if(!isMaster())return toast("Somente o organizador principal pode publicar lançamentos.","err");
   const f=Object.fromEntries(new FormData(e.target)),when=new Date(f.when).getTime();
-  if(!f.title.trim()||!Number.isFinite(when))return toast("Confira o nome, a data e a hora do evento.","err");
+  if(!f.title.trim()||!Number.isFinite(when))return toast("Confira o nome, a data e a hora.","err");
   const id=f.id||uid(),old=DB.get("launches/"+id)||{};
   try{
-    await DB.set("launches/"+id,{...old,id,title:f.title.trim(),when,description:(f.description||"").trim(),badge:(f.badge||"").trim(),bannerTitle:(f.bannerTitle||"").trim(),slogan:(f.slogan||"").trim(),step1:(f.step1||"").trim(),step2:(f.step2||"").trim(),step3:(f.step3||"").trim(),cta1:(f.cta1||"").trim(),cta2:(f.cta2||"").trim(),cta1Target:f.cta1Target||"meutime",cta2Target:f.cta2Target||"treinos",dateLabel:(f.dateLabel||"").trim(),created:old.created||Date.now(),updatedAt:Date.now()});
+    await DB.set("launches/"+id,{...old,id,title:f.title.trim(),when,description:(f.description||"").trim(),created:old.created||Date.now(),updatedAt:Date.now()});
     if(DB.status==="error")throw new Error("Não foi possível salvar no banco online.");
-    await logAct((f.id?"Editou":"Publicou")+" o evento "+f.title.trim());
-    resetLaunchForm();render();state.adminTab="launches";renderAdmin();toast(f.id?"Evento atualizado!":"Evento publicado!");
-  }catch(err){toast(err.message||"Não foi possível salvar o evento.","err");}
+    await logAct((f.id?"Editou":"Publicou")+" o lançamento "+f.title.trim());
+    resetLaunchForm();render();state.adminTab="launches";renderAdmin();toast(f.id?"Lançamento atualizado!":"Lançamento publicado!");
+  }catch(err){toast(err.message||"Não foi possível salvar o lançamento.","err");}
 });
 $("#launchCancelEdit").addEventListener("click",resetLaunchForm);
 $("#newsForm").addEventListener("submit", async e => {
@@ -2776,14 +2690,6 @@ async function extraActs(act, id, id2, u, t){
       const sel = $(`[data-regsel="${id}"]`); if (!sel || !sel.value) return no("Escolha um time");
       await DB.set(`scrims/${id}/regs/${sel.value}`, { tid: sel.value, at: Date.now(), checkin: true });
       const tm = DB.get("teams/" + sel.value); await logAct("Inscreveu o time " + (tm ? tm.name : "") + " no treino"); return true;
-    }
-    case "saveScrimHistory": {
-      if(!isAdmin())return no("Somente organizadores podem salvar no histórico");
-      const sid=id||state.resScrim, snap=buildScrimHistorySnapshot(sid); if(!snap)return no("X-Treino não encontrado");
-      if(!Object.keys(DB.get("results/"+sid)||{}).length)return no("Lance e salve os resultados antes de arquivar");
-      const existing=DB.get("scrimHistory/"+sid);
-      if(existing&&!await ask("Este X-Treino já está no histórico. Atualizar o snapshot com os resultados atuais?"))return true;
-      await DB.set("scrimHistory/"+sid,snap); await logAct("Salvou no histórico o X-Treino "+snap.title); renderScrimHistory(); toast("X-Treino salvo no histórico permanente ✅"); return true;
     }
     case "saveround": {
       const sid = state.resScrim, rn = state.resRound, o = {}, used = {};
